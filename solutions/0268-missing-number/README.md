@@ -77,17 +77,6 @@ n = 9
 . 8 is the missing number in the range since it does not appear in
 nums
 .
-
- 
-
- 
-
- 
-
- 
-
- 
-
 Constraints:
 
 n == nums.length
