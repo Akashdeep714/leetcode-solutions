@@ -9,6 +9,10 @@ import requests
 from bs4 import BeautifulSoup
 
 
+# ============================================================
+# Configuration
+# ============================================================
+
 GRAPHQL_URL = "https://leetcode.com/graphql/"
 LEETCODE_URL = "https://leetcode.com"
 
@@ -18,29 +22,31 @@ CSRF_TOKEN = os.getenv("LEETCODE_CSRF_TOKEN", "").strip()
 SOLUTIONS_DIR = Path("solutions")
 STATE_FILE = Path("sync_state.json")
 
-
 if not SESSION or not CSRF_TOKEN:
-    print("❌ Missing LeetCode credentials.")
+    print("❌ Missing LEETCODE_SESSION or LEETCODE_CSRF_TOKEN.")
     sys.exit(1)
 
 
 # ============================================================
-# Session
+# LeetCode HTTP client
 # ============================================================
 
 client = requests.Session()
 
-client.headers.update({
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/140.0.0.0 Safari/537.36"
-    ),
-    "Accept": "application/json, text/plain, */*",
-    "Origin": LEETCODE_URL,
-    "Referer": LEETCODE_URL + "/",
-    "X-CSRFToken": CSRF_TOKEN,
-})
+client.headers.update(
+    {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/140.0.0.0 Safari/537.36"
+        ),
+        "Accept": "application/json, text/plain, */*",
+        "Content-Type": "application/json",
+        "Origin": LEETCODE_URL,
+        "Referer": f"{LEETCODE_URL}/",
+        "X-CSRFToken": CSRF_TOKEN,
+    }
+)
 
 client.cookies.set(
     "LEETCODE_SESSION",
@@ -70,20 +76,28 @@ def graphql(query, variables=None, operation_name=None):
         timeout=30,
     )
 
-    response.raise_for_status()
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"LeetCode GraphQL returned HTTP "
+            f"{response.status_code}: "
+            f"{response.text[:500]}"
+        )
 
     data = response.json()
 
     if data.get("errors"):
         raise RuntimeError(
-            json.dumps(data["errors"], ensure_ascii=False)
+            json.dumps(
+                data["errors"],
+                ensure_ascii=False,
+            )
         )
 
     return data.get("data", {})
 
 
 # ============================================================
-# GraphQL
+# GraphQL queries
 # ============================================================
 
 USER_STATUS_QUERY = """
@@ -98,11 +112,29 @@ query globalData {
 
 RECENT_ACCEPTED_QUERY = """
 query recentAcSubmissions($username: String!, $limit: Int!) {
-    recentAcSubmissionList(username: $username, limit: $limit) {
+    recentAcSubmissionList(
+        username: $username,
+        limit: $limit
+    ) {
         id
         title
         titleSlug
         timestamp
+    }
+}
+"""
+
+
+SUBMISSION_DETAILS_QUERY = """
+query submissionDetails($submissionId: Int!) {
+    submissionDetails(submissionId: $submissionId) {
+        code
+        lang {
+            name
+        }
+        runtime
+        memory
+        statusDisplay
     }
 }
 """
@@ -127,7 +159,7 @@ query questionData($titleSlug: String!) {
 
 
 # ============================================================
-# Helpers
+# Language information
 # ============================================================
 
 LANGUAGE_EXTENSIONS = {
@@ -180,56 +212,51 @@ LANGUAGE_NAMES = {
 }
 
 
-def safe_slug(text):
-    value = text.lower()
-    value = re.sub(r"[^a-z0-9]+", "-", value)
-    return value.strip("-")
-
-
-def get_state():
-    if not STATE_FILE.exists():
-        return {
-            "processed_submission_ids": []
-        }
-
-    try:
-        return json.loads(
-            STATE_FILE.read_text(encoding="utf-8")
+def normalize_language_name(language):
+    if isinstance(language, dict):
+        return str(
+            language.get("name") or ""
         )
-    except Exception:
-        return {
-            "processed_submission_ids": []
-        }
+
+    return str(language or "")
 
 
-def save_state(state):
-    STATE_FILE.write_text(
-        json.dumps(state, indent=2),
-        encoding="utf-8",
+def get_language_name(language):
+    key = normalize_language_name(
+        language
+    ).lower()
+
+    return LANGUAGE_NAMES.get(
+        key,
+        normalize_language_name(language)
+        or "Unknown",
     )
 
 
-def load_html_as_markdown(content):
-    soup = BeautifulSoup(content or "", "html.parser")
+def get_extension(language):
+    key = normalize_language_name(
+        language
+    ).lower()
 
-    for pre in soup.find_all("pre"):
-        code = pre.get_text("\n")
-        pre.replace_with(
-            soup.new_string(
-                "\n```text\n" + code + "\n```\n"
-            )
-        )
+    return LANGUAGE_EXTENSIONS.get(
+        key,
+        "txt",
+    )
 
-    for br in soup.find_all("br"):
-        br.replace_with("\n")
 
-    text = soup.get_text("\n")
-    text = html.unescape(text)
+# ============================================================
+# General helpers
+# ============================================================
 
-    text = re.sub(r"[ \t]+\n", "\n", text)
-    text = re.sub(r"\n{3,}", "\n\n", text)
+def safe_slug(text):
+    value = str(text or "").lower()
+    value = re.sub(
+        r"[^a-z0-9]+",
+        "-",
+        value,
+    )
 
-    return text.strip()
+    return value.strip("-")
 
 
 def difficulty_badge(difficulty):
@@ -237,25 +264,121 @@ def difficulty_badge(difficulty):
         "Easy": "🟢 Easy",
         "Medium": "🟡 Medium",
         "Hard": "🔴 Hard",
-    }.get(difficulty, difficulty or "Unknown")
-
-
-def get_extension(lang):
-    return LANGUAGE_EXTENSIONS.get(
-        (lang or "").lower(),
-        "txt",
+    }.get(
+        difficulty,
+        difficulty or "Unknown",
     )
 
 
-def get_language_name(lang):
-    return LANGUAGE_NAMES.get(
-        (lang or "").lower(),
-        lang or "Unknown",
+def format_metric(value):
+    return str(
+        value
+        if value not in (None, "")
+        else "N/A"
     )
 
 
 # ============================================================
-# Get authenticated account
+# State management
+# ============================================================
+
+def load_state():
+    if not STATE_FILE.exists():
+        return {
+            "processed_submission_ids": []
+        }
+
+    try:
+        data = json.loads(
+            STATE_FILE.read_text(
+                encoding="utf-8"
+            )
+        )
+
+        if not isinstance(data, dict):
+            return {
+                "processed_submission_ids": []
+            }
+
+        ids = data.get(
+            "processed_submission_ids",
+            [],
+        )
+
+        if not isinstance(ids, list):
+            ids = []
+
+        return {
+            "processed_submission_ids": [
+                str(item)
+                for item in ids
+            ]
+        }
+
+    except (
+        json.JSONDecodeError,
+        OSError,
+    ):
+        return {
+            "processed_submission_ids": []
+        }
+
+
+def save_state(state):
+    STATE_FILE.write_text(
+        json.dumps(
+            state,
+            indent=2,
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+# ============================================================
+# Problem description conversion
+# ============================================================
+
+def html_to_markdown(content):
+    soup = BeautifulSoup(
+        html.unescape(content or ""),
+        "html.parser",
+    )
+
+    for pre in soup.find_all("pre"):
+        code = pre.get_text("\n")
+
+        pre.replace_with(
+            soup.new_string(
+                "\n```text\n"
+                + code
+                + "\n```\n"
+            )
+        )
+
+    for br in soup.find_all("br"):
+        br.replace_with("\n")
+
+    text = soup.get_text("\n")
+
+    text = re.sub(
+        r"[ \t]+\n",
+        "\n",
+        text,
+    )
+
+    text = re.sub(
+        r"\n{3,}",
+        "\n\n",
+        text,
+    )
+
+    return text.strip()
+
+
+# ============================================================
+# LeetCode API
 # ============================================================
 
 def get_username():
@@ -264,270 +387,122 @@ def get_username():
         operation_name="globalData",
     )
 
-    status = data.get("userStatus") or {}
+    status = data.get(
+        "userStatus"
+    ) or {}
 
     if not status.get("isSignedIn"):
         raise RuntimeError(
-            "LeetCode authentication failed."
+            "LeetCode authentication failed. "
+            "Your session may have expired."
         )
 
-    username = status.get("username")
+    username = status.get(
+        "username"
+    )
 
     if not username:
         raise RuntimeError(
-            "Could not determine LeetCode username."
+            "Unable to determine your LeetCode username."
         )
 
     return username
 
 
-# ============================================================
-# Find accepted submissions
-# ============================================================
-
-def get_recent_accepted(username):
+def get_recent_accepted(
+    username,
+    limit=20,
+):
     data = graphql(
         RECENT_ACCEPTED_QUERY,
         {
             "username": username,
-            "limit": 20,
+            "limit": limit,
         },
         operation_name="recentAcSubmissions",
     )
 
-    submissions = data.get(
-        "recentAcSubmissionList"
-    ) or []
-
-    return submissions
-
-
-# ============================================================
-# Fetch source code
-# ============================================================
-
-SUBMISSION_DETAILS_QUERY = """
-query submissionDetails($submissionId: Int!) {
-    submissionDetails(submissionId: $submissionId) {
-        code
-        lang {
-            name
-        }
-        runtime
-        memory
-        statusDisplay
-    }
-}
-"""
-
-def decode_submission_code(raw_code):
-    if not raw_code:
-        return None
-
-    try:
-        return bytes(
-            raw_code,
-            "utf-8"
-        ).decode(
-            "unicode_escape"
+    return (
+        data.get(
+            "recentAcSubmissionList"
         )
-    except Exception:
-        return raw_code
-
-
-def extract_submission_code(page):
-    """
-    LeetCode has changed how submission source is embedded
-    several times. Try several known patterns.
-    """
-
-    patterns = [
-        r"submissionCode\s*:\s*'(.*?)'\s*,\s*editCodeUrl",
-        r'"submissionCode"\s*:\s*"((?:\\.|[^"\\])*)"',
-        r"submissionCode\s*:\s*'(.*?)'",
-    ]
-
-    for pattern in patterns:
-        match = re.search(
-            pattern,
-            page,
-            re.DOTALL,
-        )
-
-        if match:
-            raw = match.group(1)
-
-            raw = html.unescape(raw)
-
-            try:
-                return bytes(
-                    raw,
-                    "utf-8"
-                ).decode(
-                    "unicode_escape"
-                )
-            except Exception:
-                return raw
-
-    # Fallback: some pages expose the source
-    # in a code/textarea element.
-    soup = BeautifulSoup(
-        page,
-        "html.parser",
+        or []
     )
 
-    candidates = [
-        soup.find(
-            "textarea",
-            id="submission-code",
-        ),
-        soup.find(
-            "code",
-            id="submission-code",
-        ),
-        soup.find(
-            id="submission-code",
-        ),
-    ]
 
-    for candidate in candidates:
-        if candidate:
-            text = candidate.get_text()
-            if text.strip():
-                return text
-
-    return None
-
-
-def fetch_submission_source(submission):
-    submission_id = int(submission.get("id"))
-
-    print("   🔐 Fetching submitted code through LeetCode GraphQL...")
-
+def get_submission_details(
+    submission_id,
+):
     data = graphql(
         SUBMISSION_DETAILS_QUERY,
-        {"submissionId": submission_id},
+        {
+            "submissionId": int(
+                submission_id
+            )
+        },
         operation_name="submissionDetails",
     )
 
-    details = data.get("submissionDetails")
+    details = data.get(
+        "submissionDetails"
+    )
 
     if not details:
         raise RuntimeError(
-            f"LeetCode did not return submission details for {submission_id}"
+            f"No submission details returned "
+            f"for ID {submission_id}."
         )
 
-    if details.get("statusDisplay") != "Accepted":
-        raise RuntimeError(
-            f"Submission {submission_id} is not Accepted."
-        )
-
-    code = details.get("code")
-
-    if not code or not code.strip():
-        raise RuntimeError(
-            f"No source code returned for submission {submission_id}."
-        )
-
-    lang = details.get("lang")
-
-    if isinstance(lang, dict):
-        lang_name = lang.get("name", "")
-    else:
-        lang_name = str(lang or "")
-
-    normalized_details = {
-        "id": submission_id,
-        "code": code,
-        "lang": lang_name,
-        "runtime": details.get("runtime"),
-        "memory": details.get("memory"),
-        "statusDisplay": details.get("statusDisplay"),
-    }
-
-    return code, normalized_details
+    return details
 
 
-# ============================================================
-# Problem details
-# ============================================================
-
-def get_question(slug):
+def get_question(title_slug):
     data = graphql(
         QUESTION_QUERY,
         {
-            "titleSlug": slug
+            "titleSlug": title_slug
         },
         operation_name="questionData",
     )
 
-    question = data.get("question")
+    question = data.get(
+        "question"
+    )
 
     if not question:
         raise RuntimeError(
-            f"Could not fetch question: {slug}"
+            f"Could not fetch problem "
+            f"'{title_slug}'."
         )
 
     return question
 
 
 # ============================================================
-# README
+# Algorithm analyzer
 # ============================================================
 
-def analyze_algorithm(code, tags):
-    """
-    Detect common algorithmic patterns from the submitted code
-    and LeetCode topic tags.
+def analyze_algorithm(
+    code,
+    tags,
+):
+    code_lower = (
+        code or ""
+    ).lower()
 
-    Returns:
-        primary_pattern
-        supporting_patterns
-        intuition
-        approach
-        time_complexity
-        space_complexity
-    """
-
-    code_lower = (code or "").lower()
-    tag_text = " ".join(tags).lower()
+    tag_text = " ".join(
+        tags or []
+    ).lower()
 
     patterns = []
 
     def add(pattern):
         if pattern not in patterns:
-            patterns.append(pattern)
+            patterns.append(
+                pattern
+            )
 
-    # Hash Map / Hash Set
-    if (
-        "hash table" in tag_text
-        or "hash map" in tag_text
-        or "hashmap" in code_lower
-        or "defaultdict" in code_lower
-        or "unordered_map" in code_lower
-        or "dict(" in code_lower
-    ):
-        add("Hash Map")
-
-    if (
-        "hash set" in tag_text
-        or "set(" in code_lower
-        or "unordered_set" in code_lower
-    ):
-        add("Hash Set")
-
-    # Two pointers
-    if (
-        "two pointers" in tag_text
-        or (
-            "left" in code_lower
-            and "right" in code_lower
-            and "while" in code_lower
-        )
-    ):
-        add("Two Pointers")
-
-    # Sliding window
+    # Sliding Window
     if (
         "sliding window" in tag_text
         or (
@@ -541,7 +516,7 @@ def analyze_algorithm(code, tags):
     ):
         add("Sliding Window")
 
-    # Binary search
+    # Binary Search
     if (
         "binary search" in tag_text
         or "bisect" in code_lower
@@ -553,17 +528,37 @@ def analyze_algorithm(code, tags):
     ):
         add("Binary Search")
 
-    # Stack
+    # Two Pointers
     if (
-        "stack" in tag_text
+        "two pointers" in tag_text
         or (
-            "append(" in code_lower
-            and ".pop(" in code_lower
+            "left" in code_lower
+            and "right" in code_lower
+            and "while" in code_lower
         )
     ):
-        add("Stack")
+        add("Two Pointers")
 
-    # Queue / BFS
+    # Dynamic Programming
+    if (
+        "dynamic programming" in tag_text
+        or "lru_cache" in code_lower
+        or re.search(
+            r"\bdp\b",
+            code_lower,
+        )
+        or "memo" in code_lower
+    ):
+        add("Dynamic Programming")
+
+    # Backtracking
+    if (
+        "backtracking" in tag_text
+        or "backtrack" in code_lower
+    ):
+        add("Backtracking")
+
+    # BFS
     if (
         "breadth-first search" in tag_text
         or "bfs" in tag_text
@@ -572,24 +567,14 @@ def analyze_algorithm(code, tags):
     ):
         add("Queue / BFS")
 
-    # DFS / Backtracking
+    # DFS
     if (
         "depth-first search" in tag_text
         or "dfs" in tag_text
-        or "backtracking" in tag_text
     ):
-        add("DFS / Backtracking")
+        add("DFS")
 
-    # Dynamic Programming
-    if (
-        "dynamic programming" in tag_text
-        or "dp" in code_lower
-        or "lru_cache" in code_lower
-        or "memo" in code_lower
-    ):
-        add("Dynamic Programming")
-
-    # Heap / Priority Queue
+    # Heap
     if (
         "heap" in tag_text
         or "priority queue" in tag_text
@@ -597,6 +582,38 @@ def analyze_algorithm(code, tags):
         or "priorityqueue" in code_lower
     ):
         add("Heap / Priority Queue")
+
+    # Monotonic Stack / Stack
+    if "monotonic stack" in tag_text:
+        add("Monotonic Stack")
+
+    elif (
+        "stack" in tag_text
+        or (
+            "append(" in code_lower
+            and ".pop(" in code_lower
+        )
+    ):
+        add("Stack")
+
+    # Hash Map
+    if (
+        "hash table" in tag_text
+        or "hash map" in tag_text
+        or "hashmap" in code_lower
+        or "unordered_map" in code_lower
+        or "defaultdict" in code_lower
+        or "dict(" in code_lower
+    ):
+        add("Hash Map")
+
+    # Hash Set
+    if (
+        "hash set" in tag_text
+        or "unordered_set" in code_lower
+        or "set(" in code_lower
+    ):
+        add("Hash Set")
 
     # Sorting
     if (
@@ -610,19 +627,20 @@ def analyze_algorithm(code, tags):
     if (
         "prefix sum" in tag_text
         or "prefix" in code_lower
-        or "cumulative" in code_lower
     ):
         add("Prefix Sum")
 
     # Bit Manipulation
     if (
         "bit manipulation" in tag_text
-        or "bitwise" in tag_text
         or "& 1" in code_lower
         or "n & (n - 1)" in code_lower
-        or "^" in code_lower
     ):
         add("Bit Manipulation")
+
+    # Greedy
+    if "greedy" in tag_text:
+        add("Greedy")
 
     # Linked List
     if (
@@ -632,12 +650,8 @@ def analyze_algorithm(code, tags):
     ):
         add("Linked List")
 
-    # Greedy
-    if "greedy" in tag_text:
-        add("Greedy")
-
     if not patterns:
-        patterns.append("Direct Iterative Approach")
+        add("Direct Iterative Approach")
 
     primary = patterns[0]
     supporting = patterns[1:3]
@@ -648,103 +662,111 @@ def analyze_algorithm(code, tags):
 
     intuition_map = {
         "Hash Map": (
-            "The key idea is to store information from elements we have "
-            "already processed so that the required value can be looked "
-            "up quickly. A hash map provides O(1) average lookup time, "
-            "which avoids repeatedly scanning the input."
+            "The key idea is to remember useful information from "
+            "elements that have already been processed. A hash map "
+            "provides O(1) average lookup, allowing the solution to "
+            "avoid repeatedly scanning the input."
         ),
 
         "Hash Set": (
-            "A set is useful here because we mainly need fast membership "
-            "checks. Instead of repeatedly searching the input, we keep "
-            "the relevant values in a hash set and test whether an element "
-            "has already been seen."
-        ),
-
-        "Two Pointers": (
-            "The solution uses two pointers to process the input from "
-            "different positions. By moving the appropriate pointer after "
-            "each comparison, unnecessary combinations are eliminated "
-            "instead of checking every possible pair."
-        ),
-
-        "Sliding Window": (
-            "The problem can be viewed as maintaining a valid window over "
-            "the input. The left and right boundaries are adjusted as we "
-            "scan the array or string, allowing the solution to process "
-            "each element a small number of times."
-        ),
-
-        "Binary Search": (
-            "The search space has an ordered structure, which means we "
-            "do not need to inspect every element. At each step, the "
-            "middle element eliminates roughly half of the remaining "
-            "possibilities."
-        ),
-
-        "Stack": (
-            "A stack is useful because the most recently added element is "
-            "often the first one that needs to be reconsidered. Push and "
-            "pop operations let the solution maintain this information "
+            "The solution mainly needs fast membership checks. "
+            "A hash set keeps track of relevant values that have "
+            "already been seen, so each lookup can be performed "
             "efficiently."
         ),
 
-        "Queue / BFS": (
-            "The problem is naturally processed level by level. A queue "
-            "stores the next states to visit, allowing breadth-first "
-            "search to explore the structure in the required order."
+        "Two Pointers": (
+            "Two pointers reduce unnecessary comparisons by narrowing "
+            "the search space from two positions. The pointer that "
+            "cannot lead to a valid or better result is moved, "
+            "eliminating work as the scan progresses."
         ),
 
-        "DFS / Backtracking": (
-            "The solution explores one possible path or choice at a time. "
-            "When a path cannot produce a valid answer, it backtracks and "
-            "tries the next possibility."
+        "Sliding Window": (
+            "The solution maintains a moving window over the input. "
+            "The right side expands the window, while the left side "
+            "moves only when the current window violates the required "
+            "condition."
+        ),
+
+        "Binary Search": (
+            "Because the search space has an exploitable order, each "
+            "comparison can eliminate roughly half of the remaining "
+            "possibilities. This reduces a linear search to logarithmic "
+            "time."
         ),
 
         "Dynamic Programming": (
             "The problem contains overlapping subproblems. Instead of "
-            "recomputing the same results repeatedly, the solution stores "
-            "previously computed states and reuses them."
+            "solving the same smaller problem repeatedly, the solution "
+            "stores previously computed states and reuses them."
+        ),
+
+        "Backtracking": (
+            "The solution explores possible choices recursively. "
+            "Whenever a choice cannot lead to a valid answer, it is "
+            "undone so the next possibility can be explored."
+        ),
+
+        "Queue / BFS": (
+            "The problem can be explored level by level. A queue stores "
+            "the next states to visit, ensuring that states at the "
+            "current depth are processed before deeper states."
+        ),
+
+        "DFS": (
+            "The solution explores one path as deeply as possible before "
+            "backtracking to another branch. This is useful when states "
+            "naturally form a tree or graph."
         ),
 
         "Heap / Priority Queue": (
-            "A priority queue keeps the most important candidate readily "
-            "available. This avoids repeatedly scanning all remaining "
-            "elements when we only need the current minimum or maximum."
+            "A priority queue keeps the most important candidate "
+            "immediately available. This avoids repeatedly scanning all "
+            "candidates when we only need the current minimum or maximum."
+        ),
+
+        "Stack": (
+            "A stack is useful when the most recently encountered "
+            "unresolved element should be processed first. Push and "
+            "pop operations make those updates efficient."
+        ),
+
+        "Monotonic Stack": (
+            "The stack maintains elements in a useful monotonic order. "
+            "When the current element resolves previously pending "
+            "elements, they can be popped once and never need to be "
+            "reconsidered."
         ),
 
         "Sorting": (
-            "Sorting puts the input into an order that makes the required "
-            "comparisons or grouping much easier. Once ordered, the "
-            "algorithm can process the elements without checking every "
-            "possible arrangement."
+            "Sorting creates an order that exposes relationships between "
+            "elements and makes the required comparisons or grouping "
+            "easier."
         ),
 
         "Prefix Sum": (
-            "Prefix information lets the solution answer cumulative "
-            "queries without recomputing the sum from the beginning each "
-            "time. Each position stores enough information to derive "
-            "later results efficiently."
+            "The solution stores cumulative information so later range "
+            "or prefix calculations can be answered without recomputing "
+            "earlier elements."
         ),
 
         "Bit Manipulation": (
-            "The solution takes advantage of bit-level properties of the "
-            "numbers. Bitwise operations can express certain mathematical "
-            "conditions much more efficiently than repeatedly performing "
-            "the equivalent arithmetic operations."
-        ),
-
-        "Linked List": (
-            "The solution works directly with node relationships rather "
-            "than treating the structure like a random-access array. "
-            "Updating or traversing the next pointers lets us manipulate "
-            "the list efficiently."
+            "The solution uses properties of binary representation and "
+            "bitwise operations to express the required condition "
+            "efficiently."
         ),
 
         "Greedy": (
-            "A greedy strategy is used: at each step, the solution makes "
-            "the best locally available choice with the goal of building "
-            "an optimal global result."
+            "At every step, the solution chooses the best available "
+            "local option. The key observation is that these choices "
+            "can be combined to produce the required global result."
+        ),
+
+        "Linked List": (
+            "The solution works directly with node relationships instead "
+            "of random-access indexing. Pointer updates allow the list "
+            "to be traversed or modified efficiently."
         ),
     }
 
@@ -752,8 +774,8 @@ def analyze_algorithm(code, tags):
         primary,
         (
             "The solution processes the input systematically while "
-            "maintaining the information needed to make each decision "
-            "without unnecessary repeated work."
+            "keeping only the state necessary to make the next decision "
+            "efficiently."
         ),
     )
 
@@ -763,107 +785,121 @@ def analyze_algorithm(code, tags):
 
     approach_map = {
         "Hash Map": [
-            "Create a hash map to store information about elements already processed.",
-            "Iterate through the input once.",
-            "For each element, compute or check the value required by the problem.",
-            "Use the hash map for an O(1) average-time lookup.",
-            "Return or update the result when the required condition is satisfied.",
+            "Create a hash map to store information about previously processed values.",
+            "Traverse the input once.",
+            "For each element, compute the value or state needed to satisfy the problem.",
+            "Use the hash map for a fast average-time lookup.",
+            "Return or update the answer when the required condition is met.",
         ],
 
         "Hash Set": [
-            "Create a set containing the values needed for fast membership checks.",
-            "Traverse the input while checking whether the current value has already been seen.",
-            "Update the set as new values are processed.",
-            "Return the result once the required condition is found.",
+            "Create a set for fast average-time membership checks.",
+            "Traverse the input and test whether the relevant value has already been seen.",
+            "Add new values to the set as the scan progresses.",
+            "Return the result when the required condition is satisfied.",
         ],
 
         "Two Pointers": [
-            "Initialize pointers at the relevant ends or positions of the input.",
-            "Compare the values indicated by the pointers.",
-            "Move the appropriate pointer according to the problem condition.",
-            "Continue until the pointers meet or the valid search range is exhausted.",
+            "Initialize the two pointers at the appropriate positions.",
+            "Compare the elements referenced by the pointers.",
+            "Move the pointer that cannot contribute to a valid or better result.",
+            "Continue until the search space is exhausted or the answer is found.",
         ],
 
         "Sliding Window": [
             "Initialize the left and right boundaries of the window.",
             "Expand the right side while processing new elements.",
-            "When the window becomes invalid, move the left boundary until it is valid again.",
-            "Track the best or required result while maintaining the window.",
+            "When the window becomes invalid, move the left boundary until validity is restored.",
+            "Track the required best or valid result while maintaining the window.",
         ],
 
         "Binary Search": [
             "Initialize the search boundaries.",
             "Calculate the middle position.",
-            "Determine which half can still contain the answer.",
+            "Use the ordering property to determine which half can still contain the answer.",
             "Discard the other half and repeat until the answer is found.",
+        ],
+
+        "Dynamic Programming": [
+            "Define a state representing a smaller subproblem.",
+            "Initialize the necessary base cases.",
+            "Compute states while reusing previously solved subproblems.",
+            "Use the final state to obtain the answer.",
+        ],
+
+        "Backtracking": [
+            "Choose one available option.",
+            "Recursively explore the state created by that choice.",
+            "Undo the choice when returning from recursion.",
+            "Continue until all necessary choices are explored or a valid answer is found.",
+        ],
+
+        "Queue / BFS": [
+            "Initialize the queue with the starting state.",
+            "Process states in first-in-first-out order.",
+            "Generate and enqueue each valid next state.",
+            "Continue until the target is reached or the structure is fully explored.",
+        ],
+
+        "DFS": [
+            "Start from the relevant node or state.",
+            "Explore one branch recursively before moving to the next branch.",
+            "Track visited state when necessary.",
+            "Continue until the target is found or all reachable states are processed.",
+        ],
+
+        "Heap / Priority Queue": [
+            "Insert the relevant candidates into a priority queue.",
+            "Retrieve the highest-priority candidate when needed.",
+            "Update the queue with newly relevant candidates.",
+            "Continue until the required result has been obtained.",
         ],
 
         "Stack": [
             "Initialize an empty stack.",
             "Process the input from left to right.",
-            "Push elements when they still need to be considered.",
-            "Pop elements when the current element resolves the pending condition.",
+            "Push unresolved elements onto the stack.",
+            "Pop elements when the current value resolves their pending condition.",
         ],
 
-        "Queue / BFS": [
-            "Initialize a queue with the starting state.",
-            "Process states in first-in-first-out order.",
-            "Generate and enqueue the next valid states.",
-            "Continue until the target state or complete traversal is reached.",
-        ],
-
-        "DFS / Backtracking": [
-            "Choose the next available option.",
-            "Recursively explore the resulting state.",
-            "Undo the choice when returning from the recursive call.",
-            "Continue until all relevant possibilities have been explored or a valid result is found.",
-        ],
-
-        "Dynamic Programming": [
-            "Define the state that represents a smaller version of the problem.",
-            "Initialize the base cases.",
-            "Build or memoize states so repeated work is avoided.",
-            "Use previously computed states to construct the final answer.",
-        ],
-
-        "Heap / Priority Queue": [
-            "Initialize a priority queue with the relevant candidates.",
-            "Repeatedly retrieve the highest-priority element.",
-            "Process it and add any newly relevant candidates.",
-            "Continue until the required number of results or final state is obtained.",
+        "Monotonic Stack": [
+            "Maintain a stack whose values follow the required monotonic order.",
+            "Process each element once.",
+            "Pop elements whose pending relationship is resolved by the current element.",
+            "Push the current element or its index for future comparisons.",
         ],
 
         "Sorting": [
-            "Sort the input using the required ordering.",
-            "Traverse the ordered data while applying the problem-specific condition.",
-            "Use the sorted structure to avoid unnecessary comparisons.",
+            "Sort the input according to the ordering required by the problem.",
+            "Traverse the sorted data and exploit the resulting order.",
+            "Avoid comparisons that are no longer necessary because of the ordering.",
         ],
 
         "Prefix Sum": [
             "Build cumulative information while traversing the input.",
-            "Use the stored prefix values to derive range or cumulative results efficiently.",
-            "Return the required result after processing the input.",
+            "Use the stored prefix values to calculate required ranges or totals efficiently.",
+            "Return the required result after processing the relevant positions.",
         ],
 
         "Bit Manipulation": [
-            "Identify the bitwise property used by the problem.",
-            "Apply the corresponding bit operation to the current value.",
-            "Repeat only while the relevant bits remain to be processed.",
+            "Identify the relevant property of the binary representation.",
+            "Apply the required bitwise operation.",
+            "Repeat while relevant bits remain to be processed.",
             "Return the resulting value or condition.",
+        ],
+
+        "Greedy": [
+            "Evaluate the choices available at the current step.",
+            "Select the locally optimal choice.",
+            "Update the state and continue.",
+            "Return the final result after processing all relevant choices.",
         ],
 
         "Linked List": [
             "Initialize the required node pointers.",
             "Traverse the list through next-pointer relationships.",
-            "Update pointers when the problem requires insertion, deletion, reversal, or comparison.",
-            "Return the appropriate node or result.",
-        ],
-
-        "Greedy": [
-            "Evaluate the available choices at the current step.",
-            "Select the locally optimal choice.",
-            "Update the state and continue to the next step.",
-            "Return the final result after all relevant choices are processed.",
+            "Update pointers when the problem requires list manipulation.",
+            "Return the required node or result.",
         ],
     }
 
@@ -878,72 +914,101 @@ def analyze_algorithm(code, tags):
     )
 
     # --------------------------------------------------------
-    # Complexity estimation
+    # Complexity
     # --------------------------------------------------------
 
-    time_complexity = "Depends on the exact implementation"
-    space_complexity = "Depends on the exact implementation"
+    complexity = {
+        "Hash Map": (
+            "O(n)",
+            "O(n)",
+        ),
+        "Hash Set": (
+            "O(n)",
+            "O(n)",
+        ),
+        "Two Pointers": (
+            "O(n)",
+            "O(1)",
+        ),
+        "Sliding Window": (
+            "O(n)",
+            "O(n)",
+        ),
+        "Binary Search": (
+            "O(log n)",
+            "O(1)",
+        ),
+        "Dynamic Programming": (
+            "Depends on the state space",
+            "Depends on the state space",
+        ),
+        "Backtracking": (
+            "Depends on the search space",
+            "O(n) auxiliary space",
+        ),
+        "Queue / BFS": (
+            "O(n)",
+            "O(n)",
+        ),
+        "DFS": (
+            "O(n)",
+            "O(n)",
+        ),
+        "Heap / Priority Queue": (
+            "O(n log n)",
+            "O(n)",
+        ),
+        "Stack": (
+            "O(n)",
+            "O(n)",
+        ),
+        "Monotonic Stack": (
+            "O(n)",
+            "O(n)",
+        ),
+        "Sorting": (
+            "O(n log n)",
+            "Depends on sorting implementation",
+        ),
+        "Prefix Sum": (
+            "O(n)",
+            "O(n)",
+        ),
+        "Bit Manipulation": (
+            "O(1) to O(log n)",
+            "O(1)",
+        ),
+        "Greedy": (
+            "O(n) to O(n log n)",
+            "Depends on implementation",
+        ),
+        "Linked List": (
+            "O(n)",
+            "O(1) auxiliary space",
+        ),
+    }
 
-    if primary == "Hash Map":
-        time_complexity = "O(n)"
-        space_complexity = "O(n)"
-
-    elif primary == "Hash Set":
-        time_complexity = "O(n)"
-        space_complexity = "O(n)"
-
-    elif primary == "Two Pointers":
-        time_complexity = "O(n)"
-        space_complexity = "O(1)"
-
-    elif primary == "Sliding Window":
-        time_complexity = "O(n)"
-        space_complexity = "O(n)"
-
-    elif primary == "Binary Search":
-        time_complexity = "O(log n)"
-        space_complexity = "O(1)"
-
-    elif primary == "Stack":
-        time_complexity = "O(n)"
-        space_complexity = "O(n)"
-
-    elif primary == "Queue / BFS":
-        time_complexity = "O(n)"
-        space_complexity = "O(n)"
-
-    elif primary == "DFS / Backtracking":
-        time_complexity = "Depends on the search space"
-        space_complexity = "O(n) auxiliary space"
-
-    elif primary == "Sorting":
-        time_complexity = "O(n log n)"
-        space_complexity = "Depends on the sorting implementation"
-
-    elif primary == "Heap / Priority Queue":
-        time_complexity = "O(n log n)"
-        space_complexity = "O(n)"
-
-    elif primary == "Bit Manipulation":
-        if "while" in code_lower:
-            time_complexity = "O(log n)"
-        else:
-            time_complexity = "O(1)"
-        space_complexity = "O(1)"
-
-    elif primary == "Prefix Sum":
-        time_complexity = "O(n)"
-        space_complexity = "O(n)"
+    time, space = complexity.get(
+        primary,
+        (
+            "Depends on the implementation",
+            "Depends on the implementation",
+        ),
+    )
 
     return {
         "primary": primary,
         "supporting": supporting,
         "intuition": intuition,
         "approach": approach,
-        "time": time_complexity,
-        "space": space_complexity,
+        "time": time,
+        "space": space,
     }
 
+
+# ============================================================
+# Per-problem README
+# ============================================================
 
 def create_problem_readme(
     question,
@@ -983,19 +1048,18 @@ def create_problem_readme(
         submission.get("lang")
     )
 
-    code = submission.get("code", "")
+    code = submission.get(
+        "code",
+        "",
+    )
 
     analysis = analyze_algorithm(
         code,
         tags,
     )
 
-    description = load_html_as_markdown(
+    description = html_to_markdown(
         question.get("content", "")
-    )
-
-    leetcode_url = (
-        f"{LEETCODE_URL}/problems/{slug}/"
     )
 
     tags_display = (
@@ -1004,8 +1068,10 @@ def create_problem_readme(
         else "Not specified"
     )
 
-    supporting_text = (
-        " · ".join(analysis["supporting"])
+    supporting_display = (
+        " · ".join(
+            analysis["supporting"]
+        )
         if analysis["supporting"]
         else "None"
     )
@@ -1018,14 +1084,16 @@ def create_problem_readme(
         )
     )
 
-    runtime = submission.get(
-        "runtime",
-        "N/A",
+    runtime = format_metric(
+        submission.get("runtime")
     )
 
-    memory = submission.get(
-        "memory",
-        "N/A",
+    memory = format_metric(
+        submission.get("memory")
+    )
+
+    leetcode_url = (
+        f"{LEETCODE_URL}/problems/{slug}/"
     )
 
     return f"""# 🧩 {number}. {title}
@@ -1050,9 +1118,10 @@ def create_problem_readme(
 
 ### 🧠 Algorithmic Pattern
 
-**Primary:** {analysis["primary"]}
-
-**Supporting:** {supporting_text}
+| Role | Pattern |
+|---|---|
+| Primary | **{analysis["primary"]}** |
+| Supporting | {supporting_display} |
 
 ---
 
@@ -1064,10 +1133,11 @@ def create_problem_readme(
 
 ## 🔍 Why This Works
 
-The approach works because it avoids unnecessary repeated work and
-maintains only the information required to make the next decision.
+The approach avoids unnecessary repeated work by maintaining the
+right state or data structure while processing the input.
 
-The exact implementation is available in the linked solution file.
+The key advantage comes from choosing an algorithmic pattern that
+reduces the amount of work required at each step.
 
 ---
 
@@ -1085,8 +1155,8 @@ The exact implementation is available in the linked solution file.
 | Runtime | `{runtime}` |
 | Memory | `{memory}` |
 
-> **Note:** The complexity above is inferred from the detected
-> algorithmic pattern and the submitted implementation.
+> The Big-O complexity is inferred from the detected algorithmic
+> pattern and is intended as a high-level guide.
 
 ---
 
@@ -1098,11 +1168,8 @@ The exact implementation is available in the linked solution file.
 
 ## 🎯 Key Takeaway
 
-The main lesson from this problem is to recognize the underlying
-algorithmic pattern before writing the implementation.
-
-Understanding **why** the chosen data structure or algorithm reduces
-unnecessary work is often more valuable than memorizing the solution.
+The most valuable part of this problem is recognizing the underlying
+pattern and understanding why it reduces unnecessary computation.
 
 ---
 
@@ -1115,6 +1182,316 @@ unnecessary work is often more valuable than memorizing the solution.
 
 ⭐ Automatically synchronized from an accepted LeetCode submission.
 """
+
+
+# ============================================================
+# Solution folder / metadata helpers
+# ============================================================
+
+def solution_folder_name(question):
+    number = int(
+        question["questionFrontendId"]
+    )
+
+    return (
+        f"{number:04d}-"
+        f"{safe_slug(question['title'])}"
+    )
+
+
+def find_solution_code(folder):
+    if not folder.exists():
+        return None
+
+    candidates = sorted(
+        folder.glob("solution.*")
+    )
+
+    return (
+        candidates[0]
+        if candidates
+        else None
+    )
+
+
+def read_metadata(folder):
+    metadata_path = (
+        folder / "metadata.json"
+    )
+
+    if not metadata_path.exists():
+        return {}
+
+    try:
+        data = json.loads(
+            metadata_path.read_text(
+                encoding="utf-8"
+            )
+        )
+
+        return (
+            data
+            if isinstance(data, dict)
+            else {}
+        )
+
+    except (
+        json.JSONDecodeError,
+        OSError,
+    ):
+        return {}
+
+
+def save_metadata(
+    folder,
+    metadata,
+):
+    (folder / "metadata.json").write_text(
+        json.dumps(
+            metadata,
+            indent=2,
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+# ============================================================
+# Import a new submission
+# ============================================================
+
+def import_submission(submission):
+    submission_id = str(
+        submission.get("id")
+    )
+
+    title = submission.get(
+        "title",
+        "Unknown",
+    )
+
+    slug = submission.get(
+        "titleSlug",
+        "",
+    )
+
+    print(
+        f"\n🔎 Processing: {title}"
+    )
+
+    question = get_question(
+        slug
+    )
+
+    details = get_submission_details(
+        submission_id
+    )
+
+    if details.get(
+        "statusDisplay"
+    ) != "Accepted":
+        raise RuntimeError(
+            f"Submission {submission_id} "
+            "is not Accepted."
+        )
+
+    code = details.get(
+        "code"
+    )
+
+    if not code or not code.strip():
+        raise RuntimeError(
+            f"No source code returned "
+            f"for submission {submission_id}."
+        )
+
+    language = normalize_language_name(
+        details.get("lang")
+    )
+
+    folder_name = solution_folder_name(
+        question
+    )
+
+    folder = (
+        SOLUTIONS_DIR
+        / folder_name
+    )
+
+    folder.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    extension = get_extension(
+        language
+    )
+
+    code_filename = (
+        f"solution.{extension}"
+    )
+
+    code_path = (
+        folder
+        / code_filename
+    )
+
+    code_path.write_text(
+        code,
+        encoding="utf-8",
+    )
+
+    submission_for_readme = {
+        "lang": language,
+        "code": code,
+        "runtime": details.get(
+            "runtime"
+        ),
+        "memory": details.get(
+            "memory"
+        ),
+    }
+
+    readme = create_problem_readme(
+        question,
+        submission_for_readme,
+        code_filename,
+    )
+
+    (
+        folder / "README.md"
+    ).write_text(
+        readme,
+        encoding="utf-8",
+    )
+
+    metadata = {
+        "number": question[
+            "questionFrontendId"
+        ],
+        "title": question[
+            "title"
+        ],
+        "difficulty": question[
+            "difficulty"
+        ],
+        "language": get_language_name(
+            language
+        ),
+        "folder": folder_name,
+        "slug": question[
+            "titleSlug"
+        ],
+        "submission_id": submission_id,
+        "runtime": details.get(
+            "runtime"
+        ),
+        "memory": details.get(
+            "memory"
+        ),
+    }
+
+    save_metadata(
+        folder,
+        metadata,
+    )
+
+    print(
+        f"   ✅ Saved: solutions/{folder_name}"
+    )
+
+    return True
+
+
+# ============================================================
+# Refresh README for an existing solution
+# ============================================================
+
+def refresh_existing_solution(
+    submission
+):
+    title = submission.get(
+        "title",
+        "Unknown",
+    )
+
+    slug = submission.get(
+        "titleSlug",
+        "",
+    )
+
+    print(
+        f"\n🔄 Refreshing README: {title}"
+    )
+
+    question = get_question(
+        slug
+    )
+
+    folder_name = solution_folder_name(
+        question
+    )
+
+    folder = (
+        SOLUTIONS_DIR
+        / folder_name
+    )
+
+    code_path = find_solution_code(
+        folder
+    )
+
+    if not code_path:
+        print(
+            "   ⚠️ Existing solution file "
+            "not found. Re-importing."
+        )
+
+        return import_submission(
+            submission
+        )
+
+    metadata = read_metadata(
+        folder
+    )
+
+    code = code_path.read_text(
+        encoding="utf-8"
+    )
+
+    language = metadata.get(
+        "language",
+        code_path.suffix.lstrip("."),
+    )
+
+    submission_for_readme = {
+        "lang": language,
+        "code": code,
+        "runtime": metadata.get(
+            "runtime",
+            "Previously recorded",
+        ),
+        "memory": metadata.get(
+            "memory",
+            "Previously recorded",
+        ),
+    }
+
+    readme = create_problem_readme(
+        question,
+        submission_for_readme,
+        code_path.name,
+    )
+
+    (
+        folder / "README.md"
+    ).write_text(
+        readme,
+        encoding="utf-8",
+    )
+
+    return True
 
 
 # ============================================================
@@ -1133,56 +1510,66 @@ def update_main_readme():
         if not folder.is_dir():
             continue
 
-        metadata_path = (
-            folder / "metadata.json"
+        metadata = read_metadata(
+            folder
         )
 
-        if not metadata_path.exists():
-            continue
-
-        try:
+        if metadata:
             records.append(
-                json.loads(
-                    metadata_path.read_text(
-                        encoding="utf-8"
-                    )
-                )
+                metadata
             )
-        except Exception:
-            continue
 
     records.sort(
-        key=lambda x: int(
-            x["number"]
+        key=lambda item: (
+            int(
+                item.get(
+                    "number",
+                    999999,
+                )
+            )
+            if str(
+                item.get(
+                    "number",
+                    "",
+                )
+            ).isdigit()
+            else 999999
         )
-        if str(x.get("number", "")).isdigit()
-        else 999999
     )
 
     easy = sum(
-        1 for x in records
-        if x.get("difficulty") == "Easy"
+        1
+        for item in records
+        if item.get(
+            "difficulty"
+        ) == "Easy"
     )
 
     medium = sum(
-        1 for x in records
-        if x.get("difficulty") == "Medium"
+        1
+        for item in records
+        if item.get(
+            "difficulty"
+        ) == "Medium"
     )
 
     hard = sum(
-        1 for x in records
-        if x.get("difficulty") == "Hard"
+        1
+        for item in records
+        if item.get(
+            "difficulty"
+        ) == "Hard"
     )
 
     rows = []
 
-    for record in records:
+    for item in records:
         rows.append(
-            f"| {record['number']} "
-            f"| [{record['title']}]"
-            f"(solutions/{record['folder']}/) "
-            f"| {difficulty_badge(record['difficulty'])} "
-            f"| {record['language']} |"
+            f"| {item.get('number', '—')} "
+            f"| [{item.get('title', 'Unknown')}]"
+            f"(solutions/{item.get('folder', '')}/) "
+            f"| {difficulty_badge(item.get('difficulty'))} "
+            f"| {item.get('language', 'Unknown')} |"
         )
 
     if not rows:
@@ -1195,7 +1582,7 @@ def update_main_readme():
     readme = f"""# 🧠 LeetCode Solutions
 
 > A continuously growing collection of my LeetCode solutions,
-> explanations, algorithmic patterns, and problem-solving notes.
+> algorithmic patterns, explanations, and problem-solving notes.
 
 ## 📊 Progress
 
@@ -1220,12 +1607,12 @@ def update_main_readme():
 
 This repository is synchronized automatically using **GitHub Actions**.
 
-Whenever a new accepted LeetCode submission is detected, the automation:
+Whenever an accepted LeetCode submission is detected, the workflow:
 
 1. Retrieves the accepted submission.
-2. Fetches the problem description.
-3. Creates the solution file.
-4. Generates a readable problem README.
+2. Fetches the problem statement and topic tags.
+3. Saves the submitted source code.
+4. Generates a visitor-friendly problem README.
 5. Updates this problem archive.
 6. Commits the changes automatically.
 
@@ -1239,8 +1626,8 @@ Whenever a new accepted LeetCode submission is detected, the automation:
 
 This repository is more than a backup of code.
 
-Each solution is organized so that visitors can understand the
-problem, the core idea, the algorithmic approach, and the implementation.
+Each solution is organized so visitors can understand the problem,
+the core idea, the algorithmic pattern, the complexity, and the implementation.
 
 ⭐ One problem at a time. One concept at a time.
 """
@@ -1249,97 +1636,6 @@ problem, the core idea, the algorithmic approach, and the implementation.
         readme,
         encoding="utf-8",
     )
-
-
-# ============================================================
-# Process submission
-# ============================================================
-
-def process_submission(submission):
-    submission_id = str(submission.get("id"))
-
-    title = submission.get(
-        "title",
-        "Unknown",
-    )
-
-    slug = submission.get(
-        "titleSlug",
-        "",
-    )
-
-    print(f"\n🔎 Processing: {title}")
-
-    question = get_question(slug)
-
-    code, submission_details = fetch_submission_source(
-        submission
-    )
-
-    submission = {
-        **submission,
-        **submission_details,
-    }
-
-    folder_name = (
-        f"{int(question['questionFrontendId']):04d}"
-        f"-{safe_slug(question['title'])}"
-    )
-
-    folder = SOLUTIONS_DIR / folder_name
-
-    folder.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    extension = get_extension(
-        submission.get("lang")
-    )
-
-    code_filename = f"solution.{extension}"
-
-    code_path = folder / code_filename
-    readme_path = folder / "README.md"
-    metadata_path = folder / "metadata.json"
-
-    code_path.write_text(
-        code,
-        encoding="utf-8",
-    )
-
-    readme_path.write_text(
-        create_problem_readme(
-            question,
-            submission,
-            code_filename,
-        ),
-        encoding="utf-8",
-    )
-
-    metadata = {
-        "number": question["questionFrontendId"],
-        "title": question["title"],
-        "difficulty": question["difficulty"],
-        "language": get_language_name(
-            submission.get("lang")
-        ),
-        "folder": folder_name,
-        "slug": question["titleSlug"],
-        "submission_id": submission_id,
-    }
-
-    metadata_path.write_text(
-        json.dumps(
-            metadata,
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
-
-    print(f"   ✅ Saved: {folder}")
-
-    return True
 
 
 # ============================================================
@@ -1356,11 +1652,10 @@ def main():
         exist_ok=True,
     )
 
-    state = get_state()
+    state = load_state()
 
     processed_ids = set(
-        str(x)
-        for x in state.get(
+        state.get(
             "processed_submission_ids",
             [],
         )
@@ -1373,7 +1668,8 @@ def main():
     )
 
     submissions = get_recent_accepted(
-        username
+        username,
+        limit=20,
     )
 
     print(
@@ -1381,9 +1677,13 @@ def main():
         "recent accepted submissions."
     )
 
-    new_processed_ids = []
+    imported_count = 0
+    refreshed_count = 0
+    failed_count = 0
 
-    for submission in submissions:
+    for submission in reversed(
+        submissions
+    ):
         submission_id = str(
             submission.get("id")
         )
@@ -1391,126 +1691,77 @@ def main():
         if not submission_id:
             continue
 
-        if submission_id in processed_ids:
-    print(
-        f"🔄 Refreshing README: "
-        f"{submission.get('title')}"
-    )
-
-    try:
-        slug = submission.get("titleSlug")
-
-        question = get_question(slug)
-
-        folder_name = (
-            f"{int(question['questionFrontendId']):04d}"
-            f"-{safe_slug(question['title'])}"
-        )
-
-        folder = SOLUTIONS_DIR / folder_name
-
-        if not folder.exists():
-            print("   ⚠️ Solution folder missing. Re-importing.")
-            process_submission(submission)
-            continue
-
-        metadata_path = folder / "metadata.json"
-
-        if not metadata_path.exists():
-            print("   ⚠️ Metadata missing. Re-importing.")
-            process_submission(submission)
-            continue
-
-        metadata = json.loads(
-            metadata_path.read_text(
-                encoding="utf-8"
-            )
-        )
-
-        language = metadata.get(
-            "language",
-            "Unknown",
-        )
-
-        extension = None
-
-        for ext in LANGUAGE_EXTENSIONS.values():
-            candidate = folder / f"solution.{ext}"
-            if candidate.exists():
-                extension = ext
-                code_path = candidate
-                break
-
-        if extension:
-            code = code_path.read_text(
-                encoding="utf-8"
-            )
-
-            refreshed_submission = {
-                "lang": language,
-                "code": code,
-                "runtime": "Previously recorded",
-                "memory": "Previously recorded",
-            }
-
-            readme = create_problem_readme(
-                question,
-                refreshed_submission,
-                code_path.name,
-            )
-
-            (folder / "README.md").write_text(
-                readme,
-                encoding="utf-8",
-            )
-
-        continue
-
-    except Exception as exc:
-        print(
-            f"   ⚠️ README refresh failed: {exc}"
-        )
-
-        continue
         try:
-            process_submission(
-                submission
-            )
+            if submission_id in processed_ids:
+                refresh_existing_solution(
+                    submission
+                )
 
-            new_processed_ids.append(
-                submission_id
-            )
+                refreshed_count += 1
+
+            else:
+                import_submission(
+                    submission
+                )
+
+                processed_ids.add(
+                    submission_id
+                )
+
+                imported_count += 1
 
         except Exception as exc:
+            failed_count += 1
+
             print(
-                f"   ❌ Failed: {exc}"
+                f"   ❌ Failed: "
+                f"{submission.get('title', 'Unknown')}"
             )
 
-    processed_ids.update(
-        new_processed_ids
-    )
+            print(
+                f"      {exc}"
+            )
 
-    state["processed_submission_ids"] = sorted(
+    state[
+        "processed_submission_ids"
+    ] = sorted(
         processed_ids
     )
 
-    save_state(state)
+    save_state(
+        state
+    )
 
     update_main_readme()
 
     print(
-        "\n✅ Synchronization complete."
+        "\n📊 Synchronization summary"
     )
 
-    if new_processed_ids:
+    print(
+        f"   🆕 Imported: {imported_count}"
+    )
+
+    print(
+        f"   🔄 Refreshed: {refreshed_count}"
+    )
+
+    print(
+        f"   ❌ Failed: {failed_count}"
+    )
+
+    if failed_count:
         print(
-            f"🎉 Imported "
-            f"{len(new_processed_ids)} new solution(s)."
+            "\n❌ Synchronization completed "
+            "with errors."
         )
-    else:
-        print(
-            "ℹ️ No new solutions were imported."
-        )
+
+        sys.exit(1)
+
+    print(
+        "\n✅ Synchronization completed "
+        "successfully."
+    )
 
 
 if __name__ == "__main__":
