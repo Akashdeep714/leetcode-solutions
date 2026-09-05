@@ -9,45 +9,50 @@ import requests
 from bs4 import BeautifulSoup
 
 
-# ============================================================
-# Configuration
-# ============================================================
-
 GRAPHQL_URL = "https://leetcode.com/graphql/"
-REPO_ROOT = Path(".")
-SOLUTIONS_DIR = REPO_ROOT / "solutions"
+LEETCODE_URL = "https://leetcode.com"
 
-SESSION = os.environ.get("LEETCODE_SESSION", "").strip()
-CSRF_TOKEN = os.environ.get("LEETCODE_CSRF_TOKEN", "").strip()
+SESSION = os.getenv("LEETCODE_SESSION", "").strip()
+CSRF_TOKEN = os.getenv("LEETCODE_CSRF_TOKEN", "").strip()
+
+SOLUTIONS_DIR = Path("solutions")
+STATE_FILE = Path("sync_state.json")
+
 
 if not SESSION or not CSRF_TOKEN:
     print("❌ Missing LeetCode credentials.")
-    print("Make sure LEETCODE_SESSION and LEETCODE_CSRF_TOKEN are configured.")
     sys.exit(1)
 
 
 # ============================================================
-# HTTP / GraphQL
+# Session
 # ============================================================
 
-session = requests.Session()
+client = requests.Session()
 
-session.headers.update(
-    {
-        "Content-Type": "application/json",
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/140.0.0.0 Safari/537.36"
-        ),
-        "Origin": "https://leetcode.com",
-        "Referer": "https://leetcode.com/",
-        "X-CSRFToken": CSRF_TOKEN,
-    }
+client.headers.update({
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/140.0.0.0 Safari/537.36"
+    ),
+    "Accept": "application/json, text/plain, */*",
+    "Origin": LEETCODE_URL,
+    "Referer": LEETCODE_URL + "/",
+    "X-CSRFToken": CSRF_TOKEN,
+})
+
+client.cookies.set(
+    "LEETCODE_SESSION",
+    SESSION,
+    domain="leetcode.com",
 )
 
-session.cookies.set("LEETCODE_SESSION", SESSION, domain="leetcode.com")
-session.cookies.set("csrftoken", CSRF_TOKEN, domain="leetcode.com")
+client.cookies.set(
+    "csrftoken",
+    CSRF_TOKEN,
+    domain="leetcode.com",
+)
 
 
 def graphql(query, variables=None, operation_name=None):
@@ -59,7 +64,7 @@ def graphql(query, variables=None, operation_name=None):
     if operation_name:
         payload["operationName"] = operation_name
 
-    response = session.post(
+    response = client.post(
         GRAPHQL_URL,
         json=payload,
         timeout=30,
@@ -71,22 +76,20 @@ def graphql(query, variables=None, operation_name=None):
 
     if data.get("errors"):
         raise RuntimeError(
-            "LeetCode GraphQL error: "
-            + json.dumps(data["errors"], ensure_ascii=False)
+            json.dumps(data["errors"], ensure_ascii=False)
         )
 
     return data.get("data", {})
 
 
 # ============================================================
-# LeetCode queries
+# GraphQL
 # ============================================================
 
-GLOBAL_DATA_QUERY = """
+USER_STATUS_QUERY = """
 query globalData {
     userStatus {
         username
-        userId
         isSignedIn
     }
 }
@@ -105,32 +108,11 @@ query recentAcSubmissions($username: String!, $limit: Int!) {
 """
 
 
-SUBMISSION_DETAILS_QUERY = """
-query mySubmissionDetail($id: ID!) {
-    submissionDetail(submissionId: $id) {
-        id
-        code
-        lang
-        runtime
-        memory
-        rawMemory
-        statusDisplay
-        timestamp
-        question {
-            titleSlug
-            title
-            questionId
-        }
-    }
-}
-"""
-
-
 QUESTION_QUERY = """
 query questionData($titleSlug: String!) {
     question(titleSlug: $titleSlug) {
-        questionId
         questionFrontendId
+        questionId
         title
         titleSlug
         content
@@ -139,10 +121,6 @@ query questionData($titleSlug: String!) {
             name
             slug
         }
-        hints
-        exampleTestcases
-        sampleTestCase
-        isPaidOnly
     }
 }
 """
@@ -163,8 +141,8 @@ LANGUAGE_EXTENSIONS = {
     "c": "c",
     "csharp": "cs",
     "c#": "cs",
-    "golang": "go",
     "go": "go",
+    "golang": "go",
     "rust": "rs",
     "kotlin": "kt",
     "swift": "swift",
@@ -177,7 +155,7 @@ LANGUAGE_EXTENSIONS = {
 }
 
 
-LANGUAGE_LABELS = {
+LANGUAGE_NAMES = {
     "python": "Python",
     "python3": "Python",
     "cpp": "C++",
@@ -188,8 +166,8 @@ LANGUAGE_LABELS = {
     "c": "C",
     "csharp": "C#",
     "c#": "C#",
-    "golang": "Go",
     "go": "Go",
+    "golang": "Go",
     "rust": "Rust",
     "kotlin": "Kotlin",
     "swift": "Swift",
@@ -203,325 +181,386 @@ LANGUAGE_LABELS = {
 
 
 def safe_slug(text):
-    text = text.lower()
-    text = re.sub(r"[^a-z0-9]+", "-", text)
-    return text.strip("-")
+    value = text.lower()
+    value = re.sub(r"[^a-z0-9]+", "-", value)
+    return value.strip("-")
 
 
-def clean_text(text):
-    text = html.unescape(text)
-    text = re.sub(r"\n{3,}", "\n\n", text)
-    return text.strip()
+def get_state():
+    if not STATE_FILE.exists():
+        return {
+            "processed_submission_ids": []
+        }
+
+    try:
+        return json.loads(
+            STATE_FILE.read_text(encoding="utf-8")
+        )
+    except Exception:
+        return {
+            "processed_submission_ids": []
+        }
 
 
-def html_to_markdown(raw_html):
-    if not raw_html:
-        return ""
+def save_state(state):
+    STATE_FILE.write_text(
+        json.dumps(state, indent=2),
+        encoding="utf-8",
+    )
 
-    soup = BeautifulSoup(raw_html, "html.parser")
 
-    # Convert <pre> blocks to fenced code blocks before text conversion.
+def load_html_as_markdown(content):
+    soup = BeautifulSoup(content or "", "html.parser")
+
     for pre in soup.find_all("pre"):
         code = pre.get_text("\n")
-        pre.replace_with(soup.new_string(f"\n```text\n{code}\n```\n"))
+        pre.replace_with(
+            soup.new_string(
+                "\n```text\n" + code + "\n```\n"
+            )
+        )
 
-    # Make lists / paragraphs reasonably readable.
-    for tag in soup.find_all(["br"]):
-        tag.replace_with("\n")
+    for br in soup.find_all("br"):
+        br.replace_with("\n")
 
     text = soup.get_text("\n")
-
     text = html.unescape(text)
 
-    # Normalize whitespace without destroying code blocks.
-    text = re.sub(r"\n[ \t]+\n", "\n\n", text)
+    text = re.sub(r"[ \t]+\n", "\n", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
 
     return text.strip()
-
-
-def clean_problem_description(content):
-    markdown = html_to_markdown(content)
-
-    # Remove occasional duplicated headings inserted by LeetCode HTML.
-    markdown = re.sub(
-        r"\n+(Example\s*\d*\s*:?)",
-        r"\n\n### \1",
-        markdown,
-        flags=re.IGNORECASE,
-    )
-
-    markdown = re.sub(
-        r"\n+(Constraints\s*:?)",
-        r"\n\n### Constraints",
-        markdown,
-        flags=re.IGNORECASE,
-    )
-
-    return clean_text(markdown)
-
-
-def language_extension(lang):
-    key = (lang or "").strip().lower()
-    return LANGUAGE_EXTENSIONS.get(key, "txt")
-
-
-def language_label(lang):
-    key = (lang or "").strip().lower()
-    return LANGUAGE_LABELS.get(key, lang or "Unknown")
 
 
 def difficulty_badge(difficulty):
-    mapping = {
+    return {
         "Easy": "🟢 Easy",
         "Medium": "🟡 Medium",
         "Hard": "🔴 Hard",
-    }
-    return mapping.get(difficulty, difficulty or "Unknown")
+    }.get(difficulty, difficulty or "Unknown")
 
 
-def detect_approach(code, tags):
-    """
-    Lightweight heuristic explanation generator.
-
-    It does not pretend to understand every algorithm perfectly.
-    Instead, it detects common patterns from the submitted code and
-    combines them with LeetCode's topic tags.
-    """
-
-    code_lower = code.lower()
-    tags_lower = {t.lower() for t in tags}
-
-    detected = []
-
-    def add(name):
-        if name not in detected:
-            detected.append(name)
-
-    if any(x in code_lower for x in ["heapq", "priorityqueue", "priority_queue"]):
-        add("Heap / Priority Queue")
-
-    if any(x in code_lower for x in ["deque(", "popleft(", "queue"]):
-        add("Queue / BFS")
-
-    if "visited" in code_lower and any(
-        x in code_lower for x in ["queue", "deque", "popleft"]
-    ):
-        add("Graph Traversal")
-
-    if "union" in code_lower and "find" in code_lower:
-        add("Disjoint Set Union")
-
-    if any(
-        x in code_lower
-        for x in ["defaultdict", "counter(", "hashmap", "hash_map"]
-    ) or "hash table" in tags_lower:
-        add("Hash Map")
-
-    if "set()" in code_lower or "seen" in code_lower:
-        add("Hash Set")
-
-    if any(x in code_lower for x in ["left", "right", "two_pointer"]):
-        if (
-            ("while" in code_lower and "left" in code_lower and "right" in code_lower)
-            or "two pointers" in tags_lower
-        ):
-            add("Two Pointers")
-
-    if "bisect" in code_lower or "binary search" in tags_lower:
-        add("Binary Search")
-
-    if "stack" in code_lower or ".pop()" in code_lower:
-        if "monotonic" in " ".join(tags_lower):
-            add("Monotonic Stack")
-        else:
-            add("Stack")
-
-    if any(
-        x in code_lower
-        for x in ["heap", "priority queue", "priorityqueue"]
-    ):
-        add("Greedy / Best-First Processing")
-
-    if re.search(r"\bdp\b", code_lower) or "dynamic programming" in tags_lower:
-        add("Dynamic Programming")
-
-    if "backtracking" in tags_lower or "dfs" in code_lower:
-        add("Depth-First Search / Backtracking")
-
-    if "bfs" in code_lower:
-        add("Breadth-First Search")
-
-    if "sort(" in code_lower or "sorted(" in code_lower or "sorting" in tags_lower:
-        add("Sorting")
-
-    if "binary tree" in tags_lower or "tree" in tags_lower:
-        if "recursion" in code_lower or "dfs" in code_lower:
-            add("Tree Traversal")
-
-    # Fallback to useful tag-based explanation.
-    if not detected and tags:
-        detected = tags[:3]
-
-    if not detected:
-        detected = ["Direct algorithmic approach"]
-
-    primary = detected[0]
-    secondary = detected[1:3]
-
-    explanation = (
-        f"This solution primarily uses **{primary}**. "
-        "The implementation processes the input while maintaining the "
-        "information needed to make the next decision efficiently."
+def get_extension(lang):
+    return LANGUAGE_EXTENSIONS.get(
+        (lang or "").lower(),
+        "txt",
     )
 
-    if secondary:
-        explanation += (
-            f" It also makes use of **{secondary[0]}**"
-            + (f" and **{secondary[1]}**" if len(secondary) > 1 else "")
-            + " as supporting techniques."
-        )
 
-    explanation += (
-        " The code below follows the same strategy as the accepted "
-        "submission and is organized to keep the main idea easy to follow."
+def get_language_name(lang):
+    return LANGUAGE_NAMES.get(
+        (lang or "").lower(),
+        lang or "Unknown",
     )
-
-    return explanation, detected
-
-
-def extract_number(question):
-    frontend_id = str(question.get("questionFrontendId") or "").strip()
-
-    if frontend_id.isdigit():
-        return int(frontend_id)
-
-    question_id = str(question.get("questionId") or "").strip()
-
-    if question_id.isdigit():
-        return int(question_id)
-
-    return None
-
-
-def solution_folder_name(question):
-    number = extract_number(question)
-    title = question.get("title", "leetcode-problem")
-
-    slug = safe_slug(title)
-
-    if number is not None:
-        return f"{number:04d}-{slug}"
-
-    return slug
-
-
-def get_existing_solution_folders():
-    if not SOLUTIONS_DIR.exists():
-        return set()
-
-    return {
-        path.name
-        for path in SOLUTIONS_DIR.iterdir()
-        if path.is_dir()
-    }
 
 
 # ============================================================
-# Fetch functions
+# Get authenticated account
 # ============================================================
 
-def get_authenticated_username():
+def get_username():
     data = graphql(
-        GLOBAL_DATA_QUERY,
+        USER_STATUS_QUERY,
         operation_name="globalData",
     )
 
-    user = data.get("userStatus") or {}
+    status = data.get("userStatus") or {}
 
-    if not user.get("isSignedIn"):
-        raise RuntimeError("LeetCode session is not signed in.")
+    if not status.get("isSignedIn"):
+        raise RuntimeError(
+            "LeetCode authentication failed."
+        )
 
-    username = user.get("username")
+    username = status.get("username")
 
     if not username:
-        raise RuntimeError("Unable to determine LeetCode username.")
+        raise RuntimeError(
+            "Could not determine LeetCode username."
+        )
 
     return username
 
 
-def get_recent_accepted(username, limit=20):
+# ============================================================
+# Find accepted submissions
+# ============================================================
+
+def get_recent_accepted(username):
     data = graphql(
         RECENT_ACCEPTED_QUERY,
         {
             "username": username,
-            "limit": limit,
+            "limit": 20,
         },
         operation_name="recentAcSubmissions",
     )
 
-    return data.get("recentAcSubmissionList") or []
+    submissions = data.get(
+        "recentAcSubmissionList"
+    ) or []
+
+    return submissions
 
 
-def get_submission_details(submission_id):
-    data = graphql(
-        SUBMISSION_DETAILS_QUERY,
-        {"id": str(submission_id)},
-        operation_name="mySubmissionDetail",
+# ============================================================
+# Fetch source code
+# ============================================================
+
+def decode_submission_code(raw_code):
+    if not raw_code:
+        return None
+
+    try:
+        return bytes(
+            raw_code,
+            "utf-8"
+        ).decode(
+            "unicode_escape"
+        )
+    except Exception:
+        return raw_code
+
+
+def extract_submission_code(page):
+    """
+    LeetCode has changed how submission source is embedded
+    several times. Try several known patterns.
+    """
+
+    patterns = [
+        r"submissionCode\s*:\s*'(.*?)'\s*,\s*editCodeUrl",
+        r'"submissionCode"\s*:\s*"((?:\\.|[^"\\])*)"',
+        r"submissionCode\s*:\s*'(.*?)'",
+    ]
+
+    for pattern in patterns:
+        match = re.search(
+            pattern,
+            page,
+            re.DOTALL,
+        )
+
+        if match:
+            raw = match.group(1)
+
+            raw = html.unescape(raw)
+
+            try:
+                return bytes(
+                    raw,
+                    "utf-8"
+                ).decode(
+                    "unicode_escape"
+                )
+            except Exception:
+                return raw
+
+    # Fallback: some pages expose the source
+    # in a code/textarea element.
+    soup = BeautifulSoup(
+        page,
+        "html.parser",
     )
 
-    return data.get("submissionDetail")
+    candidates = [
+        soup.find(
+            "textarea",
+            id="submission-code",
+        ),
+        soup.find(
+            "code",
+            id="submission-code",
+        ),
+        soup.find(
+            id="submission-code",
+        ),
+    ]
 
+    for candidate in candidates:
+        if candidate:
+            text = candidate.get_text()
+            if text.strip():
+                return text
+
+    return None
+
+
+def fetch_submission_source(submission):
+    submission_id = str(
+        submission.get("id")
+    )
+
+    url = (
+        f"{LEETCODE_URL}"
+        f"/submissions/detail/"
+        f"{submission_id}/"
+    )
+
+    print(
+        f"   🌐 Fetching submission page..."
+    )
+
+    response = client.get(
+        url,
+        timeout=30,
+    )
+
+    response.raise_for_status()
+
+    code = extract_submission_code(
+        response.text
+    )
+
+    if not code or not code.strip():
+        raise RuntimeError(
+            "Could not extract submitted source code "
+            f"from submission {submission_id}."
+        )
+
+    return code
+
+
+# ============================================================
+# Problem details
+# ============================================================
 
 def get_question(slug):
     data = graphql(
         QUESTION_QUERY,
-        {"titleSlug": slug},
+        {
+            "titleSlug": slug
+        },
         operation_name="questionData",
     )
 
-    return data.get("question")
+    question = data.get("question")
+
+    if not question:
+        raise RuntimeError(
+            f"Could not fetch question: {slug}"
+        )
+
+    return question
 
 
 # ============================================================
-# README generation
+# README
 # ============================================================
 
-def generate_problem_readme(question, submission, code_filename):
-    title = question.get("title", "LeetCode Problem")
-    number = extract_number(question)
-    difficulty = question.get("difficulty", "Unknown")
-    slug = question.get("titleSlug", "")
-    tags = [tag.get("name", "") for tag in question.get("topicTags", [])]
-    tags = [tag for tag in tags if tag]
+def build_intuition(tags):
+    tag_names = [
+        tag
+        for tag in tags
+        if tag
+    ]
 
-    description = clean_problem_description(question.get("content", ""))
+    if tag_names:
+        main = ", ".join(
+            tag_names[:3]
+        )
+    else:
+        main = "an appropriate algorithmic pattern"
 
-    explanation, techniques = detect_approach(code_from_submission(submission), tags)
-
-    number_text = f"{number}. " if number is not None else ""
-
-    topic_text = " · ".join(tags[:6]) if tags else "Not specified"
-
-    language = language_label(submission.get("lang"))
-
-    runtime = submission.get("runtime") or "N/A"
-    memory = submission.get("memory") or "N/A"
-
-    leetcode_url = f"https://leetcode.com/problems/{slug}/"
-
-    technique_list = "\n".join(
-        f"- **{technique}**"
-        for technique in techniques[:5]
+    return (
+        "The key to this problem is recognizing the right "
+        f"data structure or algorithmic pattern: **{main}**. "
+        "Instead of repeatedly checking unnecessary possibilities, "
+        "the solution keeps track of the information required to "
+        "make each decision efficiently."
     )
 
-    readme = f"""# 🧩 {number_text}{title}
+
+def build_approach(tags):
+    if not tags:
+        return (
+            "1. Identify the information required while processing "
+            "the input.\n"
+            "2. Traverse the input using the chosen algorithm.\n"
+            "3. Maintain the required state.\n"
+            "4. Return the answer once the required condition is met."
+        )
+
+    return (
+        "1. Identify the main algorithmic pattern.\n"
+        "2. Traverse the input while maintaining the required state.\n"
+        f"3. Use the relevant technique ({', '.join(tags[:4])}) "
+        "to avoid unnecessary work.\n"
+        "4. Return the result after processing the required input."
+    )
+
+
+def create_problem_readme(
+    question,
+    submission,
+    code_filename,
+):
+    number = question.get(
+        "questionFrontendId",
+        "",
+    )
+
+    title = question.get(
+        "title",
+        "LeetCode Problem",
+    )
+
+    slug = question.get(
+        "titleSlug",
+        "",
+    )
+
+    difficulty = question.get(
+        "difficulty",
+        "Unknown",
+    )
+
+    tags = [
+        tag.get("name", "")
+        for tag in question.get(
+            "topicTags",
+            [],
+        )
+        if tag.get("name")
+    ]
+
+    language = get_language_name(
+        submission.get("lang")
+    )
+
+    description = load_html_as_markdown(
+        question.get("content", "")
+    )
+
+    intuition = build_intuition(tags)
+    approach = build_approach(tags)
+
+    leetcode_url = (
+        f"{LEETCODE_URL}/problems/{slug}/"
+    )
+
+    tags_display = (
+        " · ".join(tags[:6])
+        if tags
+        else "Not specified"
+    )
+
+    runtime = submission.get(
+        "runtime",
+        "N/A",
+    )
+
+    memory = submission.get(
+        "memory",
+        "N/A",
+    )
+
+    return f"""# 🧩 {number}. {title}
 
 > **Difficulty:** {difficulty_badge(difficulty)}  
-> **Topics:** {topic_text}  
+> **Topics:** {tags_display}  
 > **Language:** {language}
 
-[🔗 View this problem on LeetCode]({leetcode_url})
+[🔗 View Problem on LeetCode]({leetcode_url})
 
 ---
 
@@ -533,26 +572,20 @@ def generate_problem_readme(question, submission, code_filename):
 
 ## 💡 Intuition
 
-{explanation}
+{intuition}
 
 ---
 
 ## 🚀 Approach
 
-The solution follows these main ideas:
-
-{technique_list}
-
-The implementation is kept in `{code_filename}` so the algorithm can be
-studied separately from the problem statement.
+{approach}
 
 ---
 
 ## ⏱️ Complexity
 
-> The exact complexity depends on the structure of the problem and the
-> algorithm used. The solution code is preserved exactly from the accepted
-> LeetCode submission.
+The exact complexity follows from the algorithm used in the accepted
+solution.
 
 **Runtime reported by LeetCode:** `{runtime}`  
 **Memory reported by LeetCode:** `{memory}`
@@ -561,31 +594,26 @@ studied separately from the problem statement.
 
 ## 💻 Solution
 
-[View the complete solution →](./{code_filename})
+[View the complete {language} solution →](./{code_filename})
 
 ---
 
 ## 🎯 Key Takeaway
 
-The important lesson from this problem is to identify the right data structure
-or algorithmic pattern before optimizing the implementation.
+The most important lesson is to recognize the underlying algorithmic
+pattern and choose a data structure that avoids unnecessary repeated work.
 
 ---
 
-### 🏆 Accepted Submission
+## 🔗 Useful Links
 
-- **Language:** {language}
-- **Runtime:** {runtime}
-- **Memory:** {memory}
+- [LeetCode Problem]({leetcode_url})
+- [My Solution](./{code_filename})
 
-⭐ This solution was automatically synchronized from an accepted LeetCode submission.
+---
+
+⭐ Automatically synchronized from an accepted LeetCode submission.
 """
-
-    return readme.strip() + "\n"
-
-
-def code_from_submission(submission):
-    return submission.get("code") or ""
 
 
 # ============================================================
@@ -593,76 +621,86 @@ def code_from_submission(submission):
 # ============================================================
 
 def update_main_readme():
-    if not SOLUTIONS_DIR.exists():
-        SOLUTIONS_DIR.mkdir(parents=True, exist_ok=True)
+    SOLUTIONS_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
-    rows = []
+    records = []
 
     for folder in SOLUTIONS_DIR.iterdir():
         if not folder.is_dir():
             continue
 
-        metadata_file = folder / "metadata.json"
+        metadata_path = (
+            folder / "metadata.json"
+        )
 
-        if not metadata_file.exists():
+        if not metadata_path.exists():
             continue
 
         try:
-            metadata = json.loads(metadata_file.read_text(encoding="utf-8"))
+            records.append(
+                json.loads(
+                    metadata_path.read_text(
+                        encoding="utf-8"
+                    )
+                )
+            )
         except Exception:
             continue
 
-        rows.append(metadata)
-
-    rows.sort(
-        key=lambda item: (
-            int(item.get("number", 999999))
-            if str(item.get("number", "")).isdigit()
-            else 999999
+    records.sort(
+        key=lambda x: int(
+            x["number"]
         )
+        if str(x.get("number", "")).isdigit()
+        else 999999
     )
 
-    easy = sum(1 for item in rows if item.get("difficulty") == "Easy")
-    medium = sum(1 for item in rows if item.get("difficulty") == "Medium")
-    hard = sum(1 for item in rows if item.get("difficulty") == "Hard")
+    easy = sum(
+        1 for x in records
+        if x.get("difficulty") == "Easy"
+    )
 
-    total = len(rows)
+    medium = sum(
+        1 for x in records
+        if x.get("difficulty") == "Medium"
+    )
 
-    table_rows = []
+    hard = sum(
+        1 for x in records
+        if x.get("difficulty") == "Hard"
+    )
 
-    for item in rows:
-        number = item.get("number", "-")
-        title = item.get("title", "Unknown")
-        difficulty = item.get("difficulty", "Unknown")
-        language = item.get("language", "Unknown")
-        folder = item.get("folder", "")
+    rows = []
 
-        difficulty_display = difficulty_badge(difficulty)
-
-        table_rows.append(
-            f"| {number} | [{title}](solutions/{folder}/) "
-            f"| {difficulty_display} | {language} |"
+    for record in records:
+        rows.append(
+            f"| {record['number']} "
+            f"| [{record['title']}]"
+            f"(solutions/{record['folder']}/) "
+            f"| {difficulty_badge(record['difficulty'])} "
+            f"| {record['language']} |"
         )
 
-    solutions_table = "\n".join(table_rows)
-
-    if not solutions_table:
-        solutions_table = (
-            "| — | Your first accepted solution will appear here | — | — |\n"
+    if not rows:
+        rows.append(
+            "| — | Your first solution will appear here | — | — |"
         )
+
+    table = "\n".join(rows)
 
     readme = f"""# 🧠 LeetCode Solutions
 
-> **Automatically synchronized from my LeetCode submissions.**
-
-A growing collection of solved LeetCode problems with readable solutions,
-algorithmic intuition, complexity notes, and problem explanations.
+> A continuously growing collection of my LeetCode solutions,
+> explanations, algorithmic patterns, and problem-solving notes.
 
 ## 📊 Progress
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **{total}** |
+| 🧩 Total Solved | **{len(records)}** |
 | 🟢 Easy | **{easy}** |
 | 🟡 Medium | **{medium}** |
 | 🔴 Hard | **{hard}** |
@@ -673,123 +711,152 @@ algorithmic intuition, complexity notes, and problem explanations.
 
 | # | Problem | Difficulty | Language |
 |---:|---|---|---|
-{solutions_table}
+{table}
 
 ---
 
-## 🔄 Automatic Sync
+## 🔄 Automatic Synchronization
 
-This repository is connected to LeetCode through **GitHub Actions**.
+This repository is synchronized automatically using **GitHub Actions**.
 
-Whenever I submit an accepted solution, the automation:
+Whenever a new accepted LeetCode submission is detected, the automation:
 
-1. Detects the accepted submission.
-2. Fetches the problem details.
-3. Fetches the submitted code.
-4. Creates a dedicated solution folder.
-5. Generates a readable problem README.
-6. Updates this problem archive.
-7. Commits everything automatically.
+1. Retrieves the accepted submission.
+2. Fetches the problem description.
+3. Creates the solution file.
+4. Generates a readable problem README.
+5. Updates this problem archive.
+6. Commits the changes automatically.
 
-So the workflow is simply:
+### Workflow
 
-**Solve → Submit → Accepted ✅ → GitHub updates automatically**
+**Solve → Submit → Accepted ✅ → GitHub automatically updates**
 
 ---
 
-## 🎯 Goal
+## 🎯 Purpose
 
-The purpose of this repository is not just to store solutions.
+This repository is more than a backup of code.
 
-It is a learning journal for algorithms, data structures, problem-solving patterns,
-and the reasoning behind each solution.
+Each solution is organized so that visitors can understand the
+problem, the core idea, the algorithmic approach, and the implementation.
 
-⭐ New problem. New concept. One step better.
+⭐ One problem at a time. One concept at a time.
 """
 
-    (REPO_ROOT / "README.md").write_text(
-        readme.strip() + "\n",
-        encoding="utf-8",
-    )
-
-
-# ============================================================
-# Process one submission
-# ============================================================
-
-def process_submission(submission_summary):
-    submission_id = submission_summary.get("id")
-    title_slug = submission_summary.get("titleSlug")
-
-    if not submission_id or not title_slug:
-        return False
-
-    print(f"🔎 Processing: {submission_summary.get('title', title_slug)}")
-
-    submission = get_submission_details(submission_id)
-
-    if not submission:
-        print("   ⚠️ Could not fetch submission details.")
-        return False
-
-    if submission.get("statusDisplay") != "Accepted":
-        print("   ⏭️ Submission is not accepted.")
-        return False
-
-    question = get_question(title_slug)
-
-    if not question:
-        print("   ⚠️ Could not fetch problem details.")
-        return False
-
-    folder_name = solution_folder_name(question)
-    solution_dir = SOLUTIONS_DIR / folder_name
-
-    solution_dir.mkdir(parents=True, exist_ok=True)
-
-    language = submission.get("lang", "text")
-    extension = language_extension(language)
-    code_filename = f"solution.{extension}"
-
-    code_path = solution_dir / code_filename
-
-    code = submission.get("code") or ""
-
-    if not code.strip():
-        print("   ⚠️ Submission contained no source code.")
-        return False
-
-    code_path.write_text(code, encoding="utf-8")
-
-    readme = generate_problem_readme(
-        question,
-        submission,
-        code_filename,
-    )
-
-    (solution_dir / "README.md").write_text(
+    Path("README.md").write_text(
         readme,
         encoding="utf-8",
     )
 
-    number = extract_number(question)
 
-    metadata = {
-        "number": number if number is not None else "",
-        "title": question.get("title", ""),
-        "difficulty": question.get("difficulty", ""),
-        "language": language_label(language),
-        "folder": folder_name,
-        "slug": question.get("titleSlug", ""),
-        "submission_id": str(submission_id),
-    }
+# ============================================================
+# Process submission
+# ============================================================
 
-    (solution_dir / "metadata.json").write_text(
-        json.dumps(metadata, indent=2, ensure_ascii=False) + "\n",
+def process_submission(submission):
+    submission_id = str(
+        submission.get("id")
+    )
+
+    title = submission.get(
+        "title",
+        "Unknown",
+    )
+
+    slug = submission.get(
+        "titleSlug",
+        "",
+    )
+
+    print(
+        f"\n🔎 Processing: {title}"
+    )
+
+    question = get_question(slug)
+
+    code = fetch_submission_source(
+        submission
+    )
+
+    folder_name = (
+        f"{int(question['questionFrontendId']):04d}"
+        f"-{safe_slug(question['title'])}"
+    )
+
+    folder = (
+        SOLUTIONS_DIR
+        / folder_name
+    )
+
+    folder.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    extension = get_extension(
+        submission.get("lang")
+    )
+
+    code_filename = (
+        f"solution.{extension}"
+    )
+
+    code_path = (
+        folder / code_filename
+    )
+
+    readme_path = (
+        folder / "README.md"
+    )
+
+    metadata_path = (
+        folder / "metadata.json"
+    )
+
+    code_path.write_text(
+        code,
         encoding="utf-8",
     )
 
-    print(f"   ✅ Saved: {solution_dir}")
+    readme_path.write_text(
+        create_problem_readme(
+            question,
+            submission,
+            code_filename,
+        ),
+        encoding="utf-8",
+    )
+
+    metadata = {
+        "number": question[
+            "questionFrontendId"
+        ],
+        "title": question["title"],
+        "difficulty": question[
+            "difficulty"
+        ],
+        "language": get_language_name(
+            submission.get("lang")
+        ),
+        "folder": folder_name,
+        "slug": question[
+            "titleSlug"
+        ],
+        "submission_id": submission_id,
+    }
+
+    metadata_path.write_text(
+        json.dumps(
+            metadata,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    print(
+        f"   ✅ Saved: {folder}"
+    )
 
     return True
 
@@ -799,63 +866,96 @@ def process_submission(submission_summary):
 # ============================================================
 
 def main():
-    print("🚀 Starting LeetCode synchronization...\n")
+    print(
+        "🚀 Starting LeetCode synchronization..."
+    )
 
-    SOLUTIONS_DIR.mkdir(parents=True, exist_ok=True)
+    SOLUTIONS_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
-    username = get_authenticated_username()
+    state = get_state()
 
-    print(f"👤 LeetCode user: {username}")
+    processed_ids = set(
+        str(x)
+        for x in state.get(
+            "processed_submission_ids",
+            [],
+        )
+    )
 
-    recent = get_recent_accepted(username, limit=20)
+    username = get_username()
 
-    print(f"📥 Found {len(recent)} recent accepted submissions.\n")
+    print(
+        f"👤 LeetCode user: {username}"
+    )
 
-    existing = get_existing_solution_folders()
-    changed = False
+    submissions = get_recent_accepted(
+        username
+    )
 
-    for submission in reversed(recent):
+    print(
+        f"📥 Found {len(submissions)} "
+        "recent accepted submissions."
+    )
+
+    new_processed_ids = []
+
+    for submission in submissions:
+        submission_id = str(
+            submission.get("id")
+        )
+
+        if not submission_id:
+            continue
+
+        if submission_id in processed_ids:
+            print(
+                f"⏭️ Already synced: "
+                f"{submission.get('title')}"
+            )
+            continue
+
         try:
-            question = {
-                "questionFrontendId": "",
-                "title": submission.get("title", ""),
-            }
-
-            # First try to identify whether this problem already exists
-            # by its title/slug.
-            slug = submission.get("titleSlug", "")
-            candidate = safe_slug(submission.get("title", ""))
-
-            already_exists = any(
-                candidate in folder.lower()
-                for folder in existing
+            process_submission(
+                submission
             )
 
-            if already_exists:
-                print(
-                    f"⏭️ Already synchronized: {submission.get('title', slug)}"
-                )
-                continue
-
-            processed = process_submission(submission)
-
-            if processed:
-                changed = True
+            new_processed_ids.append(
+                submission_id
+            )
 
         except Exception as exc:
             print(
-                f"❌ Error processing "
-                f"{submission.get('title', 'unknown problem')}: {exc}"
+                f"   ❌ Failed: {exc}"
             )
+
+    processed_ids.update(
+        new_processed_ids
+    )
+
+    state["processed_submission_ids"] = sorted(
+        processed_ids
+    )
+
+    save_state(state)
 
     update_main_readme()
 
-    if changed:
-        print("\n✅ New solution(s) synchronized.")
-    else:
-        print("\n✅ No new solutions were found.")
+    print(
+        "\n✅ Synchronization complete."
+    )
 
-    print("🏁 Synchronization complete.")
+    if new_processed_ids:
+        print(
+            f"🎉 Imported "
+            f"{len(new_processed_ids)} new solution(s)."
+        )
+    else:
+        print(
+            "ℹ️ No new solutions were imported."
+        )
 
 
 if __name__ == "__main__":
