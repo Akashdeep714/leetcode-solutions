@@ -116,26 +116,52 @@ O(n)
 
 ## 💡 Intuition
 
-The key to this problem is recognizing the right data structure or algorithmic pattern: **Array, Hash Table, Math**. Instead of repeatedly checking unnecessary possibilities, the solution keeps track of the information required to make each decision efficiently.
+Because the search space has an exploitable order, each comparison can eliminate roughly half of the remaining possibilities. This reduces a linear search to logarithmic time.
+
+### 🧠 Algorithmic Pattern
+
+| Role | Pattern |
+|---|---|
+| Primary | **Binary Search** |
+| Supporting | Hash Map · Sorting |
 
 ---
 
 ## 🚀 Approach
 
-1. Identify the main algorithmic pattern.
-2. Traverse the input while maintaining the required state.
-3. Use the relevant technique (Array, Hash Table, Math, Binary Search) to avoid unnecessary work.
-4. Return the result after processing the required input.
+1. Initialize the search boundaries.
+2. Calculate the middle position.
+3. Use the ordering property to determine which half can still contain the answer.
+4. Discard the other half and repeat until the answer is found.
+
+---
+
+## 🔍 Why This Works
+
+The approach avoids unnecessary repeated work by maintaining the
+right state or data structure while processing the input.
+
+The key advantage comes from choosing an algorithmic pattern that
+reduces the amount of work required at each step.
 
 ---
 
 ## ⏱️ Complexity
 
-The exact complexity follows from the algorithm used in the accepted
-solution.
+| Metric | Complexity |
+|---|---|
+| Time | **O(log n)** |
+| Space | **O(1)** |
 
-**Runtime reported by LeetCode:** `0`  
-**Memory reported by LeetCode:** `47100000`
+### 📊 LeetCode Performance
+
+| Metric | Result |
+|---|---|
+| Runtime | `Previously recorded` |
+| Memory | `Previously recorded` |
+
+> The Big-O complexity is inferred from the detected algorithmic
+> pattern and is intended as a high-level guide.
 
 ---
 
@@ -147,8 +173,8 @@ solution.
 
 ## 🎯 Key Takeaway
 
-The most important lesson is to recognize the underlying algorithmic
-pattern and choose a data structure that avoids unnecessary repeated work.
+The most valuable part of this problem is recognizing the underlying
+pattern and understanding why it reduces unnecessary computation.
 
 ---
 

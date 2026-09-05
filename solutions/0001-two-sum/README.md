@@ -102,26 +102,53 @@ time complexity?
 
 ## 💡 Intuition
 
-The key to this problem is recognizing the right data structure or algorithmic pattern: **Array, Hash Table**. Instead of repeatedly checking unnecessary possibilities, the solution keeps track of the information required to make each decision efficiently.
+The key idea is to remember useful information from elements that have already been processed. A hash map provides O(1) average lookup, allowing the solution to avoid repeatedly scanning the input.
+
+### 🧠 Algorithmic Pattern
+
+| Role | Pattern |
+|---|---|
+| Primary | **Hash Map** |
+| Supporting | None |
 
 ---
 
 ## 🚀 Approach
 
-1. Identify the main algorithmic pattern.
-2. Traverse the input while maintaining the required state.
-3. Use the relevant technique (Array, Hash Table) to avoid unnecessary work.
-4. Return the result after processing the required input.
+1. Create a hash map to store information about previously processed values.
+2. Traverse the input once.
+3. For each element, compute the value or state needed to satisfy the problem.
+4. Use the hash map for a fast average-time lookup.
+5. Return or update the answer when the required condition is met.
+
+---
+
+## 🔍 Why This Works
+
+The approach avoids unnecessary repeated work by maintaining the
+right state or data structure while processing the input.
+
+The key advantage comes from choosing an algorithmic pattern that
+reduces the amount of work required at each step.
 
 ---
 
 ## ⏱️ Complexity
 
-The exact complexity follows from the algorithm used in the accepted
-solution.
+| Metric | Complexity |
+|---|---|
+| Time | **O(n)** |
+| Space | **O(n)** |
 
-**Runtime reported by LeetCode:** `52`  
-**Memory reported by LeetCode:** `47024000`
+### 📊 LeetCode Performance
+
+| Metric | Result |
+|---|---|
+| Runtime | `Previously recorded` |
+| Memory | `Previously recorded` |
+
+> The Big-O complexity is inferred from the detected algorithmic
+> pattern and is intended as a high-level guide.
 
 ---
 
@@ -133,8 +160,8 @@ solution.
 
 ## 🎯 Key Takeaway
 
-The most important lesson is to recognize the underlying algorithmic
-pattern and choose a data structure that avoids unnecessary repeated work.
+The most valuable part of this problem is recognizing the underlying
+pattern and understanding why it reduces unnecessary computation.
 
 ---
 
