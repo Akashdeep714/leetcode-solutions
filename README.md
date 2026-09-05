@@ -1,9 +1,7 @@
 # 🧠 LeetCode Solutions
 
-> **Automatically synchronized from my LeetCode submissions.**
-
-A growing collection of solved LeetCode problems with readable solutions,
-algorithmic intuition, complexity notes, and problem explanations.
+> A continuously growing collection of my LeetCode solutions,
+> explanations, algorithmic patterns, and problem-solving notes.
 
 ## 📊 Progress
 
@@ -20,36 +18,34 @@ algorithmic intuition, complexity notes, and problem explanations.
 
 | # | Problem | Difficulty | Language |
 |---:|---|---|---|
-| — | Your first accepted solution will appear here | — | — |
-
-
----
-
-## 🔄 Automatic Sync
-
-This repository is connected to LeetCode through **GitHub Actions**.
-
-Whenever I submit an accepted solution, the automation:
-
-1. Detects the accepted submission.
-2. Fetches the problem details.
-3. Fetches the submitted code.
-4. Creates a dedicated solution folder.
-5. Generates a readable problem README.
-6. Updates this problem archive.
-7. Commits everything automatically.
-
-So the workflow is simply:
-
-**Solve → Submit → Accepted ✅ → GitHub updates automatically**
+| — | Your first solution will appear here | — | — |
 
 ---
 
-## 🎯 Goal
+## 🔄 Automatic Synchronization
 
-The purpose of this repository is not just to store solutions.
+This repository is synchronized automatically using **GitHub Actions**.
 
-It is a learning journal for algorithms, data structures, problem-solving patterns,
-and the reasoning behind each solution.
+Whenever a new accepted LeetCode submission is detected, the automation:
 
-⭐ New problem. New concept. One step better.
+1. Retrieves the accepted submission.
+2. Fetches the problem description.
+3. Creates the solution file.
+4. Generates a readable problem README.
+5. Updates this problem archive.
+6. Commits the changes automatically.
+
+### Workflow
+
+**Solve → Submit → Accepted ✅ → GitHub automatically updates**
+
+---
+
+## 🎯 Purpose
+
+This repository is more than a backup of code.
+
+Each solution is organized so that visitors can understand the
+problem, the core idea, the algorithmic approach, and the implementation.
+
+⭐ One problem at a time. One concept at a time.
