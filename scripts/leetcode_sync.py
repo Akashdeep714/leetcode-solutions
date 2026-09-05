@@ -773,9 +773,7 @@ problem, the core idea, the algorithmic approach, and the implementation.
 # ============================================================
 
 def process_submission(submission):
-    submission_id = str(
-        submission.get("id")
-    )
+    submission_id = str(submission.get("id"))
 
     title = submission.get(
         "title",
@@ -787,30 +785,25 @@ def process_submission(submission):
         "",
     )
 
-    print(
-        f"\n🔎 Processing: {title}"
-    )
+    print(f"\n🔎 Processing: {title}")
 
     question = get_question(slug)
 
     code, submission_details = fetch_submission_source(
-    submission
-)
+        submission
+    )
 
-submission = {
-    **submission,
-    **submission_details,
-}
+    submission = {
+        **submission,
+        **submission_details,
+    }
 
     folder_name = (
         f"{int(question['questionFrontendId']):04d}"
         f"-{safe_slug(question['title'])}"
     )
 
-    folder = (
-        SOLUTIONS_DIR
-        / folder_name
-    )
+    folder = SOLUTIONS_DIR / folder_name
 
     folder.mkdir(
         parents=True,
@@ -821,21 +814,11 @@ submission = {
         submission.get("lang")
     )
 
-    code_filename = (
-        f"solution.{extension}"
-    )
+    code_filename = f"solution.{extension}"
 
-    code_path = (
-        folder / code_filename
-    )
-
-    readme_path = (
-        folder / "README.md"
-    )
-
-    metadata_path = (
-        folder / "metadata.json"
-    )
+    code_path = folder / code_filename
+    readme_path = folder / "README.md"
+    metadata_path = folder / "metadata.json"
 
     code_path.write_text(
         code,
@@ -852,20 +835,14 @@ submission = {
     )
 
     metadata = {
-        "number": question[
-            "questionFrontendId"
-        ],
+        "number": question["questionFrontendId"],
         "title": question["title"],
-        "difficulty": question[
-            "difficulty"
-        ],
+        "difficulty": question["difficulty"],
         "language": get_language_name(
             submission.get("lang")
         ),
         "folder": folder_name,
-        "slug": question[
-            "titleSlug"
-        ],
+        "slug": question["titleSlug"],
         "submission_id": submission_id,
     }
 
@@ -877,9 +854,7 @@ submission = {
         encoding="utf-8",
     )
 
-    print(
-        f"   ✅ Saved: {folder}"
-    )
+    print(f"   ✅ Saved: {folder}")
 
     return True
 
