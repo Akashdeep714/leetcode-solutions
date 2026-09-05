@@ -307,21 +307,15 @@ def get_recent_accepted(username):
 # ============================================================
 
 SUBMISSION_DETAILS_QUERY = """
-query mySubmissionDetail($id: ID!) {
-    submissionDetail(submissionId: $id) {
-        id
+query submissionDetails($submissionId: Int!) {
+    submissionDetails(submissionId: $submissionId) {
         code
+        lang {
+            name
+        }
         runtime
         memory
-        rawMemory
         statusDisplay
-        timestamp
-        lang
-        question {
-            titleSlug
-            title
-            questionId
-        }
     }
 }
 """
@@ -406,17 +400,17 @@ def extract_submission_code(page):
 
 
 def fetch_submission_source(submission):
-    submission_id = str(submission.get("id"))
+    submission_id = int(submission.get("id"))
 
     print("   🔐 Fetching submitted code through LeetCode GraphQL...")
 
     data = graphql(
         SUBMISSION_DETAILS_QUERY,
-        {"id": submission_id},
-        operation_name="mySubmissionDetail",
+        {"submissionId": submission_id},
+        operation_name="submissionDetails",
     )
 
-    details = data.get("submissionDetail")
+    details = data.get("submissionDetails")
 
     if not details:
         raise RuntimeError(
@@ -435,7 +429,23 @@ def fetch_submission_source(submission):
             f"No source code returned for submission {submission_id}."
         )
 
-    return code, details
+    lang = details.get("lang")
+
+    if isinstance(lang, dict):
+        lang_name = lang.get("name", "")
+    else:
+        lang_name = str(lang or "")
+
+    normalized_details = {
+        "id": submission_id,
+        "code": code,
+        "lang": lang_name,
+        "runtime": details.get("runtime"),
+        "memory": details.get("memory"),
+        "statusDisplay": details.get("statusDisplay"),
+    }
+
+    return code, normalized_details
 
 
 # ============================================================
