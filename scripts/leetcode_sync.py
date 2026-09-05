@@ -113,13 +113,13 @@ query mySubmissionDetail($id: ID!) {
         lang
         runtime
         memory
+        rawMemory
         statusDisplay
         timestamp
         question {
             titleSlug
             title
             questionId
-            questionFrontendId
         }
     }
 }
