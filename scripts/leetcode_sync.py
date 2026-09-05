@@ -306,6 +306,26 @@ def get_recent_accepted(username):
 # Fetch source code
 # ============================================================
 
+SUBMISSION_DETAILS_QUERY = """
+query mySubmissionDetail($id: ID!) {
+    submissionDetail(submissionId: $id) {
+        id
+        code
+        runtime
+        memory
+        rawMemory
+        statusDisplay
+        timestamp
+        lang
+        question {
+            titleSlug
+            title
+            questionId
+        }
+    }
+}
+"""
+
 def decode_submission_code(raw_code):
     if not raw_code:
         return None
@@ -386,38 +406,36 @@ def extract_submission_code(page):
 
 
 def fetch_submission_source(submission):
-    submission_id = str(
-        submission.get("id")
+    submission_id = str(submission.get("id"))
+
+    print("   🔐 Fetching submitted code through LeetCode GraphQL...")
+
+    data = graphql(
+        SUBMISSION_DETAILS_QUERY,
+        {"id": submission_id},
+        operation_name="mySubmissionDetail",
     )
 
-    url = (
-        f"{LEETCODE_URL}"
-        f"/submissions/detail/"
-        f"{submission_id}/"
-    )
+    details = data.get("submissionDetail")
 
-    print(
-        f"   🌐 Fetching submission page..."
-    )
+    if not details:
+        raise RuntimeError(
+            f"LeetCode did not return submission details for {submission_id}"
+        )
 
-    response = client.get(
-        url,
-        timeout=30,
-    )
+    if details.get("statusDisplay") != "Accepted":
+        raise RuntimeError(
+            f"Submission {submission_id} is not Accepted."
+        )
 
-    response.raise_for_status()
-
-    code = extract_submission_code(
-        response.text
-    )
+    code = details.get("code")
 
     if not code or not code.strip():
         raise RuntimeError(
-            "Could not extract submitted source code "
-            f"from submission {submission_id}."
+            f"No source code returned for submission {submission_id}."
         )
 
-    return code
+    return code, details
 
 
 # ============================================================
@@ -775,9 +793,14 @@ def process_submission(submission):
 
     question = get_question(slug)
 
-    code = fetch_submission_source(
-        submission
-    )
+    code, submission_details = fetch_submission_source(
+    submission
+)
+
+submission = {
+    **submission,
+    **submission_details,
+}
 
     folder_name = (
         f"{int(question['questionFrontendId']):04d}"
