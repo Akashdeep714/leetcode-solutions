@@ -475,46 +475,474 @@ def get_question(slug):
 # README
 # ============================================================
 
-def build_intuition(tags):
-    tag_names = [
-        tag
-        for tag in tags
-        if tag
-    ]
+def analyze_algorithm(code, tags):
+    """
+    Detect common algorithmic patterns from the submitted code
+    and LeetCode topic tags.
 
-    if tag_names:
-        main = ", ".join(
-            tag_names[:3]
+    Returns:
+        primary_pattern
+        supporting_patterns
+        intuition
+        approach
+        time_complexity
+        space_complexity
+    """
+
+    code_lower = (code or "").lower()
+    tag_text = " ".join(tags).lower()
+
+    patterns = []
+
+    def add(pattern):
+        if pattern not in patterns:
+            patterns.append(pattern)
+
+    # Hash Map / Hash Set
+    if (
+        "hash table" in tag_text
+        or "hash map" in tag_text
+        or "hashmap" in code_lower
+        or "defaultdict" in code_lower
+        or "unordered_map" in code_lower
+        or "dict(" in code_lower
+    ):
+        add("Hash Map")
+
+    if (
+        "hash set" in tag_text
+        or "set(" in code_lower
+        or "unordered_set" in code_lower
+    ):
+        add("Hash Set")
+
+    # Two pointers
+    if (
+        "two pointers" in tag_text
+        or (
+            "left" in code_lower
+            and "right" in code_lower
+            and "while" in code_lower
         )
-    else:
-        main = "an appropriate algorithmic pattern"
+    ):
+        add("Two Pointers")
 
-    return (
-        "The key to this problem is recognizing the right "
-        f"data structure or algorithmic pattern: **{main}**. "
-        "Instead of repeatedly checking unnecessary possibilities, "
-        "the solution keeps track of the information required to "
-        "make each decision efficiently."
+    # Sliding window
+    if (
+        "sliding window" in tag_text
+        or (
+            "left" in code_lower
+            and "right" in code_lower
+            and (
+                "window" in code_lower
+                or "substring" in tag_text
+            )
+        )
+    ):
+        add("Sliding Window")
+
+    # Binary search
+    if (
+        "binary search" in tag_text
+        or "bisect" in code_lower
+        or (
+            "mid" in code_lower
+            and "left" in code_lower
+            and "right" in code_lower
+        )
+    ):
+        add("Binary Search")
+
+    # Stack
+    if (
+        "stack" in tag_text
+        or (
+            "append(" in code_lower
+            and ".pop(" in code_lower
+        )
+    ):
+        add("Stack")
+
+    # Queue / BFS
+    if (
+        "breadth-first search" in tag_text
+        or "bfs" in tag_text
+        or "popleft(" in code_lower
+        or "deque(" in code_lower
+    ):
+        add("Queue / BFS")
+
+    # DFS / Backtracking
+    if (
+        "depth-first search" in tag_text
+        or "dfs" in tag_text
+        or "backtracking" in tag_text
+    ):
+        add("DFS / Backtracking")
+
+    # Dynamic Programming
+    if (
+        "dynamic programming" in tag_text
+        or "dp" in code_lower
+        or "lru_cache" in code_lower
+        or "memo" in code_lower
+    ):
+        add("Dynamic Programming")
+
+    # Heap / Priority Queue
+    if (
+        "heap" in tag_text
+        or "priority queue" in tag_text
+        or "heapq" in code_lower
+        or "priorityqueue" in code_lower
+    ):
+        add("Heap / Priority Queue")
+
+    # Sorting
+    if (
+        "sorting" in tag_text
+        or ".sort(" in code_lower
+        or "sorted(" in code_lower
+    ):
+        add("Sorting")
+
+    # Prefix Sum
+    if (
+        "prefix sum" in tag_text
+        or "prefix" in code_lower
+        or "cumulative" in code_lower
+    ):
+        add("Prefix Sum")
+
+    # Bit Manipulation
+    if (
+        "bit manipulation" in tag_text
+        or "bitwise" in tag_text
+        or "& 1" in code_lower
+        or "n & (n - 1)" in code_lower
+        or "^" in code_lower
+    ):
+        add("Bit Manipulation")
+
+    # Linked List
+    if (
+        "linked list" in tag_text
+        or "->next" in code_lower
+        or ".next" in code_lower
+    ):
+        add("Linked List")
+
+    # Greedy
+    if "greedy" in tag_text:
+        add("Greedy")
+
+    if not patterns:
+        patterns.append("Direct Iterative Approach")
+
+    primary = patterns[0]
+    supporting = patterns[1:3]
+
+    # --------------------------------------------------------
+    # Intuition
+    # --------------------------------------------------------
+
+    intuition_map = {
+        "Hash Map": (
+            "The key idea is to store information from elements we have "
+            "already processed so that the required value can be looked "
+            "up quickly. A hash map provides O(1) average lookup time, "
+            "which avoids repeatedly scanning the input."
+        ),
+
+        "Hash Set": (
+            "A set is useful here because we mainly need fast membership "
+            "checks. Instead of repeatedly searching the input, we keep "
+            "the relevant values in a hash set and test whether an element "
+            "has already been seen."
+        ),
+
+        "Two Pointers": (
+            "The solution uses two pointers to process the input from "
+            "different positions. By moving the appropriate pointer after "
+            "each comparison, unnecessary combinations are eliminated "
+            "instead of checking every possible pair."
+        ),
+
+        "Sliding Window": (
+            "The problem can be viewed as maintaining a valid window over "
+            "the input. The left and right boundaries are adjusted as we "
+            "scan the array or string, allowing the solution to process "
+            "each element a small number of times."
+        ),
+
+        "Binary Search": (
+            "The search space has an ordered structure, which means we "
+            "do not need to inspect every element. At each step, the "
+            "middle element eliminates roughly half of the remaining "
+            "possibilities."
+        ),
+
+        "Stack": (
+            "A stack is useful because the most recently added element is "
+            "often the first one that needs to be reconsidered. Push and "
+            "pop operations let the solution maintain this information "
+            "efficiently."
+        ),
+
+        "Queue / BFS": (
+            "The problem is naturally processed level by level. A queue "
+            "stores the next states to visit, allowing breadth-first "
+            "search to explore the structure in the required order."
+        ),
+
+        "DFS / Backtracking": (
+            "The solution explores one possible path or choice at a time. "
+            "When a path cannot produce a valid answer, it backtracks and "
+            "tries the next possibility."
+        ),
+
+        "Dynamic Programming": (
+            "The problem contains overlapping subproblems. Instead of "
+            "recomputing the same results repeatedly, the solution stores "
+            "previously computed states and reuses them."
+        ),
+
+        "Heap / Priority Queue": (
+            "A priority queue keeps the most important candidate readily "
+            "available. This avoids repeatedly scanning all remaining "
+            "elements when we only need the current minimum or maximum."
+        ),
+
+        "Sorting": (
+            "Sorting puts the input into an order that makes the required "
+            "comparisons or grouping much easier. Once ordered, the "
+            "algorithm can process the elements without checking every "
+            "possible arrangement."
+        ),
+
+        "Prefix Sum": (
+            "Prefix information lets the solution answer cumulative "
+            "queries without recomputing the sum from the beginning each "
+            "time. Each position stores enough information to derive "
+            "later results efficiently."
+        ),
+
+        "Bit Manipulation": (
+            "The solution takes advantage of bit-level properties of the "
+            "numbers. Bitwise operations can express certain mathematical "
+            "conditions much more efficiently than repeatedly performing "
+            "the equivalent arithmetic operations."
+        ),
+
+        "Linked List": (
+            "The solution works directly with node relationships rather "
+            "than treating the structure like a random-access array. "
+            "Updating or traversing the next pointers lets us manipulate "
+            "the list efficiently."
+        ),
+
+        "Greedy": (
+            "A greedy strategy is used: at each step, the solution makes "
+            "the best locally available choice with the goal of building "
+            "an optimal global result."
+        ),
+    }
+
+    intuition = intuition_map.get(
+        primary,
+        (
+            "The solution processes the input systematically while "
+            "maintaining the information needed to make each decision "
+            "without unnecessary repeated work."
+        ),
     )
 
+    # --------------------------------------------------------
+    # Approach
+    # --------------------------------------------------------
 
-def build_approach(tags):
-    if not tags:
-        return (
-            "1. Identify the information required while processing "
-            "the input.\n"
-            "2. Traverse the input using the chosen algorithm.\n"
-            "3. Maintain the required state.\n"
-            "4. Return the answer once the required condition is met."
-        )
+    approach_map = {
+        "Hash Map": [
+            "Create a hash map to store information about elements already processed.",
+            "Iterate through the input once.",
+            "For each element, compute or check the value required by the problem.",
+            "Use the hash map for an O(1) average-time lookup.",
+            "Return or update the result when the required condition is satisfied.",
+        ],
 
-    return (
-        "1. Identify the main algorithmic pattern.\n"
-        "2. Traverse the input while maintaining the required state.\n"
-        f"3. Use the relevant technique ({', '.join(tags[:4])}) "
-        "to avoid unnecessary work.\n"
-        "4. Return the result after processing the required input."
+        "Hash Set": [
+            "Create a set containing the values needed for fast membership checks.",
+            "Traverse the input while checking whether the current value has already been seen.",
+            "Update the set as new values are processed.",
+            "Return the result once the required condition is found.",
+        ],
+
+        "Two Pointers": [
+            "Initialize pointers at the relevant ends or positions of the input.",
+            "Compare the values indicated by the pointers.",
+            "Move the appropriate pointer according to the problem condition.",
+            "Continue until the pointers meet or the valid search range is exhausted.",
+        ],
+
+        "Sliding Window": [
+            "Initialize the left and right boundaries of the window.",
+            "Expand the right side while processing new elements.",
+            "When the window becomes invalid, move the left boundary until it is valid again.",
+            "Track the best or required result while maintaining the window.",
+        ],
+
+        "Binary Search": [
+            "Initialize the search boundaries.",
+            "Calculate the middle position.",
+            "Determine which half can still contain the answer.",
+            "Discard the other half and repeat until the answer is found.",
+        ],
+
+        "Stack": [
+            "Initialize an empty stack.",
+            "Process the input from left to right.",
+            "Push elements when they still need to be considered.",
+            "Pop elements when the current element resolves the pending condition.",
+        ],
+
+        "Queue / BFS": [
+            "Initialize a queue with the starting state.",
+            "Process states in first-in-first-out order.",
+            "Generate and enqueue the next valid states.",
+            "Continue until the target state or complete traversal is reached.",
+        ],
+
+        "DFS / Backtracking": [
+            "Choose the next available option.",
+            "Recursively explore the resulting state.",
+            "Undo the choice when returning from the recursive call.",
+            "Continue until all relevant possibilities have been explored or a valid result is found.",
+        ],
+
+        "Dynamic Programming": [
+            "Define the state that represents a smaller version of the problem.",
+            "Initialize the base cases.",
+            "Build or memoize states so repeated work is avoided.",
+            "Use previously computed states to construct the final answer.",
+        ],
+
+        "Heap / Priority Queue": [
+            "Initialize a priority queue with the relevant candidates.",
+            "Repeatedly retrieve the highest-priority element.",
+            "Process it and add any newly relevant candidates.",
+            "Continue until the required number of results or final state is obtained.",
+        ],
+
+        "Sorting": [
+            "Sort the input using the required ordering.",
+            "Traverse the ordered data while applying the problem-specific condition.",
+            "Use the sorted structure to avoid unnecessary comparisons.",
+        ],
+
+        "Prefix Sum": [
+            "Build cumulative information while traversing the input.",
+            "Use the stored prefix values to derive range or cumulative results efficiently.",
+            "Return the required result after processing the input.",
+        ],
+
+        "Bit Manipulation": [
+            "Identify the bitwise property used by the problem.",
+            "Apply the corresponding bit operation to the current value.",
+            "Repeat only while the relevant bits remain to be processed.",
+            "Return the resulting value or condition.",
+        ],
+
+        "Linked List": [
+            "Initialize the required node pointers.",
+            "Traverse the list through next-pointer relationships.",
+            "Update pointers when the problem requires insertion, deletion, reversal, or comparison.",
+            "Return the appropriate node or result.",
+        ],
+
+        "Greedy": [
+            "Evaluate the available choices at the current step.",
+            "Select the locally optimal choice.",
+            "Update the state and continue to the next step.",
+            "Return the final result after all relevant choices are processed.",
+        ],
+    }
+
+    approach = approach_map.get(
+        primary,
+        [
+            "Initialize the required state.",
+            "Traverse the input.",
+            "Apply the problem-specific condition at each step.",
+            "Update the result and return the final answer.",
+        ],
     )
+
+    # --------------------------------------------------------
+    # Complexity estimation
+    # --------------------------------------------------------
+
+    time_complexity = "Depends on the exact implementation"
+    space_complexity = "Depends on the exact implementation"
+
+    if primary == "Hash Map":
+        time_complexity = "O(n)"
+        space_complexity = "O(n)"
+
+    elif primary == "Hash Set":
+        time_complexity = "O(n)"
+        space_complexity = "O(n)"
+
+    elif primary == "Two Pointers":
+        time_complexity = "O(n)"
+        space_complexity = "O(1)"
+
+    elif primary == "Sliding Window":
+        time_complexity = "O(n)"
+        space_complexity = "O(n)"
+
+    elif primary == "Binary Search":
+        time_complexity = "O(log n)"
+        space_complexity = "O(1)"
+
+    elif primary == "Stack":
+        time_complexity = "O(n)"
+        space_complexity = "O(n)"
+
+    elif primary == "Queue / BFS":
+        time_complexity = "O(n)"
+        space_complexity = "O(n)"
+
+    elif primary == "DFS / Backtracking":
+        time_complexity = "Depends on the search space"
+        space_complexity = "O(n) auxiliary space"
+
+    elif primary == "Sorting":
+        time_complexity = "O(n log n)"
+        space_complexity = "Depends on the sorting implementation"
+
+    elif primary == "Heap / Priority Queue":
+        time_complexity = "O(n log n)"
+        space_complexity = "O(n)"
+
+    elif primary == "Bit Manipulation":
+        if "while" in code_lower:
+            time_complexity = "O(log n)"
+        else:
+            time_complexity = "O(1)"
+        space_complexity = "O(1)"
+
+    elif primary == "Prefix Sum":
+        time_complexity = "O(n)"
+        space_complexity = "O(n)"
+
+    return {
+        "primary": primary,
+        "supporting": supporting,
+        "intuition": intuition,
+        "approach": approach,
+        "time": time_complexity,
+        "space": space_complexity,
+    }
 
 
 def create_problem_readme(
@@ -555,12 +983,16 @@ def create_problem_readme(
         submission.get("lang")
     )
 
+    code = submission.get("code", "")
+
+    analysis = analyze_algorithm(
+        code,
+        tags,
+    )
+
     description = load_html_as_markdown(
         question.get("content", "")
     )
-
-    intuition = build_intuition(tags)
-    approach = build_approach(tags)
 
     leetcode_url = (
         f"{LEETCODE_URL}/problems/{slug}/"
@@ -570,6 +1002,20 @@ def create_problem_readme(
         " · ".join(tags[:6])
         if tags
         else "Not specified"
+    )
+
+    supporting_text = (
+        " · ".join(analysis["supporting"])
+        if analysis["supporting"]
+        else "None"
+    )
+
+    approach_steps = "\n".join(
+        f"{index}. {step}"
+        for index, step in enumerate(
+            analysis["approach"],
+            start=1,
+        )
     )
 
     runtime = submission.get(
@@ -600,23 +1046,47 @@ def create_problem_readme(
 
 ## 💡 Intuition
 
-{intuition}
+{analysis["intuition"]}
+
+### 🧠 Algorithmic Pattern
+
+**Primary:** {analysis["primary"]}
+
+**Supporting:** {supporting_text}
 
 ---
 
 ## 🚀 Approach
 
-{approach}
+{approach_steps}
+
+---
+
+## 🔍 Why This Works
+
+The approach works because it avoids unnecessary repeated work and
+maintains only the information required to make the next decision.
+
+The exact implementation is available in the linked solution file.
 
 ---
 
 ## ⏱️ Complexity
 
-The exact complexity follows from the algorithm used in the accepted
-solution.
+| Metric | Complexity |
+|---|---|
+| Time | **{analysis["time"]}** |
+| Space | **{analysis["space"]}** |
 
-**Runtime reported by LeetCode:** `{runtime}`  
-**Memory reported by LeetCode:** `{memory}`
+### 📊 LeetCode Performance
+
+| Metric | Result |
+|---|---|
+| Runtime | `{runtime}` |
+| Memory | `{memory}` |
+
+> **Note:** The complexity above is inferred from the detected
+> algorithmic pattern and the submitted implementation.
 
 ---
 
@@ -628,8 +1098,11 @@ solution.
 
 ## 🎯 Key Takeaway
 
-The most important lesson is to recognize the underlying algorithmic
-pattern and choose a data structure that avoids unnecessary repeated work.
+The main lesson from this problem is to recognize the underlying
+algorithmic pattern before writing the implementation.
+
+Understanding **why** the chosen data structure or algorithm reduces
+unnecessary work is often more valuable than memorizing the solution.
 
 ---
 
@@ -919,12 +1392,86 @@ def main():
             continue
 
         if submission_id in processed_ids:
-            print(
-                f"⏭️ Already synced: "
-                f"{submission.get('title')}"
-            )
+    print(
+        f"🔄 Refreshing README: "
+        f"{submission.get('title')}"
+    )
+
+    try:
+        slug = submission.get("titleSlug")
+
+        question = get_question(slug)
+
+        folder_name = (
+            f"{int(question['questionFrontendId']):04d}"
+            f"-{safe_slug(question['title'])}"
+        )
+
+        folder = SOLUTIONS_DIR / folder_name
+
+        if not folder.exists():
+            print("   ⚠️ Solution folder missing. Re-importing.")
+            process_submission(submission)
             continue
 
+        metadata_path = folder / "metadata.json"
+
+        if not metadata_path.exists():
+            print("   ⚠️ Metadata missing. Re-importing.")
+            process_submission(submission)
+            continue
+
+        metadata = json.loads(
+            metadata_path.read_text(
+                encoding="utf-8"
+            )
+        )
+
+        language = metadata.get(
+            "language",
+            "Unknown",
+        )
+
+        extension = None
+
+        for ext in LANGUAGE_EXTENSIONS.values():
+            candidate = folder / f"solution.{ext}"
+            if candidate.exists():
+                extension = ext
+                code_path = candidate
+                break
+
+        if extension:
+            code = code_path.read_text(
+                encoding="utf-8"
+            )
+
+            refreshed_submission = {
+                "lang": language,
+                "code": code,
+                "runtime": "Previously recorded",
+                "memory": "Previously recorded",
+            }
+
+            readme = create_problem_readme(
+                question,
+                refreshed_submission,
+                code_path.name,
+            )
+
+            (folder / "README.md").write_text(
+                readme,
+                encoding="utf-8",
+            )
+
+        continue
+
+    except Exception as exc:
+        print(
+            f"   ⚠️ README refresh failed: {exc}"
+        )
+
+        continue
         try:
             process_submission(
                 submission
