@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **0** |
-| 🟢 Easy | **0** |
+| 🧩 Total Solved | **4** |
+| 🟢 Easy | **4** |
 | 🟡 Medium | **0** |
 | 🔴 Hard | **0** |
 
@@ -18,7 +18,10 @@
 
 | # | Problem | Difficulty | Language |
 |---:|---|---|---|
-| — | Your first solution will appear here | — | — |
+| 1 | [Two Sum](solutions/0001-two-sum/) | 🟢 Easy | Java |
+| 9 | [Palindrome Number](solutions/0009-palindrome-number/) | 🟢 Easy | Java |
+| 231 | [Power of Two](solutions/0231-power-of-two/) | 🟢 Easy | Java |
+| 268 | [Missing Number](solutions/0268-missing-number/) | 🟢 Easy | Java |
 
 ---
 
