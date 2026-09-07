@@ -10,139 +10,35 @@
 
 ## 📝 Problem
 
-Given an array
-nums
- containing
-n
- distinct numbers in the range
-[0, n]
-, return
-the only number in the range that is missing from the array.
-
- 
-
-Example 1:
-
-Input:
-
-nums = [3,0,1]
-
-Output:
-
-2
-
-Explanation:
-
-n = 3
- since there are 3 numbers, so all numbers are in the range
-[0,3]
-. 2 is the missing number in the range since it does not appear in
-nums
-.
-
-Example 2:
-
-Input:
-
-nums = [0,1]
-
-Output:
-
-2
-
-Explanation:
-
-n = 2
- since there are 2 numbers, so all numbers are in the range
-[0,2]
-. 2 is the missing number in the range since it does not appear in
-nums
-.
-
-Example 3:
-
-Input:
-
-nums = [9,6,4,2,3,5,7,0,1]
-
-Output:
-
-8
-
-Explanation:
-
-n = 9
- since there are 9 numbers, so all numbers are in the range
-[0,9]
-. 8 is the missing number in the range since it does not appear in
-nums
-.
-
- 
-
- 
-
- 
-
- 
-
- 
-
-Constraints:
-
-n == nums.length
-
-1 <= n <= 10
-4
-
-0 <= nums[i] <= n
-
-All the numbers of
-nums
- are
-unique
-.
-
- 
-
-Follow up:
- Could you implement a solution using only
-O(1)
- extra space complexity and
-O(n)
- runtime complexity?
+Given an array of n distinct numbers in the range [0, n], identify and return the single number from the range that is missing.
 
 ---
 
 ## 💡 Intuition
 
-Because the search space has an exploitable order, each comparison can eliminate roughly half of the remaining possibilities. This reduces a linear search to logarithmic time.
+XORing a number with itself cancels it out to 0 (A ^ A = 0), while XORing a number with 0 leaves it unchanged (A ^ 0 = A). If we XOR all full range numbers from 0 to n together with all numbers in the array, every number present in both sets will appear twice and cancel out, leaving only the missing number.
 
-### 🧠 Algorithmic Pattern
+---
 
-| Role | Pattern |
-|---|---|
-| Primary | **Binary Search** |
-| Supporting | Hash Map · Sorting |
+## 🧠 Algorithmic Pattern
+
+> **Bit Manipulation**
 
 ---
 
 ## 🚀 Approach
 
-1. Initialize the search boundaries.
-2. Calculate the middle position.
-3. Use the ordering property to determine which half can still contain the answer.
-4. Discard the other half and repeat until the answer is found.
+1. Initialize a variable `xor` with `nums.length` (representing $n$).
+2. Loop through the array with index `i` from `0` to `nums.length - 1`.
+3. In each step, update `xor` by XORing it with both the index `i` and the value `nums[i]`.
+4. Allow all paired numbers present in both the indices and the array values to cancel each other out.
+5. Return the final value of `xor`, which is the unmatched missing number.
 
 ---
 
-## 🔍 Why This Works
+## ✅ Why This Works
 
-The approach avoids unnecessary repeated work by maintaining the
-right state or data structure while processing the input.
-
-The key advantage comes from choosing an algorithmic pattern that
-reduces the amount of work required at each step.
+The indices `0` to `n-1` combined with the initial `xor` value of `n` represent the complete set of expected numbers $[0, n]$. The array `nums` contains $n$ numbers from $[0, n]$ with exactly one missing. Because XOR is commutative and associative, all elements present in `nums` pair up with their matching range numbers and reduce to 0, leaving only the single missing number.
 
 ---
 
@@ -150,18 +46,15 @@ reduces the amount of work required at each step.
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(log n)** |
-| Space | **O(1)** |
+| Time | **O(n), where n is the length of `nums`. The algorithm makes a single pass through the array, performing constant-time bitwise operations in each iteration.** |
+| Space | **O(1) auxiliary space, as the algorithm only uses a single integer variable (`xor`) to track the result.** |
 
 ### 📊 LeetCode Performance
 
 | Metric | Result |
 |---|---|
-| Runtime | `Previously recorded` |
-| Memory | `Previously recorded` |
-
-> The Big-O complexity is inferred from the detected algorithmic
-> pattern and is intended as a high-level guide.
+| Runtime | `N/A` |
+| Memory | `47100000` |
 
 ---
 
@@ -173,8 +66,7 @@ reduces the amount of work required at each step.
 
 ## 🎯 Key Takeaway
 
-The most valuable part of this problem is recognizing the underlying
-pattern and understanding why it reduces unnecessary computation.
+Using the XOR property $A \oplus A = 0$ allows us to detect missing or unique elements in a single pass using $O(1)$ extra space, avoiding any potential integer overflow issues present in summation approaches.
 
 ---
 

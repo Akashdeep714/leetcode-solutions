@@ -10,126 +10,36 @@
 
 ## 📝 Problem
 
-You are given an array of integers
-nums
- and an integer
-target
-, return
-indices of the two numbers such that they add up to
-target
-.
-
-You may assume that each input would have
-exactly
- one solution
-, and you may not use the
-same
- element twice.
-
-You can return the answer in any order.
-
- 
-
-Example 1:
-
-```text
-
-Input:
- nums = [2,7,11,15], target = 9
-
-Output:
- [0,1]
-
-Explanation:
- Because nums[0] + nums[1] == 9, we return [0, 1].
-
-```
-
-Example 2:
-
-```text
-
-Input:
- nums = [3,2,4], target = 6
-
-Output:
- [1,2]
-
-```
-
-Example 3:
-
-```text
-
-Input:
- nums = [3,3], target = 6
-
-Output:
- [0,1]
-
-```
-
- 
-
-Constraints:
-
-2 <= nums.length <= 10
-4
-
--10
-9
- <= nums[i] <= 10
-9
-
--10
-9
- <= target <= 10
-9
-
-Only one valid answer exists.
-
- 
-
-Follow-up: 
-Can you come up with an algorithm that is less than
-O(n
-2
-)
- 
-time complexity?
+Given an array of integers and a target value, find the indices of two distinct numbers that add up to the target.
 
 ---
 
 ## 💡 Intuition
 
-The key idea is to remember useful information from elements that have already been processed. A hash map provides O(1) average lookup, allowing the solution to avoid repeatedly scanning the input.
+The most straightforward way to find the target sum is to test every possible combination of two numbers in the array until we find the pair that adds up to the target.
 
-### 🧠 Algorithmic Pattern
+---
 
-| Role | Pattern |
-|---|---|
-| Primary | **Hash Map** |
-| Supporting | None |
+## 🧠 Algorithmic Pattern
+
+> **Brute Force / Nested Loop Search**
 
 ---
 
 ## 🚀 Approach
 
-1. Create a hash map to store information about previously processed values.
-2. Traverse the input once.
-3. For each element, compute the value or state needed to satisfy the problem.
-4. Use the hash map for a fast average-time lookup.
-5. Return or update the answer when the required condition is met.
+1. Initialize an integer array `arr` of size 2 to store the result indices.
+2. Set up an outer loop with index `i` running from `0` to `nums.length - 1` to represent the first element of the pair.
+3. Set up an inner loop with index `j` starting from `i + 1` to `nums.length - 1` to represent the second distinct element.
+4. Check if the sum of `nums[i]` and `nums[j]` equals `target`.
+5. If the sum equals `target`, store `i` into `arr[0]` and `j` into `arr[1]`.
+6. Return `arr` after searching through the pairs.
 
 ---
 
-## 🔍 Why This Works
+## ✅ Why This Works
 
-The approach avoids unnecessary repeated work by maintaining the
-right state or data structure while processing the input.
-
-The key advantage comes from choosing an algorithmic pattern that
-reduces the amount of work required at each step.
+By starting `j` at `i + 1`, the code checks every unique unordered pair of indices $(i, j)$ where $i < j$. This avoids pairing an element with itself or re-checking previously tested pairs. Since the problem guarantees exactly one valid solution exists, the condition `nums[i] + nums[j] == target` will successfully trigger for the correct pair and capture its indices.
 
 ---
 
@@ -137,18 +47,15 @@ reduces the amount of work required at each step.
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(n)** |
-| Space | **O(n)** |
+| Time | **O(n²) where n is the length of `nums`. The outer loop runs n times and the inner loop runs approximately n/2 times on average, performing roughly n(n - 1) / 2 comparisons in total.** |
+| Space | **O(1) auxiliary space because only a fixed 2-element array is created regardless of the input size.** |
 
 ### 📊 LeetCode Performance
 
 | Metric | Result |
 |---|---|
-| Runtime | `Previously recorded` |
-| Memory | `Previously recorded` |
-
-> The Big-O complexity is inferred from the detected algorithmic
-> pattern and is intended as a high-level guide.
+| Runtime | `52` |
+| Memory | `47024000` |
 
 ---
 
@@ -160,8 +67,7 @@ reduces the amount of work required at each step.
 
 ## 🎯 Key Takeaway
 
-The most valuable part of this problem is recognizing the underlying
-pattern and understanding why it reduces unnecessary computation.
+While a brute force nested loop approach is easy to implement and uses O(1) extra space, it takes O(n²) time complexity. Using a Hash Table can optimize this search to O(n) time.
 
 ---
 

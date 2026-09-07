@@ -1,9 +1,11 @@
 {
-  "number": "268",
+  "number": 268,
   "title": "Missing Number",
   "difficulty": "Easy",
   "language": "Java",
   "folder": "0268-missing-number",
   "slug": "missing-number",
-  "submission_id": "2030853058"
+  "submission_id": "2030853058",
+  "runtime": 0,
+  "memory": 47100000
 }

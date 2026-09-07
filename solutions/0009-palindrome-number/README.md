@@ -10,111 +10,37 @@
 
 ## 📝 Problem
 
-Given an integer
-x
-, return
-true
- if
-x
- is a
-palindrome
-, and
-false
- otherwise.
-
- 
-
-Example 1:
-
-```text
-
-Input:
- x = 121
-
-Output:
- true
-
-Explanation:
- 121 reads as 121 from left to right and from right to left.
-
-```
-
-Example 2:
-
-```text
-
-Input:
- x = -121
-
-Output:
- false
-
-Explanation:
- From left to right, it reads -121. From right to left, it becomes 121-. Therefore it is not a palindrome.
-
-```
-
-Example 3:
-
-```text
-
-Input:
- x = 10
-
-Output:
- false
-
-Explanation:
- Reads 01 from right to left. Therefore it is not a palindrome.
-
-```
-
- 
-
-Constraints:
-
--2
-31
- <= x <= 2
-31
- - 1
-
- 
-
-Follow up:
- Could you solve it without converting the integer to a string?
+Determine whether an integer is a palindrome (reads the same forward and backward) without converting it to a string.
 
 ---
 
 ## 💡 Intuition
 
-The solution processes the input systematically while keeping only the state necessary to make the next decision efficiently.
+A number is a palindrome if reversing its digits yields the exact original value. Negative numbers are never palindromes because of the minus sign. By repeatedly stripping off the last digit of the number using modulo operations and appending it to a new number, we can reverse the integer mathematically and compare it to the original.
 
-### 🧠 Algorithmic Pattern
+---
 
-| Role | Pattern |
-|---|---|
-| Primary | **Direct Iterative Approach** |
-| Supporting | None |
+## 🧠 Algorithmic Pattern
+
+> **Math / Digit Manipulation**
 
 ---
 
 ## 🚀 Approach
 
-1. Initialize the required state.
-2. Traverse the input.
-3. Apply the problem-specific condition at each step.
-4. Update the result and return the final answer.
+1. Check if x is negative; if so, immediately return false because negative signs prevent palindrome symmetry.
+2. Initialize a temporary variable n equal to x to keep the original value of x intact, and set revNum to 0.
+3. Loop while n is greater than 0.
+4. Extract the last digit of n using d = n % 10.
+5. Append d to revNum by multiplying revNum by 10 and adding d.
+6. Remove the last digit from n using integer division n = n / 10.
+7. After the loop, compare revNum to x and return true if they are equal, or false otherwise.
 
 ---
 
-## 🔍 Why This Works
+## ✅ Why This Works
 
-The approach avoids unnecessary repeated work by maintaining the
-right state or data structure while processing the input.
-
-The key advantage comes from choosing an algorithmic pattern that
-reduces the amount of work required at each step.
+The operation `n % 10` isolates the rightmost digit of `n`, and `revNum * 10 + d` appends this digit to `revNum`, effectively processing the digits of `x` from right to left. Integer division `n / 10` shifts `n` right by one decimal place. Once all digits are processed, `revNum` contains the exact reverse of `x`, making `revNum == x` a direct and accurate symmetry test.
 
 ---
 
@@ -122,18 +48,15 @@ reduces the amount of work required at each step.
 
 | Metric | Complexity |
 |---|---|
-| Time | **Depends on the implementation** |
-| Space | **Depends on the implementation** |
+| Time | **O(log10(x)) — The number of iterations equals the total number of digits in x, which is proportional to log10(x).** |
+| Space | **O(1) — The solution uses a constant amount of memory with only a few primitive integer variables (n, revNum, d).** |
 
 ### 📊 LeetCode Performance
 
 | Metric | Result |
 |---|---|
-| Runtime | `Previously recorded` |
-| Memory | `Previously recorded` |
-
-> The Big-O complexity is inferred from the detected algorithmic
-> pattern and is intended as a high-level guide.
+| Runtime | `4` |
+| Memory | `46080000` |
 
 ---
 
@@ -145,8 +68,7 @@ reduces the amount of work required at each step.
 
 ## 🎯 Key Takeaway
 
-The most valuable part of this problem is recognizing the underlying
-pattern and understanding why it reduces unnecessary computation.
+Digits of a base-10 integer can be processed from right to left using modulo (% 10) to extract the last digit and integer division (/ 10) to drop it, avoiding string conversion.
 
 ---
 

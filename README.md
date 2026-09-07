@@ -1,7 +1,7 @@
 # 🧠 LeetCode Solutions
 
-> A continuously growing collection of my LeetCode solutions,
-> algorithmic patterns, explanations, and problem-solving notes.
+> My automatically synchronized collection of LeetCode solutions,
+> algorithmic insights, and problem-solving notes.
 
 ## 📊 Progress
 
@@ -25,30 +25,34 @@
 
 ---
 
-## 🔄 Automatic Synchronization
+## 🤖 Automatic Synchronization
 
-This repository is synchronized automatically using **GitHub Actions**.
+This repository is connected to my LeetCode account through GitHub Actions.
 
-Whenever an accepted LeetCode submission is detected, the workflow:
+After an accepted submission is detected, the workflow automatically:
 
-1. Retrieves the accepted submission.
-2. Fetches the problem statement and topic tags.
-3. Saves the submitted source code.
-4. Generates a visitor-friendly problem README.
-5. Updates this problem archive.
-6. Commits the changes automatically.
+1. Retrieves the submitted code.
+2. Retrieves the problem metadata.
+3. Analyzes the actual implementation.
+4. Generates a concise problem explanation.
+5. Generates intuition and step-by-step approach.
+6. Explains why the solution works.
+7. Determines the algorithmic pattern.
+8. Documents time and space complexity.
+9. Creates the solution folder.
+10. Updates this archive.
 
 ### Workflow
 
-**Solve → Submit → Accepted ✅ → GitHub automatically updates**
+**Solve → Submit → Accepted ✅ → GitHub updates automatically**
 
 ---
 
 ## 🎯 Purpose
 
-This repository is more than a backup of code.
+This repository is intended to be useful for both myself and visitors.
 
-Each solution is organized so visitors can understand the problem,
-the core idea, the algorithmic pattern, the complexity, and the implementation.
+The goal is not simply to collect code, but to document the ideas,
+patterns, and reasoning behind each solution.
 
 ⭐ One problem at a time. One concept at a time.

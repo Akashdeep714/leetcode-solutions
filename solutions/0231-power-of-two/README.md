@@ -10,117 +10,35 @@
 
 ## 📝 Problem
 
-Given an integer
-n
-, return
-true
- if it is a power of two. Otherwise, return
-false
-.
-
-An integer
-n
- is a power of two, if there exists an integer
-x
- such that
-n == 2
-x
-.
-
- 
-
-Example 1:
-
-```text
-
-Input:
- n = 1
-
-Output:
- true
-
-Explanation:
-2
-0
- = 1
-
-```
-
-Example 2:
-
-```text
-
-Input:
- n = 16
-
-Output:
- true
-
-Explanation:
-2
-4
- = 16
-
-```
-
-Example 3:
-
-```text
-
-Input:
- n = 3
-
-Output:
- false
-
-```
-
- 
-
-Constraints:
-
--2
-31
- <= n <= 2
-31
- - 1
-
- 
-
-Follow up:
- Could you solve it without loops/recursion?
+Determine if a given integer is a power of two.
 
 ---
 
 ## 💡 Intuition
 
-The solution uses properties of binary representation and bitwise operations to express the required condition efficiently.
+Any positive power of two can be repeatedly halved until it equals 1. If a number stops being divisible by 2 before reaching 1, it contains an odd factor and cannot be a power of two.
 
-### 🧠 Algorithmic Pattern
+---
 
-| Role | Pattern |
-|---|---|
-| Primary | **Bit Manipulation** |
-| Supporting | None |
+## 🧠 Algorithmic Pattern
+
+> **Iterative Division**
 
 ---
 
 ## 🚀 Approach
 
-1. Identify the relevant property of the binary representation.
-2. Apply the required bitwise operation.
-3. Repeat while relevant bits remain to be processed.
-4. Return the resulting value or condition.
+1. Check if n is less than 1; if so, return false because non-positive numbers cannot be powers of two.
+2. Check if n is equal to 1; if so, return true immediately as 2^0 = 1.
+3. Repeatedly divide n by 2 in a loop while n is even (n % 2 == 0).
+4. Once n is no longer divisible by 2, check if n has been reduced to 1.
+5. Return true if n equals 1, or false otherwise.
 
 ---
 
-## 🔍 Why This Works
+## ✅ Why This Works
 
-The approach avoids unnecessary repeated work by maintaining the
-right state or data structure while processing the input.
-
-The key advantage comes from choosing an algorithmic pattern that
-reduces the amount of work required at each step.
+A power of two consists exclusively of prime factors of 2. By repeatedly dividing n by 2 while n is even, all factors of 2 are stripped away. If n was originally a power of two, this reduction will always leave 1. If n had any odd prime factors, the loop terminates early with n > 1.
 
 ---
 
@@ -128,18 +46,15 @@ reduces the amount of work required at each step.
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(1) to O(log n)** |
-| Space | **O(1)** |
+| Time | **O(log n) because the value of n is halved in each step of the loop when n is a power of two.** |
+| Space | **O(1) auxiliary space, as the reduction is performed directly on the input variable using no additional memory.** |
 
 ### 📊 LeetCode Performance
 
 | Metric | Result |
 |---|---|
-| Runtime | `Previously recorded` |
-| Memory | `Previously recorded` |
-
-> The Big-O complexity is inferred from the detected algorithmic
-> pattern and is intended as a high-level guide.
+| Runtime | `1` |
+| Memory | `42724000` |
 
 ---
 
@@ -151,8 +66,7 @@ reduces the amount of work required at each step.
 
 ## 🎯 Key Takeaway
 
-The most valuable part of this problem is recognizing the underlying
-pattern and understanding why it reduces unnecessary computation.
+To test if a number is a power of a base k iteratively, continuously divide out factors of k while divisible and check if the final result is 1.
 
 ---
 
