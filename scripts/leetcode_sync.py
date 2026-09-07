@@ -167,7 +167,9 @@ query submissionDetails(
             name
         }
         runtime
+        runtimeDisplay
         memory
+        memoryDisplay
         statusDisplay
     }
 }
@@ -515,6 +517,7 @@ def html_to_text(
 def fallback_analysis(
     code,
     tags,
+    question=None,
 ):
     code_lower = (
         code or ""
@@ -523,6 +526,210 @@ def fallback_analysis(
     tag_text = " ".join(
         tags or []
     ).lower()
+
+    title = str((question or {}).get("title", "")).strip()
+
+    # Strong code-based fallbacks for common problems. These are used only
+    # when Gemini is unavailable, so the explanation remains useful offline.
+    if title == "Two Sum":
+        if re.search(r"for\s*\([^)]*\).*for\s*\([^)]*\)", code or "", re.DOTALL):
+            return {
+                "pattern": "🔎 Brute Force / Nested Loops",
+                "problem_summary": (
+                    "Find two different indices whose values add up to the given target. "
+                    "Return the indices of that pair."
+                ),
+                "intuition": (
+                    "Check each possible pair until the two values add up to the target. "
+                    "Because the solution uses nested loops, every unique pair is examined."
+                ),
+                "approach": [
+                    "Initialize an array to store the two answer indices.",
+                    "Use an outer loop to choose the first index.",
+                    "Use an inner loop starting after it to choose the second index.",
+                    "Check whether the two selected values sum to target.",
+                    "Store the matching indices and return them.",
+                ],
+                "why_it_works": (
+                    "The nested loops enumerate every unique pair with the second index "
+                    "greater than the first. Since the problem guarantees a solution, "
+                    "the matching pair will be found."
+                ),
+                "time_complexity": "O(n^2)",
+                "space_complexity": "O(1)",
+                "key_takeaway": (
+                    "Brute force is simple and reliable, but checking every pair costs "
+                    "quadratic time; a hash map can reduce the time to O(n)."
+                ),
+            }
+
+    if title == "Palindrome Number" and re.search(r"%\s*10|/=\s*10|/\s*10", code or ""):
+        return {
+            "pattern": "🔢 Digit Manipulation",
+            "problem_summary": (
+                "Determine whether an integer reads the same forward and backward."
+            ),
+            "intuition": (
+                "The solution works directly with the digits. It repeatedly takes the "
+                "last digit and uses it to build the number in reverse, then compares "
+                "the result with the original value."
+            ),
+            "approach": [
+                "Keep the original value available for the final comparison.",
+                "Extract the last digit using modulo 10.",
+                "Append that digit to the reversed number.",
+                "Remove the processed digit using integer division by 10.",
+                "Compare the reversed number with the original value.",
+            ],
+            "why_it_works": (
+                "Reversing all digits produces exactly the number obtained by reading "
+                "the input from right to left. The two values are equal exactly when "
+                "the input is a palindrome."
+            ),
+            "time_complexity": "O(log n)",
+            "space_complexity": "O(1)",
+            "key_takeaway": (
+                "Modulo and integer division are enough to inspect and reverse digits "
+                "without converting the number to a string."
+            ),
+        }
+
+    if title == "Power of Two":
+        code_text = code or ""
+        if re.search(r"&\s*\(?[a-zA-Z_][\w]*\s*-\s*1\)?", code_text):
+            return {
+                "pattern": "⚡ Bit Manipulation",
+                "problem_summary": "Determine whether an integer is a power of two.",
+                "intuition": (
+                    "A positive power of two has exactly one set bit in binary. The "
+                    "submitted bitwise check tests that property directly."
+                ),
+                "approach": [
+                    "Reject non-positive values.",
+                    "Apply the bitwise power-of-two condition to the number.",
+                    "Return true when the condition holds.",
+                    "Otherwise return false.",
+                ],
+                "why_it_works": (
+                    "For a positive power of two, subtracting one changes its single "
+                    "set bit to zero and turns lower bits on, so the number and n - 1 "
+                    "share no set bits. Other positive integers do not satisfy this condition."
+                ),
+                "time_complexity": "O(1)",
+                "space_complexity": "O(1)",
+                "key_takeaway": (
+                    "Binary representation can turn a seemingly iterative power check "
+                    "into a constant-time bit manipulation test."
+                ),
+            }
+
+        if re.search(r"/\s*=\s*2|/\s*2|\bpow(?!\w)|Math\.pow|recursive", code_text, re.I):
+            return {
+                "pattern": "🔁 Repeated Division / Recursion",
+                "problem_summary": "Determine whether an integer is a power of two.",
+                "intuition": (
+                    "Powers of two can be reduced by dividing by two repeatedly. A valid "
+                    "power reaches 1 without leaving a remainder at any step."
+                ),
+                "approach": [
+                    "Reject values that are not positive.",
+                    "Repeatedly reduce the value according to the submitted implementation.",
+                    "Check that each required division is valid.",
+                    "Accept the number when the process reaches the valid base case.",
+                ],
+                "why_it_works": (
+                    "Every positive power of two can be reduced to 1 by repeatedly dividing "
+                    "by two exactly, while any other positive integer eventually leaves a "
+                    "remainder or fails the base condition."
+                ),
+                "time_complexity": "O(log n)",
+                "space_complexity": "O(1)",
+                "key_takeaway": (
+                    "Repeated division works because the exponent determines how many "
+                    "times the value can be divided by two before reaching 1."
+                ),
+            }
+
+    if title == "Missing Number":
+        code_text = code or ""
+        if "^" in code_text:
+            return {
+                "pattern": "🔀 XOR",
+                "problem_summary": (
+                    "Find the one missing value from an array containing distinct numbers "
+                    "chosen from the range 0 through n."
+                ),
+                "intuition": (
+                    "XOR cancels equal values. Combine the expected range with the values "
+                    "in the array so every present number cancels itself, leaving only "
+                    "the missing number."
+                ),
+                "approach": [
+                    "Initialize the XOR accumulator with the required range state.",
+                    "Traverse the array and XOR each present value into the accumulator.",
+                    "Also XOR the corresponding range values.",
+                    "Let equal values cancel each other through XOR.",
+                    "Return the value left in the accumulator.",
+                ],
+                "why_it_works": (
+                    "Because x ^ x = 0 and x ^ 0 = x, every value that exists in both the "
+                    "range and the array cancels. The only value without a matching partner "
+                    "is the missing number."
+                ),
+                "time_complexity": "O(n)",
+                "space_complexity": "O(1)",
+                "key_takeaway": "XOR is a useful way to find one missing value without extra storage.",
+            }
+
+        if re.search(r"Arrays\.sort|Collections\.sort|\bsort\s*\(", code_text):
+            return {
+                "pattern": "📊 Sorting",
+                "problem_summary": (
+                    "Find the one missing value from the complete range 0 through n."
+                ),
+                "intuition": (
+                    "Sorting places the values in order, making the first position where "
+                    "the expected value is absent reveal the missing number."
+                ),
+                "approach": [
+                    "Sort the array.",
+                    "Scan the values in increasing order.",
+                    "Compare each value with the position or expected value.",
+                    "Return the first missing value; otherwise return n when all prior values match.",
+                ],
+                "why_it_works": (
+                    "After sorting, every present value appears in increasing order. The first "
+                    "place where the expected sequence is broken identifies the missing value."
+                ),
+                "time_complexity": "O(n log n)",
+                "space_complexity": "O(1)",
+                "key_takeaway": "Sorting can simplify missing-value detection, at the cost of O(n log n) time.",
+            }
+
+        if re.search(r"n\s*\*\s*\(\s*n\s*\+\s*1\s*\)\s*/\s*2|sum", code_text, re.I):
+            return {
+                "pattern": "➕ Arithmetic Sum",
+                "problem_summary": (
+                    "Find the one missing value from the range 0 through n."
+                ),
+                "intuition": (
+                    "The complete range has a known arithmetic sum. Subtracting the actual "
+                    "array sum from that expected sum leaves the missing value."
+                ),
+                "approach": [
+                    "Compute the expected sum of values from 0 through n.",
+                    "Compute the sum of the values present in the array.",
+                    "Subtract the actual sum from the expected sum.",
+                    "Return the difference.",
+                ],
+                "why_it_works": (
+                    "Only one value is missing, so the difference between the complete range "
+                    "sum and the array sum is exactly that missing value."
+                ),
+                "time_complexity": "O(n)",
+                "space_complexity": "O(1)",
+                "key_takeaway": "A known total can expose a single missing value in one pass.",
+            }
 
     # Important: more specific patterns
     # are checked before generic patterns.
@@ -881,6 +1088,38 @@ def fallback_analysis(
     }
 
 
+def normalize_fallback_analysis(analysis, question):
+    """Normalize deterministic fallback output to the README schema."""
+    result = dict(analysis or {})
+    result["why_it_works"] = result.get(
+        "why_it_works",
+        result.get(
+            "why",
+            "The submitted algorithm maintains the information needed to determine the result."
+        ),
+    )
+    result["time_complexity"] = result.get(
+        "time_complexity",
+        result.get("time", "O(n)"),
+    )
+    result["space_complexity"] = result.get(
+        "space_complexity",
+        result.get("space", "O(1)"),
+    )
+    if "problem_summary" not in result:
+        title = str((question or {}).get("title", "this problem"))
+        result["problem_summary"] = f"Solve {title} using the submitted implementation."
+    if "key_takeaway" not in result:
+        result["key_takeaway"] = (
+            "Focus on the algorithmic pattern used by the submitted implementation "
+            "and understand why it satisfies the problem."
+        )
+    result.pop("why", None)
+    result.pop("time", None)
+    result.pop("space", None)
+    return result
+
+
 # ============================================================
 # AI explanation
 # ============================================================
@@ -1209,31 +1448,40 @@ def create_problem_readme(
     )
 
     runtime_raw = (
-        submission.get("runtime")
+        submission.get("runtimeDisplay")
+        or submission.get("runtime")
         or "N/A"
     )
 
     memory_raw = (
-        submission.get("memory")
+        submission.get("memoryDisplay")
+        or submission.get("memory")
         or "N/A"
     )
 
     runtime = str(runtime_raw).strip()
     memory = str(memory_raw).strip()
 
-    # LeetCode normally returns values such as "64 ms" and "19.6 MB".
-    # Add the expected unit only when LeetCode returns a bare numeric value.
     if runtime != "N/A" and re.fullmatch(
         r"\d+(?:\.\d+)?",
         runtime
     ):
         runtime = f"{runtime} ms"
 
+    # The raw GraphQL memory value is commonly reported as bytes.
+    # Only convert when it is a bare numeric value; otherwise preserve
+    # LeetCode's display string exactly.
     if memory != "N/A" and re.fullmatch(
         r"\d+(?:\.\d+)?",
         memory
     ):
-        memory = f"{memory} MB"
+        memory_number = float(memory)
+        if memory_number >= 1024 * 1024:
+            memory = f"{memory_number / (1024 * 1024):.1f} MB"
+        elif memory_number >= 1024:
+            memory = f"{memory_number / 1024:.1f} KB"
+        else:
+            memory = f"{memory_number:.0f} B"
 
     tags_display = (
         " · ".join(tags)
@@ -1572,9 +1820,13 @@ def import_submission(
         )
 
     else:
-        analysis = fallback_analysis(
-            code,
-            tags,
+        analysis = normalize_fallback_analysis(
+            fallback_analysis(
+                code,
+                tags,
+                question,
+            ),
+            question,
         )
 
         explanation_source = (
@@ -1632,8 +1884,14 @@ def import_submission(
             "runtime": details.get(
                 "runtime"
             ),
+            "runtimeDisplay": details.get(
+                "runtimeDisplay"
+            ),
             "memory": details.get(
                 "memory"
+            ),
+            "memoryDisplay": details.get(
+                "memoryDisplay"
             ),
         },
         analysis,
@@ -1665,8 +1923,14 @@ def import_submission(
         "runtime": details.get(
             "runtime"
         ),
+        "runtime_display": details.get(
+            "runtimeDisplay"
+        ),
         "memory": details.get(
             "memory"
+        ),
+        "memory_display": details.get(
+            "memoryDisplay"
         ),
     }
 
@@ -1749,9 +2013,13 @@ def refresh_existing_submission(
     )
 
     if not analysis:
-        analysis = fallback_analysis(
-            code,
-            tags,
+        analysis = normalize_fallback_analysis(
+            fallback_analysis(
+                code,
+                tags,
+                question,
+            ),
+            question,
         )
 
     number = int(
@@ -1798,8 +2066,14 @@ def refresh_existing_submission(
             "runtime": details.get(
                 "runtime"
             ),
+            "runtimeDisplay": details.get(
+                "runtimeDisplay"
+            ),
             "memory": details.get(
                 "memory"
+            ),
+            "memoryDisplay": details.get(
+                "memoryDisplay"
             ),
         },
         analysis,
@@ -1838,8 +2112,14 @@ def refresh_existing_submission(
             "runtime": details.get(
                 "runtime"
             ),
+            "runtimeDisplay": details.get(
+                "runtimeDisplay"
+            ),
             "memory": details.get(
                 "memory"
+            ),
+            "memoryDisplay": details.get(
+                "memoryDisplay"
             ),
         }
     )
@@ -1884,6 +2164,116 @@ def read_metadata(
         return {}
 
 
+def repair_placeholder_readmes():
+    """Repair older generic READMEs once, without refreshing good entries."""
+    if not SOLUTIONS_DIR.exists():
+        return 0
+
+    repaired = 0
+
+    for folder in sorted(SOLUTIONS_DIR.iterdir()):
+        if not folder.is_dir():
+            continue
+
+        readme_path = folder / "README.md"
+        metadata_path = folder / "metadata.json"
+
+        if not readme_path.exists() or not metadata_path.exists():
+            continue
+
+        try:
+            readme_text = readme_path.read_text(encoding="utf-8")
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+
+        # Only repair the READMEs created by the old low-information fallback.
+        placeholder_markers = (
+            "Solve the problem using the submitted implementation.",
+            "Recognize the algorithmic pattern and maintain the state required by the implementation.",
+            "> **🔎 Algorithmic Approach**",
+        )
+
+        if not any(marker in readme_text for marker in placeholder_markers):
+            continue
+
+        submission_id = metadata.get("submission_id")
+        slug = metadata.get("slug")
+        if not submission_id or not slug:
+            continue
+
+        try:
+            print(
+                f"\n🛠️ Repairing placeholder README: {metadata.get('title', folder.name)}"
+            )
+
+            question = get_question(slug)
+            details = get_submission_details(str(submission_id))
+            code = details.get("code")
+
+            if not code:
+                continue
+
+            tags = [
+                tag.get("name", "")
+                for tag in question.get("topicTags", [])
+                if tag.get("name")
+            ]
+
+            analysis = normalize_fallback_analysis(
+                fallback_analysis(
+                    code,
+                    tags,
+                    question,
+                ),
+                question,
+            )
+
+            extension = file_extension(details.get("lang"))
+            code_filename = f"solution.{extension}"
+
+            readme = create_problem_readme(
+                question,
+                {
+                    "lang": details.get("lang"),
+                    "runtime": details.get("runtime"),
+                    "runtimeDisplay": details.get("runtimeDisplay"),
+                    "memory": details.get("memory"),
+                    "memoryDisplay": details.get("memoryDisplay"),
+                },
+                analysis,
+                code_filename,
+            )
+
+            readme_path.write_text(
+                readme,
+                encoding="utf-8",
+            )
+
+            metadata["runtime"] = details.get("runtime")
+            metadata["runtime_display"] = details.get("runtimeDisplay")
+            metadata["memory"] = details.get("memory")
+            metadata["memory_display"] = details.get("memoryDisplay")
+
+            metadata_path.write_text(
+                json.dumps(
+                    metadata,
+                    indent=2,
+                    ensure_ascii=False,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            repaired += 1
+            print(f"   ✅ Repaired: {folder}")
+
+        except Exception as exc:
+            print(f"   ⚠️ Could not repair {folder}: {exc}")
+
+    return repaired
+
+
 # ============================================================
 # Main
 # ============================================================
@@ -1897,6 +2287,12 @@ def main():
         parents=True,
         exist_ok=True,
     )
+
+    repaired = repair_placeholder_readmes()
+    if repaired:
+        print(
+            f"\n🛠️ Repaired {repaired} placeholder README(s)."
+        )
 
     state = load_state()
 
