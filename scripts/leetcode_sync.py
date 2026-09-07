@@ -282,8 +282,11 @@ def get_username():
 
 def get_recent_accepted(
     username,
-    limit=20,
+    limit=2000,
 ):
+    # recentAcSubmissionList does not expose an offset/cursor on
+    # LeetCode's current public GraphQL schema, so request a large
+    # history window in one call instead of limiting the sync to 20.
     data = graphql(
         RECENT_ACCEPTED_QUERY,
         {
@@ -1984,12 +1987,12 @@ def main():
 
     submissions = get_recent_accepted(
         username,
-        limit=20,
+        limit=2000,
     )
 
     print(
         f"📥 Found {len(submissions)} "
-        "recent accepted submissions."
+        "accepted submissions in the sync window."
     )
 
     imported = 0
