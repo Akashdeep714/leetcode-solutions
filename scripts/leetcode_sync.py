@@ -13,9 +13,6 @@ from bs4 import BeautifulSoup
 # ============================================================
 
 GRAPHQL_URL = "https://leetcode.com/graphql/"
-GITHUB_MODELS_URL = (
-    "https://models.github.ai/inference/chat/completions"
-)
 
 SOLUTIONS_DIR = Path("solutions")
 STATE_FILE = Path("sync_state.json")
@@ -30,8 +27,8 @@ LEETCODE_CSRF_TOKEN = os.getenv(
     "",
 ).strip()
 
-GITHUB_MODELS_TOKEN = os.getenv(
-    "GITHUB_MODELS_TOKEN",
+GEMINI_API_KEY = os.getenv(
+    "GEMINI_API_KEY",
     "",
 ).strip()
 
@@ -893,33 +890,54 @@ def ai_analysis(
     code,
     tags,
 ):
-    if not GITHUB_MODELS_TOKEN:
+    """
+    Generate a problem-specific explanation using Gemini.
+
+    The model receives both the original problem and the user's
+    accepted implementation so the explanation is tied to the
+    actual submitted code.
+    """
+
+    if not GEMINI_API_KEY:
+        print(
+            "⚠️ GEMINI_API_KEY is not configured. "
+            "Using deterministic fallback."
+        )
         return None
 
     problem_text = html_to_text(
         question.get("content", "")
     )
 
-    # Keep the prompt bounded.
+    # Keep the prompt reasonably sized.
     if len(problem_text) > 12000:
         problem_text = problem_text[:12000]
 
     prompt = f"""
 You are an expert algorithms educator.
 
-Analyze the following LeetCode problem and the user's accepted
-solution code.
+Analyze the following LeetCode problem and the user's ACCEPTED solution.
 
-Your job is to explain THIS implementation accurately.
+Your explanation must describe the submitted implementation accurately.
 
-PROBLEM:
+====================
+PROBLEM
+====================
 {problem_text}
 
-TOPICS:
+====================
+TOPICS
+====================
 {", ".join(tags)}
 
-SUBMITTED CODE:
+====================
+ACCEPTED CODE
+====================
 {code}
+
+====================
+TASK
+====================
 
 Return ONLY valid JSON with exactly these keys:
 
@@ -933,90 +951,99 @@ space_complexity
 key_takeaway
 
 Rules:
-- The explanation must describe the submitted code, not a different
-  or idealized solution.
-- Do not invent techniques that are not present in the code.
-- Problem summary must be a concise paraphrase, not a verbatim copy.
-- Intuition should explain the core insight in simple language.
-- approach must be an array of 4 to 8 concrete ordered steps.
-- why_it_works must explain the actual correctness idea.
-- Give Big-O complexity for THIS implementation.
-- For recursive algorithms, account for recursion depth.
-- For sorting, include the sorting cost when appropriate.
-- For hash maps/sets, use average-case complexity unless the problem
-  specifically requires otherwise.
-- Keep explanations understandable to a student.
-- Return JSON only.
+
+1. Explain the ACTUAL submitted code.
+2. Do not replace it with a different algorithm.
+3. Do not invent data structures or optimizations not present in the code.
+4. problem_summary must be a concise paraphrase of the problem.
+5. intuition must explain the core idea in beginner-friendly language.
+6. approach must contain 4 to 8 concrete ordered steps.
+7. why_it_works must explain the actual correctness reasoning.
+8. time_complexity must describe the actual submitted implementation.
+9. space_complexity must describe the actual submitted implementation.
+10. Include sorting cost when sorting is used.
+11. Include recursion depth / auxiliary memory where appropriate.
+12. For hash maps and hash sets, use average-case complexity.
+13. Keep the explanation concise but genuinely educational.
+14. Do not copy the problem statement word-for-word.
+15. Return JSON only. No Markdown fences.
 """
 
-    headers = {
-        "Authorization": (
-            f"Bearer {GITHUB_MODELS_TOKEN}"
-        ),
-        "Content-Type": "application/json",
-        "Accept": "application/vnd.github+json",
-    }
-
-    payload = {
-        "model": "openai/gpt-4.1",
-        "messages": [
-            {
-                "role": "system",
-                "content": (
-                    "You are a precise algorithms educator. "
-                    "Never invent details."
-                ),
-            },
-            {
-                "role": "user",
-                "content": prompt,
-            },
-        ],
-        "temperature": 0.1,
-        "max_tokens": 1800,
-    }
-
-    response = requests.post(
-        GITHUB_MODELS_URL,
-        headers=headers,
-        json=payload,
-        timeout=60,
-    )
-
-    if response.status_code != 200:
-        print(
-            f"⚠️ GitHub Models unavailable: "
-            f"HTTP {response.status_code}"
-        )
-        return None
-
-    body = response.json()
-
     try:
-        content = (
-            body["choices"][0]["message"]["content"]
+        response = requests.post(
+            "https://generativelanguage.googleapis.com/"
+            "v1beta/models/gemini-2.5-flash:generateContent",
+            headers={
+                "Content-Type": "application/json",
+                "x-goog-api-key": GEMINI_API_KEY,
+            },
+            json={
+                "contents": [
+                    {
+                        "parts": [
+                            {
+                                "text": prompt
+                            }
+                        ]
+                    }
+                ],
+                "generationConfig": {
+                    "temperature": 0.1,
+                    "responseMimeType": "application/json",
+                    "maxOutputTokens": 2000,
+                },
+            },
+            timeout=60,
         )
 
-        # Remove accidental Markdown fences.
-        content = content.strip()
+        if response.status_code != 200:
+            print(
+                "⚠️ Gemini request failed: "
+                f"HTTP {response.status_code}"
+            )
+            print(
+                response.text[:500]
+            )
+            return None
 
-        if content.startswith("```"):
-            content = re.sub(
-                r"^```(?:json)?\s*",
-                "",
-                content,
+        body = response.json()
+
+        candidates = body.get(
+            "candidates",
+            [],
+        )
+
+        if not candidates:
+            print(
+                "⚠️ Gemini returned no candidates."
             )
-            content = re.sub(
-                r"\s*```$",
-                "",
-                content,
+            return None
+
+        parts = (
+            candidates[0]
+            .get("content", {})
+            .get("parts", [])
+        )
+
+        if not parts:
+            print(
+                "⚠️ Gemini returned no content."
             )
+            return None
+
+        content = parts[0].get(
+            "text",
+            "",
+        ).strip()
+
+        if not content:
+            return None
 
         result = json.loads(
             content
         )
 
-        required = {
+        required_keys = {
             "pattern",
             "problem_summary",
             "intuition",
@@ -1027,23 +1054,42 @@ Rules:
             "key_takeaway",
         }
 
-        if not required.issubset(
+        if not required_keys.issubset(
             result.keys()
         ):
+            print(
+                "⚠️ Gemini response is missing "
+                "required fields."
+            )
             return None
 
         if not isinstance(
             result["approach"],
             list,
         ):
+            print(
+                "⚠️ Gemini returned an invalid "
+                "approach format."
+            )
             return None
 
         return result
 
+    except requests.RequestException as exc:
+        print(
+            f"⚠️ Gemini network error: {exc}"
+        )
+        return None
+
+    except json.JSONDecodeError as exc:
+        print(
+            f"⚠️ Gemini returned invalid JSON: {exc}"
+        )
+        return None
+
     except Exception as exc:
         print(
-            f"⚠️ Could not parse AI explanation: "
-            f"{exc}"
+            f"⚠️ Gemini analysis failed: {exc}"
         )
         return None
 
