@@ -10,36 +10,36 @@
 
 ## 📝 Problem
 
-Find the indices of two distinct elements in an array that add up to a specified target integer.
+Find the indices of two distinct numbers in an array that sum up to a specified target value.
 
 ---
 
 ## 💡 Intuition
 
-Check every possible pair of elements in the array one by one until you find the combination whose sum equals the target.
+To find two numbers that sum up to the target, we can exhaustively test every possible pair of elements in the array until we find the pair that matches.
 
 ---
 
 ## 🧠 Algorithmic Pattern
 
-> **Brute Force / Nested Loops**
+> **Brute Force**
 
 ---
 
 ## 🚀 Approach
 
-1. Initialize an integer array of size 2 to hold the pair of result indices.
-2. Start an outer loop with index `i` running from `0` to the end of the array.
-3. Start an inner loop with index `j` running from `i + 1` to the end of the array to avoid picking the same element twice.
-4. Check if the sum of `nums[i]` and `nums[j]` is equal to `target`.
-5. If a match is found, record `i` and `j` into the result array.
-6. Return the result array containing the two indices once the iterations complete.
+1. Initialize an integer array `arr` of size 2 to hold the result indices.
+2. Iterate through the array with an outer loop index `i` from 0 to `nums.length - 1`.
+3. For each `i`, iterate through subsequent elements with an inner loop index `j` from `i + 1` to `nums.length - 1` to avoid pairing an element with itself.
+4. Check if the sum `nums[i] + nums[j]` equals `target`.
+5. If a match is found, assign `i` to `arr[0]` and `j` to `arr[1]`.
+6. Return `arr` containing the matching pair of indices.
 
 ---
 
 ## ✅ Why This Works
 
-The algorithm systematically evaluates every unique pair of indices `(i, j)` where `i < j`. Because the problem guarantees exactly one valid pair exists, testing all unique pairs ensures that the correct indices will be evaluated, saved, and returned.
+The algorithm uses two nested loops to check all unique pairs of indices `(i, j)` where `i < j`. Since the problem guarantees exactly one valid pair exists, exhaustively checking every pair ensures that the target sum will be detected and its indices recorded.
 
 ---
 
@@ -47,8 +47,8 @@ The algorithm systematically evaluates every unique pair of indices `(i, j)` whe
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(n²), where n is the length of the `nums` array. The nested loops perform n * (n - 1) / 2 total additions and comparisons in the worst case.** |
-| Space | **O(1) auxiliary space, as only a fixed-size array of length 2 is allocated regardless of the input size.** |
+| Time | **O(n^2)** |
+| Space | **O(1)** |
 
 ### 📊 LeetCode Performance
 
@@ -67,7 +67,7 @@ The algorithm systematically evaluates every unique pair of indices `(i, j)` whe
 
 ## 🎯 Key Takeaway
 
-The brute force approach guarantees finding the solution by exhaustively testing all pairs in O(n²) time. It serves as a simple starting baseline before applying optimizations like hash maps to reduce time complexity to O(n).
+While a brute force approach with nested loops guarantees finding the solution by testing all O(n^2) pairs in O(1) extra space, this problem can be optimized to O(n) time using a hash map.
 
 ---
 

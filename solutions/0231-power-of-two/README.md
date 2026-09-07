@@ -10,13 +10,13 @@
 
 ## 📝 Problem
 
-Determine whether a given integer n can be expressed as a power of two (n = 2^x for an integer x).
+Determine whether a given integer is a power of two.
 
 ---
 
 ## 💡 Intuition
 
-A power of two consists purely of prime factor 2 (e.g., 1, 2, 4, 8, 16...). If we repeatedly divide a positive number by 2 as long as it remains even, a true power of two will eventually strip down to exactly 1. If any odd number greater than 1 remains, it is not a power of two.
+A positive integer is a power of two if its only prime factor is 2. If you repeatedly divide a power of two by 2, you will eventually reach 1. If any odd factor remains that is not 1, the original number was not a power of two.
 
 ---
 
@@ -30,16 +30,16 @@ A power of two consists purely of prime factor 2 (e.g., 1, 2, 4, 8, 16...). If w
 
 1. Check if n is less than 1; if so, return false immediately because powers of two must be positive.
 2. Check if n equals 1; if so, return true because 2^0 = 1.
-3. If n is greater than 1, enter a loop that runs as long as n is evenly divisible by 2 (n % 2 == 0).
-4. Inside the loop, divide n by 2 (n = n / 2) to strip away factors of 2.
-5. After the loop finishes, check if the remaining value of n is 1.
-6. Return true if n equals 1, and false otherwise.
+3. Enter a while loop that continues as long as n is evenly divisible by 2 (n % 2 == 0).
+4. In each iteration of the loop, divide n by 2.
+5. After the loop finishes, check if n has been reduced to 1.
+6. Return true if n is equal to 1, or false otherwise.
 
 ---
 
 ## ✅ Why This Works
 
-Repeatedly dividing n by 2 removes all factors of 2. If n was originally a power of two (2^x), dividing by 2 exactly x times reduces n to 1. If n contained any prime factor other than 2, removing all 2s will leave an odd number greater than 1, causing n == 1 to evaluate to false.
+Any power of two can be represented as 2^x. Dividing 2^x by 2 repeatedly x times reduces the number to 1. If a number contains any odd prime factors or is less than 1, repeated division by 2 will terminate at an odd integer greater than 1, or fail the initial condition.
 
 ---
 
@@ -47,8 +47,8 @@ Repeatedly dividing n by 2 removes all factors of 2. If n was originally a power
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(log n) because the number n is divided by 2 in each iteration, performing at most log2(n) steps.** |
-| Space | **O(1) as the algorithm uses only a few integer checks and modifies the input variable in place without allocating extra memory.** |
+| Time | **O(log n)** |
+| Space | **O(1)** |
 
 ### 📊 LeetCode Performance
 
@@ -67,7 +67,7 @@ Repeatedly dividing n by 2 removes all factors of 2. If n was originally a power
 
 ## 🎯 Key Takeaway
 
-Repeated division by a base is a fundamental way to check if a number is a power of that base, by continuously stripping away factors until reaching 1 or encountering an indivisible remainder.
+Repeated division allows checking factor properties iteratively, though bitwise operations can solve power-of-two checks in O(1) time without loops.
 
 ---
 
