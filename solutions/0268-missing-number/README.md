@@ -10,36 +10,34 @@
 
 ## 📝 Problem
 
-Find the single missing number from an array containing n distinct numbers in the range [0, n].
+Solve the problem using the submitted implementation.
 
 ---
 
 ## 💡 Intuition
 
-The bitwise XOR operation has two crucial properties: any number XORed with itself equals 0 (a ^ a = 0), and any number XORed with 0 remains unchanged (a ^ 0 = a). If we XOR every number from the full range [0, n] together with every number actually present in the array, all present numbers will appear twice and cancel each other out, leaving only the missing number.
+The search space is ordered, so each comparison can eliminate roughly half of the remaining candidates.
 
 ---
 
 ## 🧠 Algorithmic Pattern
 
-> **Bit Manipulation**
+> **🔍 Binary Search**
 
 ---
 
 ## 🚀 Approach
 
-1. Initialize a variable `xor` to `nums.length`, which represents the upper bound `n` of the range [0, n].
-2. Loop through the array using index `i` from `0` to `nums.length - 1`.
-3. In each iteration, update `xor` by XORing it with the current index `i`.
-4. Further update `xor` by XORing it with the array value `nums[i]`.
-5. Continue the loop until all indices and array values have been processed.
-6. Return `xor`, which holds the value of the missing number.
+1. Define the current search boundaries.
+2. Inspect the middle position.
+3. Determine which half can still contain the answer.
+4. Discard the other half and continue.
 
 ---
 
 ## ✅ Why This Works
 
-XOR is commutative and associative, meaning order does not matter. By starting with `n` and XORing every index `i` from `0` to `n-1` alongside every element `nums[i]`, we effectively perform XOR across the set of all range numbers [0, n] and all elements in `nums`. Since every present number appears exactly twice (once as an index/upper bound and once inside `nums`), they cancel out to 0. The missing number appears only once, so the final result is the missing number.
+Every iteration removes about half of the remaining search space.
 
 ---
 
@@ -47,7 +45,7 @@ XOR is commutative and associative, meaning order does not matter. By starting w
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(n)** |
+| Time | **O(log n)** |
 | Space | **O(1)** |
 
 ### 📊 LeetCode Performance
@@ -55,7 +53,7 @@ XOR is commutative and associative, meaning order does not matter. By starting w
 | Metric | Result |
 |---|---|
 | Runtime | `N/A` |
-| Memory | `47100000` |
+| Memory | `47100000 MB` |
 
 ---
 
@@ -67,7 +65,7 @@ XOR is commutative and associative, meaning order does not matter. By starting w
 
 ## 🎯 Key Takeaway
 
-Using XOR is a clever way to find missing or unique elements in O(1) space because identical numbers cancel out (a ^ a = 0) without risk of integer overflow.
+Recognize the algorithmic pattern and maintain the state required by the implementation.
 
 ---
 

@@ -10,13 +10,13 @@
 
 ## 📝 Problem
 
-Find the indices of two distinct numbers in an array that sum up to a specified target value.
+Find the indices of two numbers in an array that add up to a specified target value.
 
 ---
 
 ## 💡 Intuition
 
-To find two numbers that sum up to the target, we can exhaustively test every possible pair of elements in the array until we find the pair that matches.
+This is a brute-force approach that tests every possible pair of numbers in the array. By systematically checking all pairs, it guarantees finding the two numbers that sum up to the target.
 
 ---
 
@@ -28,18 +28,18 @@ To find two numbers that sum up to the target, we can exhaustively test every po
 
 ## 🚀 Approach
 
-1. Initialize an integer array `arr` of size 2 to hold the result indices.
+1. Initialize an integer array `arr` of size 2 to store the target indices.
 2. Iterate through the array with an outer loop index `i` from 0 to `nums.length - 1`.
-3. For each `i`, iterate through subsequent elements with an inner loop index `j` from `i + 1` to `nums.length - 1` to avoid pairing an element with itself.
-4. Check if the sum `nums[i] + nums[j]` equals `target`.
-5. If a match is found, assign `i` to `arr[0]` and `j` to `arr[1]`.
-6. Return `arr` containing the matching pair of indices.
+3. Iterate through the remaining elements with an inner loop index `j` starting from `i + 1` to `nums.length - 1`.
+4. Check if `nums[i] + nums[j]` equals `target` for the current pair.
+5. If the sum matches the target, assign `i` to `arr[0]` and `j` to `arr[1]`.
+6. After completing the iterations, return the array `arr` containing the found indices.
 
 ---
 
 ## ✅ Why This Works
 
-The algorithm uses two nested loops to check all unique pairs of indices `(i, j)` where `i < j`. Since the problem guarantees exactly one valid pair exists, exhaustively checking every pair ensures that the target sum will be detected and its indices recorded.
+The nested loops check every unique pair of elements `(nums[i], nums[j])` where `i < j`. Since the problem guarantees exactly one valid solution exists, checking all combinations ensures that the matching pair will be found and its indices recorded.
 
 ---
 
@@ -54,8 +54,8 @@ The algorithm uses two nested loops to check all unique pairs of indices `(i, j)
 
 | Metric | Result |
 |---|---|
-| Runtime | `52` |
-| Memory | `47024000` |
+| Runtime | `52 ms` |
+| Memory | `47024000 MB` |
 
 ---
 
@@ -67,7 +67,7 @@ The algorithm uses two nested loops to check all unique pairs of indices `(i, j)
 
 ## 🎯 Key Takeaway
 
-While a brute force approach with nested loops guarantees finding the solution by testing all O(n^2) pairs in O(1) extra space, this problem can be optimized to O(n) time using a hash map.
+While a brute-force double loop solves the problem in O(1) auxiliary space, checking all pairs results in O(n^2) time complexity. Using a hash map can optimize this to O(n) time by storing seen values during a single pass.
 
 ---
 

@@ -10,37 +10,36 @@
 
 ## 📝 Problem
 
-Determine whether a given integer is a palindrome, meaning it reads the same forward and backward.
+Determine whether a given integer reads the same forwards and backwards.
 
 ---
 
 ## 💡 Intuition
 
-A number is a palindrome if reversing its digits yields the exact same number. Negative numbers can never be palindromes due to the leading minus sign. By extracting digits from right to left using modulo and building a new reversed number using multiplication and addition, we can directly compare the reversed value to the original number.
+Negative numbers cannot be palindromes because of the minus sign. For positive numbers, we can construct the reversed version of the number mathematically digit-by-digit and check if it equals the original number.
 
 ---
 
 ## 🧠 Algorithmic Pattern
 
-> **Math / Digit Manipulation**
+> **Math / Digit Extraction**
 
 ---
 
 ## 🚀 Approach
 
-1. Check if the input integer `x` is negative; if so, immediately return `false`.
-2. Store a copy of `x` in a variable `n` and initialize `revNum` to `0` to hold the reversed number.
-3. Loop while `n > 0` to process each digit from right to left.
-4. Extract the last digit of `n` using `d = n % 10`.
-5. Shift `revNum` one decimal place to the left and add `d` (`revNum = revNum * 10 + d`).
-6. Remove the last digit from `n` using integer division (`n = n / 10`).
-7. Compare `revNum` with the original `x` and return `true` if they match, otherwise return `false`.
+1. Check if the input integer x is negative; if so, immediately return false.
+2. Create a variable n initialized to x to manipulate during digit extraction, keeping x unchanged for the final comparison.
+3. Initialize revNum to 0 to store the reversed integer.
+4. Run a while loop that continues as long as n is greater than 0.
+5. In each iteration, extract the last digit of n using n % 10, shift revNum left by multiplying it by 10, add the extracted digit, and drop the last digit from n using integer division (n / 10).
+6. Compare the reversed number revNum with the original number x and return true if they are equal, or false otherwise.
 
 ---
 
 ## ✅ Why This Works
 
-Repeatedly applying `% 10` isolates the rightmost digit of `n`, and appending it to `revNum` via `revNum * 10 + d` constructs the reverse of `x` from left to right. Once all digits are processed, `revNum` represents the exact numerical reverse of `x`. If `revNum == x`, the number is symmetrical and therefore a palindrome.
+Extracting the least significant digit with modulo 10 and pushing it onto the accumulated reversed total constructs the number backwards. If the original number is a palindrome, its reverse will be identical to its original value.
 
 ---
 
@@ -55,8 +54,8 @@ Repeatedly applying `% 10` isolates the rightmost digit of `n`, and appending it
 
 | Metric | Result |
 |---|---|
-| Runtime | `4` |
-| Memory | `46080000` |
+| Runtime | `4 ms` |
+| Memory | `46080000 MB` |
 
 ---
 
@@ -68,7 +67,7 @@ Repeatedly applying `% 10` isolates the rightmost digit of `n`, and appending it
 
 ## 🎯 Key Takeaway
 
-Using modulo (`% 10`) and division (`/ 10`) allows you to manipulate and reverse integer digits directly without relying on string conversion or extra memory allocations.
+Integers can be reversed mathematically using modulo (% 10) for digit extraction and multiplication (* 10) for place-value shifting, avoiding the need for string conversion.
 
 ---
 
