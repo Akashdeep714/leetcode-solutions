@@ -881,6 +881,44 @@ def fallback_analysis(
     }
 
 
+def normalize_fallback_analysis(
+    fallback,
+    question,
+    code,
+    tags,
+):
+    """Convert deterministic fallback fields to the README schema."""
+    fallback = fallback or {}
+
+    approach = fallback.get("approach") or []
+    if not isinstance(approach, list):
+        approach = [str(approach)]
+
+    return {
+        "pattern": fallback.get("pattern", "🔎 Algorithmic Approach"),
+        "problem_summary": "Solve the problem using the submitted implementation.",
+        "intuition": fallback.get(
+            "intuition",
+            "The implementation processes the input while maintaining the state needed to construct the answer.",
+        ),
+        "approach": approach,
+        "why_it_works": fallback.get(
+            "why_it_works",
+            fallback.get(
+                "why",
+                "The implementation maintains the information required to produce the result.",
+            ),
+        ),
+        "time_complexity": str(
+            fallback.get("time_complexity") or fallback.get("time") or "O(n)"
+        ),
+        "space_complexity": str(
+            fallback.get("space_complexity") or fallback.get("space") or "O(1)"
+        ),
+        "key_takeaway": "Recognize the algorithmic pattern and maintain the state required by the implementation.",
+    }
+
+
 # ============================================================
 # AI explanation
 # ============================================================
@@ -1566,13 +1604,28 @@ def import_submission(
         tags,
     )
 
-    if analysis:
+    required_fields = {
+        "pattern",
+        "problem_summary",
+        "intuition",
+        "approach",
+        "why_it_works",
+        "time_complexity",
+        "space_complexity",
+        "key_takeaway",
+    }
+
+    if analysis and required_fields.issubset(analysis.keys()):
         explanation_source = (
             "AI-assisted analysis"
         )
-
     else:
-        analysis = fallback_analysis(
+        analysis = normalize_fallback_analysis(
+            fallback_analysis(
+                code,
+                tags,
+            ),
+            question,
             code,
             tags,
         )
@@ -1748,8 +1801,24 @@ def refresh_existing_submission(
         tags,
     )
 
-    if not analysis:
-        analysis = fallback_analysis(
+    required_fields = {
+        "pattern",
+        "problem_summary",
+        "intuition",
+        "approach",
+        "why_it_works",
+        "time_complexity",
+        "space_complexity",
+        "key_takeaway",
+    }
+
+    if not analysis or not required_fields.issubset(analysis.keys()):
+        analysis = normalize_fallback_analysis(
+            fallback_analysis(
+                code,
+                tags,
+            ),
+            question,
             code,
             tags,
         )
