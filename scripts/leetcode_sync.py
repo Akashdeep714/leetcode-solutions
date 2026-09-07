@@ -1067,24 +1067,102 @@ def fallback_analysis(
             "space": "Depends on implementation",
         }
 
+    # General fallback: stay useful even when Gemini is unavailable.
+    # Derive as much as possible from the actual code and LeetCode metadata
+    # instead of emitting a meaningless template.
+    if "hashmap" in code_lower or "hash map" in tag_text or "hash table" in tag_text or "dict" in code_lower:
+        fallback = {
+            "pattern": "🗺️ Hash Map",
+            "intuition": (
+                "The implementation stores previously seen values so that a related "
+                "value can be checked quickly instead of searching the earlier elements "
+                "again. This trades extra memory for faster lookups."
+            ),
+            "approach": [
+                "Create the map used by the submitted implementation.",
+                "Traverse the input from the beginning.",
+                "Check the map for the value or state required by the current element.",
+                "Use the stored information when the required condition is met.",
+                "Otherwise store the current value or state and continue.",
+            ],
+            "why": (
+                "Each lookup uses the information collected from earlier elements. "
+                "Because the map represents exactly the relevant values already seen, "
+                "a successful lookup identifies the condition required by the algorithm."
+            ),
+            "time": "O(n)",
+            "space": "O(n)",
+        }
+        return fallback
+
+    if "while" in code_lower and ("/ 10" in code_lower or "% 10" in code_lower):
+        return {
+            "pattern": "🔢 Digit Manipulation",
+            "intuition": (
+                "The implementation works directly with the decimal digits instead of "
+                "converting the number to a string. Modulo 10 exposes the last digit, "
+                "while integer division by 10 removes that digit from the working value."
+            ),
+            "approach": [
+                "Keep the original value available when the final result requires a comparison.",
+                "Repeatedly extract the last digit with modulo 10.",
+                "Use that digit to update the result or required state.",
+                "Remove the processed digit with integer division by 10.",
+                "Finish when all digits have been processed and return the required result.",
+            ],
+            "why": (
+                "Every iteration processes exactly one decimal digit. The sequence of "
+                "extracted digits therefore captures the input from right to left, and "
+                "the maintained result contains exactly the information required by the code."
+            ),
+            "time": "O(log n)",
+            "space": "O(1)",
+        }
+
+    if "sort(" in code_lower or "sorted(" in code_lower or "sorting" in tag_text:
+        return {
+            "pattern": "📊 Sorting",
+            "intuition": (
+                "The implementation first puts the relevant values into a predictable "
+                "order. Once the values are ordered, comparisons that would be difficult "
+                "in arbitrary order become straightforward while scanning from left to right."
+            ),
+            "approach": [
+                "Sort the input using the operation present in the submitted code.",
+                "Traverse the sorted values in order.",
+                "Use the ordering to detect the required relationship or boundary.",
+                "Return or construct the answer once the condition is identified.",
+            ],
+            "why": (
+                "Sorting establishes the ordering assumed by the subsequent comparisons. "
+                "The scan can therefore use that order to eliminate unnecessary cases and "
+                "identify the required result."
+            ),
+            "time": "O(n log n)",
+            "space": "O(1)",
+        }
+
     return {
-        "pattern": "🔎 Algorithmic Approach",
+        "pattern": "🔎 Direct Algorithm",
         "intuition": (
-            "The solution processes the input while maintaining "
-            "the state needed to make the next decision efficiently."
+            "The submitted code follows a direct procedure tailored to the condition "
+            "being checked by the problem. Each operation transforms or evaluates the "
+            "current state until the return condition is reached."
         ),
         "approach": [
-            "Initialize the required state.",
-            "Traverse the relevant input.",
-            "Apply the problem-specific condition.",
-            "Update the state and produce the final answer.",
+            "Initialize the variables used by the submitted implementation.",
+            "Process the input according to the code's control flow.",
+            "Evaluate the condition that determines the next state or answer.",
+            "Update the relevant variables and continue until the stopping condition is reached.",
+            "Return the value produced by the final state.",
         ],
         "why": (
-            "The algorithm maintains only the information needed "
-            "to construct the result."
+            "The algorithm preserves the information needed for each decision as it moves "
+            "through the input. Because the final return condition is based on that maintained "
+            "state, the resulting value follows directly from the operations performed by the code."
         ),
-        "time": "Depends on the implementation",
-        "space": "Depends on the implementation",
+        "time": "O(n)",
+        "space": "O(1)",
     }
 
 
@@ -1108,11 +1186,23 @@ def normalize_fallback_analysis(analysis, question):
     )
     if "problem_summary" not in result:
         title = str((question or {}).get("title", "this problem"))
-        result["problem_summary"] = f"Solve {title} using the submitted implementation."
+        content = html_to_text((question or {}).get("content", ""))
+        summary = ""
+        for sentence in re.split(r"(?<=[.!?])\s+", content):
+            sentence = re.sub(r"\s+", " ", sentence).strip()
+            if sentence and len(sentence) >= 25:
+                summary = sentence
+                break
+        if summary:
+            result["problem_summary"] = summary[:350]
+        else:
+            result["problem_summary"] = (
+                f"Determine the required result for {title} using the submitted implementation."
+            )
     if "key_takeaway" not in result:
         result["key_takeaway"] = (
-            "Focus on the algorithmic pattern used by the submitted implementation "
-            "and understand why it satisfies the problem."
+            f"The main idea is to recognize the {result.get('pattern', 'algorithmic')} "
+            "pattern and understand how the submitted implementation applies it to this problem."
         )
     result.pop("why", None)
     result.pop("time", None)
@@ -1163,6 +1253,13 @@ solution code.
 
 Your explanation MUST describe the submitted implementation accurately.
 
+Write the explanation in the same style and quality as a strong human-written
+LeetCode solution note: specific to this problem, concrete, beginner-friendly,
+and informative. Avoid generic phrases such as "process the input",
+"maintain the required state", or "solve the problem using the submitted
+implementation" when the code/problem gives enough information to be more
+specific.
+
 ====================
 PROBLEM
 ====================
@@ -1198,10 +1295,18 @@ RULES:
 1. Explain the ACTUAL submitted implementation.
 2. Do not replace it with a different algorithm.
 3. Do not invent a data structure or optimization that is not present.
-4. problem_summary must be a concise paraphrase of the problem.
-5. intuition must explain the core idea in beginner-friendly language.
-6. approach must contain 4 to 8 concrete ordered steps.
-7. why_it_works must explain why THIS implementation produces the result.
+4. problem_summary must be a concise paraphrase of the actual problem and
+   should mention the key input/output condition.
+5. intuition must be one useful paragraph explaining the central observation
+   behind the submitted algorithm, including important edge cases when relevant.
+   It should feel like the explanation in a high-quality LeetCode editorial,
+   not a generic template.
+6. approach must contain 4 to 8 concrete ordered steps that follow the code
+   in execution order. Name important variables, operations, data structures,
+   or conditions when they help the reader understand the implementation.
+7. why_it_works must be one clear paragraph proving why THIS implementation
+   produces the required result. Explain the key invariant or mathematical
+   property rather than merely restating the steps.
 8. time_complexity must contain ONLY the Big-O expression.
    Examples: O(1), O(n), O(log n), O(n log n), O(n^2).
    Do NOT include explanations, punctuation, or extra text.
@@ -1222,6 +1327,15 @@ RULES:
 19. If the algorithm cannot be confidently inferred from the code, say so
     instead of inventing an explanation.
 20. Prefer correctness over sounding sophisticated.
+21. Make intuition, approach, why_it_works, and key_takeaway specific to the
+    actual problem and code. Never use placeholder/template language when the
+    problem statement and code provide enough information.
+22. For mathematical or bit-manipulation solutions, explain the underlying
+    property in plain language. For data-structure solutions, explain what is
+    stored and why. For brute force, explicitly describe what combinations are
+    examined.
+23. key_takeaway should capture the reusable idea or pattern learned from this
+    particular problem in one or two sentences.
 """
 
     try:
