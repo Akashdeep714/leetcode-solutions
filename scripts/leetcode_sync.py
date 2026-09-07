@@ -964,8 +964,14 @@ RULES:
 5. intuition must explain the core idea in beginner-friendly language.
 6. approach must contain 4 to 8 concrete ordered steps.
 7. why_it_works must explain why THIS implementation produces the result.
-8. time_complexity must describe THIS implementation.
-9. space_complexity must describe THIS implementation.
+8. time_complexity must contain ONLY the Big-O expression.
+   Examples: O(1), O(n), O(log n), O(n log n), O(n^2).
+   Do NOT include explanations, punctuation, or extra text.
+
+9. space_complexity must contain ONLY the Big-O expression.
+   Examples: O(1), O(n), O(log n).
+   Do NOT include explanations, punctuation, or extra text.
+   
 10. Account for sorting cost when sorting is used.
 11. Account for recursion depth when recursion is used.
 12. For hash maps/sets, use average-case complexity.
@@ -973,6 +979,13 @@ RULES:
 14. Keep the writing concise, clear and educational.
 15. Do not copy the complete problem statement.
 16. Return JSON only.
+17. If the submitted code is brute force, explicitly say that it is brute force.
+18. If a more optimal solution exists, do not replace the submitted approach
+    with it. You may mention the limitation briefly, but document the
+    submitted implementation exactly.
+19. If the algorithm cannot be confidently inferred from the code, say so
+    instead of inventing an explanation.
+20. Prefer correctness over sounding sophisticated.
 """
 
     try:
@@ -1054,6 +1067,26 @@ RULES:
         result = json.loads(
             output_text
         )
+
+            complexity_pattern = re.compile(
+        r"^O\(.+\)$"
+    )
+
+    if not complexity_pattern.match(
+        str(result.get("time_complexity", ""))
+    ):
+        print(
+            "⚠️ Invalid time complexity returned by Gemini."
+        )
+        return None
+
+    if not complexity_pattern.match(
+        str(result.get("space_complexity", ""))
+    ):
+        print(
+            "⚠️ Invalid space complexity returned by Gemini."
+        )
+        return None
 
         required_keys = {
             "pattern",
