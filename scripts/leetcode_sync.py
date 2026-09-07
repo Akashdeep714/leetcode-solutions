@@ -891,16 +891,15 @@ def ai_analysis(
     tags,
 ):
     """
-    Generate a problem-specific explanation using Gemini's
-    current Interactions API.
+    Generate a problem-specific explanation using Gemini.
 
     The model receives:
         - the LeetCode problem
         - the LeetCode topics
         - the user's actual accepted solution
 
-    The explanation is therefore based on the implementation
-    that was actually submitted.
+    The explanation is based on the implementation that was
+    actually submitted.
     """
 
     if not GEMINI_API_KEY:
@@ -967,14 +966,12 @@ RULES:
 8. time_complexity must contain ONLY the Big-O expression.
    Examples: O(1), O(n), O(log n), O(n log n), O(n^2).
    Do NOT include explanations, punctuation, or extra text.
-
 9. space_complexity must contain ONLY the Big-O expression.
    Examples: O(1), O(n), O(log n).
    Do NOT include explanations, punctuation, or extra text.
-   
 10. Account for sorting cost when sorting is used.
 11. Account for recursion depth when recursion is used.
-12. For hash maps/sets, use average-case complexity.
+12. For hash maps and hash sets, use average-case complexity.
 13. Explain numeric techniques such as digit extraction when they are used.
 14. Keep the writing concise, clear and educational.
 15. Do not copy the complete problem statement.
@@ -1019,20 +1016,24 @@ RULES:
         )
 
         if not output_text:
-            # Compatibility fallback for the current
-            # interaction response structure.
             for step in body.get(
                 "steps",
                 [],
             ):
-                if step.get("type") == "model_output":
+                if step.get(
+                    "type"
+                ) == "model_output":
+
                     content = step.get(
                         "content",
                         [],
                     )
 
                     for item in content:
-                        if item.get("type") == "text":
+                        if item.get(
+                            "type"
+                        ) == "text":
+
                             output_text = item.get(
                                 "text",
                                 "",
@@ -1050,7 +1051,6 @@ RULES:
 
         output_text = output_text.strip()
 
-        # Remove accidental Markdown fences.
         if output_text.startswith("```"):
             output_text = re.sub(
                 r"^```(?:json)?\s*",
@@ -1067,26 +1067,6 @@ RULES:
         result = json.loads(
             output_text
         )
-
-            complexity_pattern = re.compile(
-        r"^O\(.+\)$"
-    )
-
-    if not complexity_pattern.match(
-        str(result.get("time_complexity", ""))
-    ):
-        print(
-            "⚠️ Invalid time complexity returned by Gemini."
-        )
-        return None
-
-    if not complexity_pattern.match(
-        str(result.get("space_complexity", ""))
-    ):
-        print(
-            "⚠️ Invalid space complexity returned by Gemini."
-        )
-        return None
 
         required_keys = {
             "pattern",
@@ -1118,6 +1098,50 @@ RULES:
             )
             return None
 
+        complexity_pattern = re.compile(
+            r"^O\(.+\)$"
+        )
+
+        time_complexity = str(
+            result.get(
+                "time_complexity",
+                "",
+            )
+        ).strip()
+
+        space_complexity = str(
+            result.get(
+                "space_complexity",
+                "",
+            )
+        ).strip()
+
+        if not complexity_pattern.match(
+            time_complexity
+        ):
+            print(
+                "⚠️ Invalid time complexity "
+                "returned by Gemini."
+            )
+            return None
+
+        if not complexity_pattern.match(
+            space_complexity
+        ):
+            print(
+                "⚠️ Invalid space complexity "
+                "returned by Gemini."
+            )
+            return None
+
+        result["time_complexity"] = (
+            time_complexity
+        )
+
+        result["space_complexity"] = (
+            space_complexity
+        )
+
         return result
 
     except requests.RequestException as exc:
@@ -1137,7 +1161,6 @@ RULES:
             f"⚠️ Gemini analysis failed: {exc}"
         )
         return None
-
 
 # ============================================================
 # README generation
