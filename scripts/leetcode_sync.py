@@ -891,11 +891,16 @@ def ai_analysis(
     tags,
 ):
     """
-    Generate a problem-specific explanation using Gemini.
+    Generate a problem-specific explanation using Gemini's
+    current Interactions API.
 
-    The model receives both the original problem and the user's
-    accepted implementation so the explanation is tied to the
-    actual submitted code.
+    The model receives:
+        - the LeetCode problem
+        - the LeetCode topics
+        - the user's actual accepted solution
+
+    The explanation is therefore based on the implementation
+    that was actually submitted.
     """
 
     if not GEMINI_API_KEY:
@@ -909,16 +914,16 @@ def ai_analysis(
         question.get("content", "")
     )
 
-    # Keep the prompt reasonably sized.
-    if len(problem_text) > 12000:
-        problem_text = problem_text[:12000]
+    if len(problem_text) > 14000:
+        problem_text = problem_text[:14000]
 
     prompt = f"""
 You are an expert algorithms educator.
 
-Analyze the following LeetCode problem and the user's ACCEPTED solution.
+Analyze the following LeetCode problem and the user's accepted
+solution code.
 
-Your explanation must describe the submitted implementation accurately.
+Your explanation MUST describe the submitted implementation accurately.
 
 ====================
 PROBLEM
@@ -939,7 +944,7 @@ ACCEPTED CODE
 TASK
 ====================
 
-Return ONLY valid JSON with exactly these keys:
+Return ONLY valid JSON with these exact keys:
 
 pattern
 problem_summary
@@ -950,50 +955,38 @@ time_complexity
 space_complexity
 key_takeaway
 
-Rules:
+RULES:
 
-1. Explain the ACTUAL submitted code.
+1. Explain the ACTUAL submitted implementation.
 2. Do not replace it with a different algorithm.
-3. Do not invent data structures or optimizations not present in the code.
+3. Do not invent a data structure or optimization that is not present.
 4. problem_summary must be a concise paraphrase of the problem.
 5. intuition must explain the core idea in beginner-friendly language.
 6. approach must contain 4 to 8 concrete ordered steps.
-7. why_it_works must explain the actual correctness reasoning.
-8. time_complexity must describe the actual submitted implementation.
-9. space_complexity must describe the actual submitted implementation.
-10. Include sorting cost when sorting is used.
-11. Include recursion depth / auxiliary memory where appropriate.
-12. For hash maps and hash sets, use average-case complexity.
-13. Keep the explanation concise but genuinely educational.
-14. Do not copy the problem statement word-for-word.
-15. Return JSON only. No Markdown fences.
+7. why_it_works must explain why THIS implementation produces the result.
+8. time_complexity must describe THIS implementation.
+9. space_complexity must describe THIS implementation.
+10. Account for sorting cost when sorting is used.
+11. Account for recursion depth when recursion is used.
+12. For hash maps/sets, use average-case complexity.
+13. Explain numeric techniques such as digit extraction when they are used.
+14. Keep the writing concise, clear and educational.
+15. Do not copy the complete problem statement.
+16. Return JSON only.
 """
 
     try:
         response = requests.post(
-            "https://generativelanguage.googleapis.com/"
-            "v1beta/models/gemini-2.5-flash:generateContent",
+            "https://generativelanguage.googleapis.com/v1beta/interactions",
             headers={
                 "Content-Type": "application/json",
                 "x-goog-api-key": GEMINI_API_KEY,
             },
             json={
-                "contents": [
-                    {
-                        "parts": [
-                            {
-                                "text": prompt
-                            }
-                        ]
-                    }
-                ],
-                "generationConfig": {
-                    "temperature": 0.1,
-                    "responseMimeType": "application/json",
-                    "maxOutputTokens": 2000,
-                },
+                "model": "gemini-3.6-flash",
+                "input": prompt,
             },
-            timeout=60,
+            timeout=90,
         )
 
         if response.status_code != 200:
@@ -1002,45 +995,64 @@ Rules:
                 f"HTTP {response.status_code}"
             )
             print(
-                response.text[:500]
+                response.text[:1000]
             )
             return None
 
         body = response.json()
 
-        candidates = body.get(
-            "candidates",
-            [],
+        output_text = body.get(
+            "output_text"
         )
 
-        if not candidates:
+        if not output_text:
+            # Compatibility fallback for the current
+            # interaction response structure.
+            for step in body.get(
+                "steps",
+                [],
+            ):
+                if step.get("type") == "model_output":
+                    content = step.get(
+                        "content",
+                        [],
+                    )
+
+                    for item in content:
+                        if item.get("type") == "text":
+                            output_text = item.get(
+                                "text",
+                                "",
+                            )
+                            break
+
+                if output_text:
+                    break
+
+        if not output_text:
             print(
-                "⚠️ Gemini returned no candidates."
+                "⚠️ Gemini returned no text output."
             )
             return None
 
-        parts = (
-            candidates[0]
-            .get("content", {})
-            .get("parts", [])
-        )
+        output_text = output_text.strip()
 
-        if not parts:
-            print(
-                "⚠️ Gemini returned no content."
+        # Remove accidental Markdown fences.
+        if output_text.startswith("```"):
+            output_text = re.sub(
+                r"^```(?:json)?\s*",
+                "",
+                output_text,
             )
-            return None
 
-        content = parts[0].get(
-            "text",
-            "",
-        ).strip()
-
-        if not content:
-            return None
+            output_text = re.sub(
+                r"\s*```$",
+                "",
+                output_text,
+            )
 
         result = json.loads(
-            content
+            output_text
         )
 
         required_keys = {
