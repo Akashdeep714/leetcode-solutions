@@ -10,35 +10,37 @@
 
 ## 📝 Problem
 
-Determine whether an integer reads the same forward and backward.
+Determine whether an integer is a palindrome (reads the same forward and backward) without converting it to a string.
 
 ---
 
 ## 💡 Intuition
 
-The solution works directly with the digits. It repeatedly takes the last digit and uses it to build the number in reverse, then compares the result with the original value.
+A number is a palindrome if reversing its digits yields the exact original value. Negative numbers are never palindromes because of the minus sign. By repeatedly stripping off the last digit of the number using modulo operations and appending it to a new number, we can reverse the integer mathematically and compare it to the original.
 
 ---
 
 ## 🧠 Algorithmic Pattern
 
-> **🔢 Digit Manipulation**
+> **Math / Digit Manipulation**
 
 ---
 
 ## 🚀 Approach
 
-1. Keep the original value available for the final comparison.
-2. Extract the last digit using modulo 10.
-3. Append that digit to the reversed number.
-4. Remove the processed digit using integer division by 10.
-5. Compare the reversed number with the original value.
+1. Check if `x` is negative; if so, immediately return `false` because negative signs prevent palindrome symmetry.
+2. Initialize a temporary variable `n` equal to `x` to keep the original value of `x` intact, and set `revNum` to `0`.
+3. Loop while `n` is greater than `0`.
+4. Extract the last digit of `n` using `d = n % 10`.
+5. Append `d` to `revNum` by multiplying `revNum` by `10` and adding `d`.
+6. Remove the last digit from `n` using integer division `n = n / 10`.
+7. After the loop, compare `revNum` to `x` and return `true` if they are equal, or `false` otherwise.
 
 ---
 
 ## ✅ Why This Works
 
-Reversing all digits produces exactly the number obtained by reading the input from right to left. The two values are equal exactly when the input is a palindrome.
+The operation `n % 10` isolates the rightmost digit of `n`, and `revNum * 10 + d` appends this digit to `revNum`, effectively processing the digits of `x` from right to left. Integer division `n / 10` shifts `n` right by one decimal place. Once all digits are processed, `revNum` contains the exact reverse of `x`, making `revNum == x` a direct and accurate symmetry test.
 
 ---
 
@@ -46,7 +48,7 @@ Reversing all digits produces exactly the number obtained by reading the input f
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(log n)** |
+| Time | **O(log₁₀(x))** |
 | Space | **O(1)** |
 
 ### 📊 LeetCode Performance
@@ -54,7 +56,7 @@ Reversing all digits produces exactly the number obtained by reading the input f
 | Metric | Result |
 |---|---|
 | Runtime | `4 ms` |
-| Memory | `46.1 MB` |
+| Memory | `46.08 MB` |
 
 ---
 
@@ -66,7 +68,7 @@ Reversing all digits produces exactly the number obtained by reading the input f
 
 ## 🎯 Key Takeaway
 
-Modulo and integer division are enough to inspect and reverse digits without converting the number to a string.
+Digits of a base-10 integer can be processed from right to left using modulo (`% 10`) to extract the last digit and integer division (`/ 10`) to drop it, avoiding string conversion.
 
 ---
 
@@ -77,4 +79,4 @@ Modulo and integer division are enough to inspect and reverse digits without con
 
 ---
 
-⭐ Automatically synchronized from an accepted LeetCode submission.
+⭐ Automatically synchronized from an accepted LeetCode submission
