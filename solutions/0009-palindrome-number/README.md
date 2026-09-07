@@ -49,9 +49,9 @@ The operation `n % 10` isolates the rightmost digit of `n`, and `revNum * 10 + d
 ## ⏱️ Complexity
 
 | Metric | Complexity |
-|---|---|
-| Time | **O(log₁₀(x))** |
-| Space | **O(1)** |
+| ---- | --------------------------------------------------------------------------------------------------------------------- |
+| Time | **O(log10(x)) — The number of iterations equals the total number of digits in x, which is proportional to log10(x).** |
+| Space | **O(1) — The solution uses a constant amount of memory with only a few primitive integer variables (n, revNum, d).** |
 
 ### 📊 LeetCode Performance
 
