@@ -10,34 +10,35 @@
 
 ## 📝 Problem
 
-Solve the problem using the submitted implementation.
+Find the one missing value from an array containing distinct numbers chosen from the range 0 through n.
 
 ---
 
 ## 💡 Intuition
 
-The search space is ordered, so each comparison can eliminate roughly half of the remaining candidates.
+XOR cancels equal values. Combine the expected range with the values in the array so every present number cancels itself, leaving only the missing number.
 
 ---
 
 ## 🧠 Algorithmic Pattern
 
-> **🔍 Binary Search**
+> **🔀 XOR**
 
 ---
 
 ## 🚀 Approach
 
-1. Define the current search boundaries.
-2. Inspect the middle position.
-3. Determine which half can still contain the answer.
-4. Discard the other half and continue.
+1. Initialize the XOR accumulator with the required range state.
+2. Traverse the array and XOR each present value into the accumulator.
+3. Also XOR the corresponding range values.
+4. Let equal values cancel each other through XOR.
+5. Return the value left in the accumulator.
 
 ---
 
 ## ✅ Why This Works
 
-Every iteration removes about half of the remaining search space.
+Because x ^ x = 0 and x ^ 0 = x, every value that exists in both the range and the array cancels. The only value without a matching partner is the missing number.
 
 ---
 
@@ -45,15 +46,15 @@ Every iteration removes about half of the remaining search space.
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(log n)** |
+| Time | **O(n)** |
 | Space | **O(1)** |
 
 ### 📊 LeetCode Performance
 
 | Metric | Result |
 |---|---|
-| Runtime | `N/A` |
-| Memory | `47100000 MB` |
+| Runtime | `0 ms` |
+| Memory | `47.1 MB` |
 
 ---
 
@@ -65,7 +66,7 @@ Every iteration removes about half of the remaining search space.
 
 ## 🎯 Key Takeaway
 
-Recognize the algorithmic pattern and maintain the state required by the implementation.
+XOR is a useful way to find one missing value without extra storage.
 
 ---
 

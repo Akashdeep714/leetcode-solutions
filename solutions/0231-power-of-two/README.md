@@ -10,34 +10,34 @@
 
 ## 📝 Problem
 
-Solve the problem using the submitted implementation.
+Determine whether an integer is a power of two.
 
 ---
 
 ## 💡 Intuition
 
-The solution processes the input while maintaining the state needed to make the next decision efficiently.
+Powers of two can be reduced by dividing by two repeatedly. A valid power reaches 1 without leaving a remainder at any step.
 
 ---
 
 ## 🧠 Algorithmic Pattern
 
-> **🔎 Algorithmic Approach**
+> **🔁 Repeated Division / Recursion**
 
 ---
 
 ## 🚀 Approach
 
-1. Initialize the required state.
-2. Traverse the relevant input.
-3. Apply the problem-specific condition.
-4. Update the state and produce the final answer.
+1. Reject values that are not positive.
+2. Repeatedly reduce the value according to the submitted implementation.
+3. Check that each required division is valid.
+4. Accept the number when the process reaches the valid base case.
 
 ---
 
 ## ✅ Why This Works
 
-The algorithm maintains only the information needed to construct the result.
+Every positive power of two can be reduced to 1 by repeatedly dividing by two exactly, while any other positive integer eventually leaves a remainder or fails the base condition.
 
 ---
 
@@ -45,15 +45,15 @@ The algorithm maintains only the information needed to construct the result.
 
 | Metric | Complexity |
 |---|---|
-| Time | **Depends on the implementation** |
-| Space | **Depends on the implementation** |
+| Time | **O(log n)** |
+| Space | **O(1)** |
 
 ### 📊 LeetCode Performance
 
 | Metric | Result |
 |---|---|
 | Runtime | `1 ms` |
-| Memory | `42724000 MB` |
+| Memory | `42.7 MB` |
 
 ---
 
@@ -65,7 +65,7 @@ The algorithm maintains only the information needed to construct the result.
 
 ## 🎯 Key Takeaway
 
-Recognize the algorithmic pattern and maintain the state required by the implementation.
+Repeated division works because the exponent determines how many times the value can be divided by two before reaching 1.
 
 ---
 

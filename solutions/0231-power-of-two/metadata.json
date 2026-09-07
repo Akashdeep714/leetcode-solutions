@@ -7,5 +7,7 @@
   "slug": "power-of-two",
   "submission_id": "2029112103",
   "runtime": 1,
-  "memory": 42724000
+  "memory": 42724000,
+  "runtime_display": "1 ms",
+  "memory_display": "42.7 MB"
 }

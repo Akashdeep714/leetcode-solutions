@@ -7,5 +7,7 @@
   "slug": "palindrome-number",
   "submission_id": "2027988715",
   "runtime": 4,
-  "memory": 46080000
+  "memory": 46080000,
+  "runtime_display": "4 ms",
+  "memory_display": "46.1 MB"
 }

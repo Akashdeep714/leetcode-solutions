@@ -7,5 +7,7 @@
   "slug": "missing-number",
   "submission_id": "2030853058",
   "runtime": 0,
-  "memory": 47100000
+  "memory": 47100000,
+  "runtime_display": "0 ms",
+  "memory_display": "47.1 MB"
 }

@@ -10,34 +10,35 @@
 
 ## 📝 Problem
 
-Solve the problem using the submitted implementation.
+Determine whether an integer reads the same forward and backward.
 
 ---
 
 ## 💡 Intuition
 
-The solution processes the input while maintaining the state needed to make the next decision efficiently.
+The solution works directly with the digits. It repeatedly takes the last digit and uses it to build the number in reverse, then compares the result with the original value.
 
 ---
 
 ## 🧠 Algorithmic Pattern
 
-> **🔎 Algorithmic Approach**
+> **🔢 Digit Manipulation**
 
 ---
 
 ## 🚀 Approach
 
-1. Initialize the required state.
-2. Traverse the relevant input.
-3. Apply the problem-specific condition.
-4. Update the state and produce the final answer.
+1. Keep the original value available for the final comparison.
+2. Extract the last digit using modulo 10.
+3. Append that digit to the reversed number.
+4. Remove the processed digit using integer division by 10.
+5. Compare the reversed number with the original value.
 
 ---
 
 ## ✅ Why This Works
 
-The algorithm maintains only the information needed to construct the result.
+Reversing all digits produces exactly the number obtained by reading the input from right to left. The two values are equal exactly when the input is a palindrome.
 
 ---
 
@@ -45,15 +46,15 @@ The algorithm maintains only the information needed to construct the result.
 
 | Metric | Complexity |
 |---|---|
-| Time | **Depends on the implementation** |
-| Space | **Depends on the implementation** |
+| Time | **O(log n)** |
+| Space | **O(1)** |
 
 ### 📊 LeetCode Performance
 
 | Metric | Result |
 |---|---|
 | Runtime | `4 ms` |
-| Memory | `46080000 MB` |
+| Memory | `46.1 MB` |
 
 ---
 
@@ -65,7 +66,7 @@ The algorithm maintains only the information needed to construct the result.
 
 ## 🎯 Key Takeaway
 
-Recognize the algorithmic pattern and maintain the state required by the implementation.
+Modulo and integer division are enough to inspect and reverse digits without converting the number to a string.
 
 ---
 
