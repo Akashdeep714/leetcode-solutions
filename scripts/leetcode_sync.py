@@ -284,9 +284,6 @@ def get_recent_accepted(
     username,
     limit=2000,
 ):
-    # recentAcSubmissionList does not expose an offset/cursor on
-    # LeetCode's current public GraphQL schema, so request a large
-    # history window in one call instead of limiting the sync to 20.
     data = graphql(
         RECENT_ACCEPTED_QUERY,
         {
@@ -881,44 +878,6 @@ def fallback_analysis(
         ),
         "time": "Depends on the implementation",
         "space": "Depends on the implementation",
-    }
-
-
-def normalize_fallback_analysis(
-    fallback,
-    question,
-    code,
-    tags,
-):
-    """Convert deterministic fallback fields to the README schema."""
-    fallback = fallback or {}
-
-    approach = fallback.get("approach") or []
-    if not isinstance(approach, list):
-        approach = [str(approach)]
-
-    return {
-        "pattern": fallback.get("pattern", "🔎 Algorithmic Approach"),
-        "problem_summary": "Solve the problem using the submitted implementation.",
-        "intuition": fallback.get(
-            "intuition",
-            "The implementation processes the input while maintaining the state needed to construct the answer.",
-        ),
-        "approach": approach,
-        "why_it_works": fallback.get(
-            "why_it_works",
-            fallback.get(
-                "why",
-                "The implementation maintains the information required to produce the result.",
-            ),
-        ),
-        "time_complexity": str(
-            fallback.get("time_complexity") or fallback.get("time") or "O(n)"
-        ),
-        "space_complexity": str(
-            fallback.get("space_complexity") or fallback.get("space") or "O(1)"
-        ),
-        "key_takeaway": "Recognize the algorithmic pattern and maintain the state required by the implementation.",
     }
 
 
@@ -1607,28 +1566,13 @@ def import_submission(
         tags,
     )
 
-    required_fields = {
-        "pattern",
-        "problem_summary",
-        "intuition",
-        "approach",
-        "why_it_works",
-        "time_complexity",
-        "space_complexity",
-        "key_takeaway",
-    }
-
-    if analysis and required_fields.issubset(analysis.keys()):
+    if analysis:
         explanation_source = (
             "AI-assisted analysis"
         )
+
     else:
-        analysis = normalize_fallback_analysis(
-            fallback_analysis(
-                code,
-                tags,
-            ),
-            question,
+        analysis = fallback_analysis(
             code,
             tags,
         )
@@ -1804,24 +1748,8 @@ def refresh_existing_submission(
         tags,
     )
 
-    required_fields = {
-        "pattern",
-        "problem_summary",
-        "intuition",
-        "approach",
-        "why_it_works",
-        "time_complexity",
-        "space_complexity",
-        "key_takeaway",
-    }
-
-    if not analysis or not required_fields.issubset(analysis.keys()):
-        analysis = normalize_fallback_analysis(
-            fallback_analysis(
-                code,
-                tags,
-            ),
-            question,
+    if not analysis:
+        analysis = fallback_analysis(
             code,
             tags,
         )
@@ -1996,11 +1924,34 @@ def main():
     )
 
     imported = 0
-    refreshed = 0
+    skipped = 0
     failed = 0
 
+    new_submissions = []
+
+    for submission in submissions:
+        submission_id = str(
+            submission.get("id")
+        )
+
+        if not submission_id:
+            continue
+
+        if submission_id in processed_ids:
+            skipped += 1
+            continue
+
+        new_submissions.append(
+            submission
+        )
+
+    print(
+        f"🆕 New accepted submissions to process: "
+        f"{len(new_submissions)}"
+    )
+
     for submission in reversed(
-        submissions
+        new_submissions
     ):
         submission_id = str(
             submission.get("id")
@@ -2010,23 +1961,15 @@ def main():
             continue
 
         try:
-            if submission_id in processed_ids:
-                refresh_existing_submission(
-                    submission
-                )
+            import_submission(
+                submission
+            )
 
-                refreshed += 1
+            processed_ids.add(
+                submission_id
+            )
 
-            else:
-                import_submission(
-                    submission
-                )
-
-                processed_ids.add(
-                    submission_id
-                )
-
-                imported += 1
+            imported += 1
 
         except Exception as exc:
             failed += 1
@@ -2061,7 +2004,7 @@ def main():
     )
 
     print(
-        f"   🔄 Refreshed: {refreshed}"
+        f"   ⏭️ Skipped already processed: {skipped}"
     )
 
     print(
