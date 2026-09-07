@@ -1,7 +1,9 @@
-# 🧩 9. Palindrome Number
+# 9. Palindrome Number
 
-> **Difficulty:** 🟢 Easy  
-> **Topics:** Math  
+> **Difficulty:** 🟢 Easy
+>
+> **Topics:** Math
+>
 > **Language:** Java
 
 [🔗 View Problem on LeetCode](https://leetcode.com/problems/palindrome-number/)
@@ -62,7 +64,7 @@ The operation `n % 10` isolates the rightmost digit of `n`, and `revNum * 10 + d
 
 ## 💻 Solution
 
-[View the complete Java solution →](./solution.java)
+[View the complete Java solution →](https://github.com/Akashdeep714/leetcode-solutions/blob/main/solutions/0009-palindrome-number/solution.java)
 
 ---
 
@@ -75,7 +77,7 @@ Digits of a base-10 integer can be processed from right to left using modulo (`%
 ## 🔗 Useful Links
 
 - [LeetCode Problem](https://leetcode.com/problems/palindrome-number/)
-- [My Solution](./solution.java)
+- [My Solution](https://github.com/Akashdeep714/leetcode-solutions/blob/main/solutions/0009-palindrome-number/solution.java)
 
 ---
 
