@@ -1204,7 +1204,7 @@ def create_problem_readme(
         if tag.get("name")
     ]
 
-        language = language_name(
+    language = language_name(
         submission.get("lang")
     )
 
@@ -1234,7 +1234,7 @@ def create_problem_readme(
         memory
     ):
         memory = f"{memory} MB"
-        
+
     tags_display = (
         " · ".join(tags)
         if tags
