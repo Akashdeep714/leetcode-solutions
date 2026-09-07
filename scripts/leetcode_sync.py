@@ -1208,15 +1208,32 @@ def create_problem_readme(
         submission.get("lang")
     )
 
-    runtime = (
-        submission.get("runtime")
-        or "N/A"
-    )
+    runtime_raw = (
+    submission.get("runtime")
+    or "N/A"
+)
 
-    memory = (
-        submission.get("memory")
-        or "N/A"
-    )
+memory_raw = (
+    submission.get("memory")
+    or "N/A"
+)
+
+runtime = str(runtime_raw).strip()
+memory = str(memory_raw).strip()
+
+# LeetCode normally returns values such as "64 ms" and "19.6 MB".
+# Add the expected unit only when LeetCode returns a bare numeric value.
+if runtime != "N/A" and re.fullmatch(
+    r"\d+(?:\.\d+)?",
+    runtime
+):
+    runtime = f"{runtime} ms"
+
+if memory != "N/A" and re.fullmatch(
+    r"\d+(?:\.\d+)?",
+    memory
+):
+    memory = f"{memory} MB"
 
     tags_display = (
         " · ".join(tags)
