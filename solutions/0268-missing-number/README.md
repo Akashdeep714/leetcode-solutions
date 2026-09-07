@@ -10,13 +10,13 @@
 
 ## 📝 Problem
 
-Given an array of n distinct numbers in the range [0, n], identify and return the single number from the range that is missing.
+Given an array of n distinct numbers in the range [0, n], return the only number missing from the range.
 
 ---
 
 ## 💡 Intuition
 
-XORing a number with itself cancels it out to 0 (A ^ A = 0), while XORing a number with 0 leaves it unchanged (A ^ 0 = A). If we XOR all full range numbers from 0 to n together with all numbers in the array, every number present in both sets will appear twice and cancel out, leaving only the missing number.
+XORing a number with itself cancels it out to 0 (A ^ A = 0), and XORing any number with 0 leaves it unchanged (A ^ 0 = A). If we XOR all expected numbers from 0 to n together with all numbers present in the array, every number that exists in the array will appear twice and cancel out, leaving only the missing number.
 
 ---
 
@@ -28,17 +28,16 @@ XORing a number with itself cancels it out to 0 (A ^ A = 0), while XORing a numb
 
 ## 🚀 Approach
 
-1. Initialize a variable `xor` with `nums.length` (representing $n$).
-2. Loop through the array with index `i` from `0` to `nums.length - 1`.
-3. In each step, update `xor` by XORing it with both the index `i` and the value `nums[i]`.
-4. Allow all paired numbers present in both the indices and the array values to cancel each other out.
-5. Return the final value of `xor`, which is the unmatched missing number.
+1. Initialize a variable `xor` with `nums.length` (representing n).
+2. Loop through the array using index `i` from 0 to `nums.length - 1`.
+3. In each iteration, update `xor` by XORing it with both the current index `i` and the array element `nums[i]`.
+4. After the loop finishes, return `xor`, which now holds the single missing number.
 
 ---
 
 ## ✅ Why This Works
 
-The indices `0` to `n-1` combined with the initial `xor` value of `n` represent the complete set of expected numbers $[0, n]$. The array `nums` contains $n$ numbers from $[0, n]$ with exactly one missing. Because XOR is commutative and associative, all elements present in `nums` pair up with their matching range numbers and reduce to 0, leaving only the single missing number.
+The expected set of numbers is {0, 1, ..., n}. The array `nums` has indices 0 through n-1 and contains all expected values except the missing one. By initializing `xor` to n and accumulating `i ^ nums[i]` for each index, every present number is XORed exactly twice (once as an index or initial value n, and once as an array element). Due to XOR commutativity and self-cancellation, all matched pairs reduce to 0, leaving only the missing number.
 
 ---
 
@@ -46,8 +45,8 @@ The indices `0` to `n-1` combined with the initial `xor` value of `n` represent 
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(n), where n is the length of `nums`. The algorithm makes a single pass through the array, performing constant-time bitwise operations in each iteration.** |
-| Space | **O(1) auxiliary space, as the algorithm only uses a single integer variable (`xor`) to track the result.** |
+| Time | **O(n), where n is the length of `nums`. The solution performs a single linear pass over the array.** |
+| Space | **O(1) auxiliary space, as it only uses a single integer variable (`xor`) to compute the result.** |
 
 ### 📊 LeetCode Performance
 
@@ -66,7 +65,7 @@ The indices `0` to `n-1` combined with the initial `xor` value of `n` represent 
 
 ## 🎯 Key Takeaway
 
-Using the XOR property $A \oplus A = 0$ allows us to detect missing or unique elements in a single pass using $O(1)$ extra space, avoiding any potential integer overflow issues present in summation approaches.
+Using the self-canceling property of the bitwise XOR operator allows you to detect missing or unique elements across two collections in O(n) time and O(1) space.
 
 ---
 

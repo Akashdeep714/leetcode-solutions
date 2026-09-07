@@ -10,13 +10,13 @@
 
 ## 📝 Problem
 
-Determine if a given integer is a power of two.
+Determine whether a given integer n can be expressed as a power of two (n = 2^x for an integer x).
 
 ---
 
 ## 💡 Intuition
 
-Any positive power of two can be repeatedly halved until it equals 1. If a number stops being divisible by 2 before reaching 1, it contains an odd factor and cannot be a power of two.
+A power of two consists purely of prime factor 2 (e.g., 1, 2, 4, 8, 16...). If we repeatedly divide a positive number by 2 as long as it remains even, a true power of two will eventually strip down to exactly 1. If any odd number greater than 1 remains, it is not a power of two.
 
 ---
 
@@ -28,17 +28,18 @@ Any positive power of two can be repeatedly halved until it equals 1. If a numbe
 
 ## 🚀 Approach
 
-1. Check if n is less than 1; if so, return false because non-positive numbers cannot be powers of two.
-2. Check if n is equal to 1; if so, return true immediately as 2^0 = 1.
-3. Repeatedly divide n by 2 in a loop while n is even (n % 2 == 0).
-4. Once n is no longer divisible by 2, check if n has been reduced to 1.
-5. Return true if n equals 1, or false otherwise.
+1. Check if n is less than 1; if so, return false immediately because powers of two must be positive.
+2. Check if n equals 1; if so, return true because 2^0 = 1.
+3. If n is greater than 1, enter a loop that runs as long as n is evenly divisible by 2 (n % 2 == 0).
+4. Inside the loop, divide n by 2 (n = n / 2) to strip away factors of 2.
+5. After the loop finishes, check if the remaining value of n is 1.
+6. Return true if n equals 1, and false otherwise.
 
 ---
 
 ## ✅ Why This Works
 
-A power of two consists exclusively of prime factors of 2. By repeatedly dividing n by 2 while n is even, all factors of 2 are stripped away. If n was originally a power of two, this reduction will always leave 1. If n had any odd prime factors, the loop terminates early with n > 1.
+Repeatedly dividing n by 2 removes all factors of 2. If n was originally a power of two (2^x), dividing by 2 exactly x times reduces n to 1. If n contained any prime factor other than 2, removing all 2s will leave an odd number greater than 1, causing n == 1 to evaluate to false.
 
 ---
 
@@ -46,8 +47,8 @@ A power of two consists exclusively of prime factors of 2. By repeatedly dividin
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(log n) because the value of n is halved in each step of the loop when n is a power of two.** |
-| Space | **O(1) auxiliary space, as the reduction is performed directly on the input variable using no additional memory.** |
+| Time | **O(log n) because the number n is divided by 2 in each iteration, performing at most log2(n) steps.** |
+| Space | **O(1) as the algorithm uses only a few integer checks and modifies the input variable in place without allocating extra memory.** |
 
 ### 📊 LeetCode Performance
 
@@ -66,7 +67,7 @@ A power of two consists exclusively of prime factors of 2. By repeatedly dividin
 
 ## 🎯 Key Takeaway
 
-To test if a number is a power of a base k iteratively, continuously divide out factors of k while divisible and check if the final result is 1.
+Repeated division by a base is a fundamental way to check if a number is a power of that base, by continuously stripping away factors until reaching 1 or encountering an indivisible remainder.
 
 ---
 

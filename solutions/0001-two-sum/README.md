@@ -10,36 +10,36 @@
 
 ## 📝 Problem
 
-Given an array of integers and a target value, find the indices of two distinct numbers that add up to the target.
+Find the indices of two distinct elements in an array that add up to a specified target integer.
 
 ---
 
 ## 💡 Intuition
 
-The most straightforward way to find the target sum is to test every possible combination of two numbers in the array until we find the pair that adds up to the target.
+Check every possible pair of elements in the array one by one until you find the combination whose sum equals the target.
 
 ---
 
 ## 🧠 Algorithmic Pattern
 
-> **Brute Force / Nested Loop Search**
+> **Brute Force / Nested Loops**
 
 ---
 
 ## 🚀 Approach
 
-1. Initialize an integer array `arr` of size 2 to store the result indices.
-2. Set up an outer loop with index `i` running from `0` to `nums.length - 1` to represent the first element of the pair.
-3. Set up an inner loop with index `j` starting from `i + 1` to `nums.length - 1` to represent the second distinct element.
-4. Check if the sum of `nums[i]` and `nums[j]` equals `target`.
-5. If the sum equals `target`, store `i` into `arr[0]` and `j` into `arr[1]`.
-6. Return `arr` after searching through the pairs.
+1. Initialize an integer array of size 2 to hold the pair of result indices.
+2. Start an outer loop with index `i` running from `0` to the end of the array.
+3. Start an inner loop with index `j` running from `i + 1` to the end of the array to avoid picking the same element twice.
+4. Check if the sum of `nums[i]` and `nums[j]` is equal to `target`.
+5. If a match is found, record `i` and `j` into the result array.
+6. Return the result array containing the two indices once the iterations complete.
 
 ---
 
 ## ✅ Why This Works
 
-By starting `j` at `i + 1`, the code checks every unique unordered pair of indices $(i, j)$ where $i < j$. This avoids pairing an element with itself or re-checking previously tested pairs. Since the problem guarantees exactly one valid solution exists, the condition `nums[i] + nums[j] == target` will successfully trigger for the correct pair and capture its indices.
+The algorithm systematically evaluates every unique pair of indices `(i, j)` where `i < j`. Because the problem guarantees exactly one valid pair exists, testing all unique pairs ensures that the correct indices will be evaluated, saved, and returned.
 
 ---
 
@@ -47,8 +47,8 @@ By starting `j` at `i + 1`, the code checks every unique unordered pair of indic
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(n²) where n is the length of `nums`. The outer loop runs n times and the inner loop runs approximately n/2 times on average, performing roughly n(n - 1) / 2 comparisons in total.** |
-| Space | **O(1) auxiliary space because only a fixed 2-element array is created regardless of the input size.** |
+| Time | **O(n²), where n is the length of the `nums` array. The nested loops perform n * (n - 1) / 2 total additions and comparisons in the worst case.** |
+| Space | **O(1) auxiliary space, as only a fixed-size array of length 2 is allocated regardless of the input size.** |
 
 ### 📊 LeetCode Performance
 
@@ -67,7 +67,7 @@ By starting `j` at `i + 1`, the code checks every unique unordered pair of indic
 
 ## 🎯 Key Takeaway
 
-While a brute force nested loop approach is easy to implement and uses O(1) extra space, it takes O(n²) time complexity. Using a Hash Table can optimize this search to O(n) time.
+The brute force approach guarantees finding the solution by exhaustively testing all pairs in O(n²) time. It serves as a simple starting baseline before applying optimizations like hash maps to reduce time complexity to O(n).
 
 ---
 

@@ -10,13 +10,13 @@
 
 ## 📝 Problem
 
-Determine whether an integer is a palindrome (reads the same forward and backward) without converting it to a string.
+Determine if a given integer reads the same forwards and backwards.
 
 ---
 
 ## 💡 Intuition
 
-A number is a palindrome if reversing its digits yields the exact original value. Negative numbers are never palindromes because of the minus sign. By repeatedly stripping off the last digit of the number using modulo operations and appending it to a new number, we can reverse the integer mathematically and compare it to the original.
+A number is a palindrome if reversing its digits yields the original number. Negative numbers are automatically not palindromes due to the negative sign. By repeatedly extracting the last digit of the number using modulo operations, we can construct the reversed number mathematically.
 
 ---
 
@@ -28,19 +28,20 @@ A number is a palindrome if reversing its digits yields the exact original value
 
 ## 🚀 Approach
 
-1. Check if x is negative; if so, immediately return false because negative signs prevent palindrome symmetry.
-2. Initialize a temporary variable n equal to x to keep the original value of x intact, and set revNum to 0.
-3. Loop while n is greater than 0.
-4. Extract the last digit of n using d = n % 10.
-5. Append d to revNum by multiplying revNum by 10 and adding d.
-6. Remove the last digit from n using integer division n = n / 10.
-7. After the loop, compare revNum to x and return true if they are equal, or false otherwise.
+1. Check if the input integer x is negative; if so, return false immediately.
+2. Create a variable n initialized to x to keep track of the remaining digits without modifying x.
+3. Initialize revNum to 0 to store the accumulating reversed number.
+4. Enter a loop that runs while n is greater than 0.
+5. Extract the last digit of n using d = n % 10.
+6. Append d to revNum by calculating revNum = revNum * 10 + d.
+7. Truncate the last digit from n using integer division n = n / 10.
+8. After the loop, compare revNum with the original x and return true if equal, false otherwise.
 
 ---
 
 ## ✅ Why This Works
 
-The operation `n % 10` isolates the rightmost digit of `n`, and `revNum * 10 + d` appends this digit to `revNum`, effectively processing the digits of `x` from right to left. Integer division `n / 10` shifts `n` right by one decimal place. Once all digits are processed, `revNum` contains the exact reverse of `x`, making `revNum == x` a direct and accurate symmetry test.
+The operation `n % 10` extracts the rightmost digit (least significant). Multiplying `revNum` by 10 shifts all existing digits in the reversed number one position to the left, making room to add the extracted digit. Repeating this process until `n` reaches 0 successfully reverses all digits. Comparing the reversed number back to `x` verifies if the number is symmetric.
 
 ---
 
@@ -48,8 +49,8 @@ The operation `n % 10` isolates the rightmost digit of `n`, and `revNum * 10 + d
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(log10(x)) — The number of iterations equals the total number of digits in x, which is proportional to log10(x).** |
-| Space | **O(1) — The solution uses a constant amount of memory with only a few primitive integer variables (n, revNum, d).** |
+| Time | **O(log10(x)) where x is the input integer. The number of iterations in the loop corresponds directly to the total number of digits in x.** |
+| Space | **O(1) auxiliary space, as the algorithm only uses a constant number of primitive integer variables (n, revNum, d).** |
 
 ### 📊 LeetCode Performance
 
@@ -68,7 +69,7 @@ The operation `n % 10` isolates the rightmost digit of `n`, and `revNum * 10 + d
 
 ## 🎯 Key Takeaway
 
-Digits of a base-10 integer can be processed from right to left using modulo (% 10) to extract the last digit and integer division (/ 10) to drop it, avoiding string conversion.
+Digits of an integer can be processed from right to left mathematically using modulo (`% 10`) for extraction and integer division (`/ 10`) for removal, avoiding the need for string conversion.
 
 ---
 
