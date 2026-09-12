@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **4** |
-| 🟢 Easy | **4** |
+| 🧩 Total Solved | **5** |
+| 🟢 Easy | **5** |
 | 🟡 Medium | **0** |
 | 🔴 Hard | **0** |
 
@@ -20,6 +20,7 @@
 |---:|---|---|---|
 | 1 | [Two Sum](solutions/0001-two-sum/) | 🟢 Easy | Java |
 | 9 | [Palindrome Number](solutions/0009-palindrome-number/) | 🟢 Easy | Java |
+| 26 | [Remove Duplicates from Sorted Array](solutions/0026-remove-duplicates-from-sorted-array/) | 🟢 Easy | Java |
 | 231 | [Power of Two](solutions/0231-power-of-two/) | 🟢 Easy | Java |
 | 268 | [Missing Number](solutions/0268-missing-number/) | 🟢 Easy | Java |
 

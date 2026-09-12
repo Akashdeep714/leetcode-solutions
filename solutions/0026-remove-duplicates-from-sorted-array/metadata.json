@@ -1,0 +1,13 @@
+{
+  "number": 26,
+  "title": "Remove Duplicates from Sorted Array",
+  "difficulty": "Easy",
+  "language": "Java",
+  "folder": "0026-remove-duplicates-from-sorted-array",
+  "slug": "remove-duplicates-from-sorted-array",
+  "submission_id": "2139893149",
+  "runtime": 1,
+  "runtime_display": "1 ms",
+  "memory": 46800000,
+  "memory_display": "46.8 MB"
+}
