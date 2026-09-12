@@ -1,0 +1,13 @@
+{
+  "number": 121,
+  "title": "Best Time to Buy and Sell Stock",
+  "difficulty": "Easy",
+  "language": "Java",
+  "folder": "0121-best-time-to-buy-and-sell-stock",
+  "slug": "best-time-to-buy-and-sell-stock",
+  "submission_id": "2139943751",
+  "runtime": 1,
+  "runtime_display": "1 ms",
+  "memory": 94312000,
+  "memory_display": "94.3 MB"
+}
