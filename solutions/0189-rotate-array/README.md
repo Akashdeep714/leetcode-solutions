@@ -10,36 +10,34 @@
 
 ## 📝 Problem
 
-Rotate an array of integers to the right by k steps in-place.
+Given an integer array nums , rotate the array to the right by k steps, where k is non-negative.
 
 ---
 
 ## 💡 Intuition
 
-Rotating an array of length n to the right by k steps moves the last k elements to the front and shifts the first n - k elements to the back. Notice that if we reverse the entire array, the last k elements move to the front and the first n - k elements move to the back, but both segments end up upside down (reversed). By reversing the first k elements back and then reversing the remaining n - k elements back, each block returns to its correct relative ordering while staying in its new location. Additionally, rotating by k steps when k >= n is equivalent to rotating by k % n steps, so we simplify k first.
+Two positions are maintained so the algorithm can eliminate unnecessary comparisons while scanning the input.
 
 ---
 
 ## 🧠 Algorithmic Pattern
 
-> **Two Pointers (Array Reversal)**
+> **👉 Two Pointers**
 
 ---
 
 ## 🚀 Approach
 
-1. Calculate the length n of the array nums.
-2. Check if k % n == 0. If so, rotating by k steps leaves the array unchanged, so return early.
-3. Update k to k % n to handle cases where k is greater than the array length.
-4. Call the helper function rev(nums, 0, n - 1) to reverse the entire array from index 0 to n - 1 using two pointers (start and end) swapping elements until they meet.
-5. Call rev(nums, 0, k - 1) to reverse the first k elements back into their original relative order.
-6. Call rev(nums, k, n - 1) to reverse the remaining n - k elements back into their original relative order.
+1. Initialize the two pointers.
+2. Compare the values at the current positions.
+3. Move the appropriate pointer according to the problem condition.
+4. Continue until the search space is exhausted or the answer is found.
 
 ---
 
 ## ✅ Why This Works
 
-When the entire array of size n is reversed, the block of elements originally at indices [n - k, n - 1] moves to indices [0, k - 1], and the block originally at indices [0, n - k - 1] moves to indices [k, n - 1]. However, within each block, elements are in reverse order. Reversing index range [0, k - 1] restores the correct relative sequence of the k elements now at the front. Reversing index range [k, n - 1] restores the correct relative sequence of the n - k elements at the end, completing the right rotation in-place without extra memory.
+The pointers move through the input without repeatedly revisiting eliminated candidates.
 
 ---
 
@@ -54,8 +52,8 @@ When the entire array of size n is reversed, the block of elements originally at
 
 | Metric | Result |
 |---|---|
-| Runtime | `5 ms` |
-| Memory | `268.9 MB` |
+| Runtime | `8 ms` |
+| Memory | `268.7 MB` |
 
 ---
 
@@ -67,7 +65,7 @@ When the entire array of size n is reversed, the block of elements originally at
 
 ## 🎯 Key Takeaway
 
-An array right-rotation by k steps can be achieved in O(n) time and O(1) space by reversing the entire array and then reversing the two sub-arrays [0, k - 1] and [k, n - 1] independently.
+The main idea is to recognize the 👉 Two Pointers pattern and understand how the submitted implementation applies it to this problem.
 
 ---
 
