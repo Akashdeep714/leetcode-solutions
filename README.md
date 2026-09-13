@@ -7,9 +7,9 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **6** |
+| 🧩 Total Solved | **8** |
 | 🟢 Easy | **6** |
-| 🟡 Medium | **0** |
+| 🟡 Medium | **2** |
 | 🔴 Hard | **0** |
 
 ---
@@ -22,6 +22,8 @@
 | 9 | [Palindrome Number](solutions/0009-palindrome-number/) | 🟢 Easy | Java |
 | 26 | [Remove Duplicates from Sorted Array](solutions/0026-remove-duplicates-from-sorted-array/) | 🟢 Easy | Java |
 | 121 | [Best Time to Buy and Sell Stock](solutions/0121-best-time-to-buy-and-sell-stock/) | 🟢 Easy | Java |
+| 122 | [Best Time to Buy and Sell Stock II](solutions/0122-best-time-to-buy-and-sell-stock-ii/) | 🟡 Medium | Java |
+| 189 | [Rotate Array](solutions/0189-rotate-array/) | 🟡 Medium | Java |
 | 231 | [Power of Two](solutions/0231-power-of-two/) | 🟢 Easy | Java |
 | 268 | [Missing Number](solutions/0268-missing-number/) | 🟢 Easy | Java |
 

@@ -1,0 +1,13 @@
+{
+  "number": 189,
+  "title": "Rotate Array",
+  "difficulty": "Medium",
+  "language": "Java",
+  "folder": "0189-rotate-array",
+  "slug": "rotate-array",
+  "submission_id": "2140264818",
+  "runtime": 5,
+  "runtime_display": "5 ms",
+  "memory": 268932000,
+  "memory_display": "268.9 MB"
+}
