@@ -1,0 +1,13 @@
+{
+  "number": 217,
+  "title": "Contains Duplicate",
+  "difficulty": "Easy",
+  "language": "Java",
+  "folder": "0217-contains-duplicate",
+  "slug": "contains-duplicate",
+  "submission_id": "2141807052",
+  "runtime": 26,
+  "runtime_display": "26 ms",
+  "memory": 81620000,
+  "memory_display": "81.6 MB"
+}

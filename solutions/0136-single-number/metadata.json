@@ -1,0 +1,13 @@
+{
+  "number": 136,
+  "title": "Single Number",
+  "difficulty": "Easy",
+  "language": "Java",
+  "folder": "0136-single-number",
+  "slug": "single-number",
+  "submission_id": "2141850506",
+  "runtime": 1,
+  "runtime_display": "1 ms",
+  "memory": 47000000,
+  "memory_display": "47 MB"
+}
