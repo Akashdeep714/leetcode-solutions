@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **10** |
-| 🟢 Easy | **8** |
+| 🧩 Total Solved | **12** |
+| 🟢 Easy | **10** |
 | 🟡 Medium | **2** |
 | 🔴 Hard | **0** |
 
@@ -28,6 +28,8 @@
 | 217 | [Contains Duplicate](solutions/0217-contains-duplicate/) | 🟢 Easy | Java |
 | 231 | [Power of Two](solutions/0231-power-of-two/) | 🟢 Easy | Java |
 | 268 | [Missing Number](solutions/0268-missing-number/) | 🟢 Easy | Java |
+| 349 | [Intersection of Two Arrays](solutions/0349-intersection-of-two-arrays/) | 🟢 Easy | Java |
+| 350 | [Intersection of Two Arrays II](solutions/0350-intersection-of-two-arrays-ii/) | 🟢 Easy | Java |
 
 ---
 

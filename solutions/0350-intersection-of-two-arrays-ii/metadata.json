@@ -1,0 +1,13 @@
+{
+  "number": 350,
+  "title": "Intersection of Two Arrays II",
+  "difficulty": "Easy",
+  "language": "Java",
+  "folder": "0350-intersection-of-two-arrays-ii",
+  "slug": "intersection-of-two-arrays-ii",
+  "submission_id": "2143037579",
+  "runtime": 6,
+  "runtime_display": "6 ms",
+  "memory": 45344000,
+  "memory_display": "45.3 MB"
+}
