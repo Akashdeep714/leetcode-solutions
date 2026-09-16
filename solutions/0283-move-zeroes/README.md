@@ -10,13 +10,13 @@
 
 ## 📝 Problem
 
-Rearrange an integer array in-place so all non-zero elements retain their relative order at the beginning, followed by all zeroes at the end.
+Rearrange an integer array in-place so all zero values are moved to the end while maintaining the original relative order of non-zero elements.
 
 ---
 
 ## 💡 Intuition
 
-Instead of repeatedly swapping elements, we can compress all non-zero elements towards the front of the array in a single pass. By using a write pointer `j` alongside a read pointer `i`, every non-zero value encountered at `nums[i]` can be copied directly to `nums[j]`. Once all non-zero elements are placed sequentially at indices `0` through `j - 1`, the remaining positions from `j` to the end of the array are simply filled with zeroes.
+To shift all zeros to the end of the array in-place without altering the order of non-zero elements, we can use a two-pointer technique. A fast pointer `i` scans through every element of the array, while a slow pointer `j` tracks the destination index for the next non-zero element. Whenever `i` finds a non-zero number, we place it at index `j` and clear index `i` by setting it to zero. Because `j` only advances when a non-zero element is processed, all non-zero elements are gathered at the front in their original order, leaving zeros to fill the remaining positions at the end.
 
 ---
 
@@ -28,18 +28,19 @@ Instead of repeatedly swapping elements, we can compress all non-zero elements t
 
 ## 🚀 Approach
 
-1. Initialize a write pointer `j` to `0`, representing the index where the next non-zero element should be stored.
-2. Iterate through the array with a read pointer `i` from index `0` to `nums.length - 1`.
-3. For each index `i`, check if `nums[i]` is non-zero (`nums[i] != 0`).
-4. If `nums[i]` is non-zero, assign `nums[j] = nums[i]` and increment `j` by `1`.
-5. After the loop finishes scanning all elements, all non-zero values occupy indices `0` through `j - 1` in their original relative order.
-6. Execute a second loop while `j < nums.length` to set `nums[j] = 0` and increment `j` until the end of the array is reached.
+1. Initialize a slow pointer `j = 0` to mark the insertion index for the next non-zero element.
+2. Iterate through the array with a fast pointer `i` from index `0` to `nums.length - 1`.
+3. At each step, check if the current element `nums[i]` is non-zero.
+4. If `nums[i]` is non-zero, store its value in a temporary variable `temp`.
+5. Set `nums[i] = 0` to clear the position at `i`.
+6. Assign `temp` to `nums[j]` to place the non-zero value at the target position.
+7. Increment `j` by `1` to advance the destination marker for future non-zero elements.
 
 ---
 
 ## ✅ Why This Works
 
-The read pointer `i` inspects elements in sequential left-to-right order, ensuring non-zero elements are written into contiguous positions `0` to `j - 1` without altering their original sequence. Because `j` is always less than or equal to `i`, overwriting `nums[j]` never destroys an unread value ahead of `i`. Filling all remaining indices from `j` to `nums.length - 1` with zeroes completes the required transformation while preserving the array's original length and element count.
+The pointer `j` maintains the invariant that all elements strictly before `j` are non-zero values placed in their exact original order. Since `i` iterates sequentially from left to right, every non-zero value is encountered and written to `j` in order. When `i > j`, `nums[j]` is guaranteed to be a zero from a previous swap, so setting `nums[i] = 0` and `nums[j] = temp` effectively swaps the non-zero element with that zero. When `i == j` (before any zero has been encountered), setting `nums[i] = 0` followed by `nums[j] = temp` restores the non-zero element at index `i` without changing it. Consequently, once `i` finishes scanning, all non-zero elements occupy indices `0` through `j - 1`, and all remaining indices are filled with zeros.
 
 ---
 
@@ -55,7 +56,7 @@ The read pointer `i` inspects elements in sequential left-to-right order, ensuri
 | Metric | Result |
 |---|---|
 | Runtime | `2 ms` |
-| Memory | `47.4 MB` |
+| Memory | `47.8 MB` |
 
 ---
 
@@ -67,7 +68,7 @@ The read pointer `i` inspects elements in sequential left-to-right order, ensuri
 
 ## 🎯 Key Takeaway
 
-To compact filtered values in an array in-place without altering order, use a write pointer to shift valid elements forward sequentially and fill any remaining tail elements in a subsequent pass.
+Using a two-pointer read/write strategy allows reordering array elements in-place in a single pass while preserving their original relative order without requiring extra memory.
 
 ---
 
