@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **12** |
-| 🟢 Easy | **10** |
+| 🧩 Total Solved | **14** |
+| 🟢 Easy | **12** |
 | 🟡 Medium | **2** |
 | 🔴 Hard | **0** |
 
@@ -21,6 +21,7 @@
 | 1 | [Two Sum](solutions/0001-two-sum/) | 🟢 Easy | Java |
 | 9 | [Palindrome Number](solutions/0009-palindrome-number/) | 🟢 Easy | Java |
 | 26 | [Remove Duplicates from Sorted Array](solutions/0026-remove-duplicates-from-sorted-array/) | 🟢 Easy | Java |
+| 66 | [Plus One](solutions/0066-plus-one/) | 🟢 Easy | Java |
 | 121 | [Best Time to Buy and Sell Stock](solutions/0121-best-time-to-buy-and-sell-stock/) | 🟢 Easy | Java |
 | 122 | [Best Time to Buy and Sell Stock II](solutions/0122-best-time-to-buy-and-sell-stock-ii/) | 🟡 Medium | Java |
 | 136 | [Single Number](solutions/0136-single-number/) | 🟢 Easy | Java |
@@ -28,6 +29,7 @@
 | 217 | [Contains Duplicate](solutions/0217-contains-duplicate/) | 🟢 Easy | Java |
 | 231 | [Power of Two](solutions/0231-power-of-two/) | 🟢 Easy | Java |
 | 268 | [Missing Number](solutions/0268-missing-number/) | 🟢 Easy | Java |
+| 283 | [Move Zeroes](solutions/0283-move-zeroes/) | 🟢 Easy | Java |
 | 349 | [Intersection of Two Arrays](solutions/0349-intersection-of-two-arrays/) | 🟢 Easy | Java |
 | 350 | [Intersection of Two Arrays II](solutions/0350-intersection-of-two-arrays-ii/) | 🟢 Easy | Java |
 
