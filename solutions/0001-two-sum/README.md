@@ -10,36 +10,37 @@
 
 ## 📝 Problem
 
-Find the indices of two numbers in an array that add up to a given target value.
+Given an array of integers nums and an integer target, return the indices of two numbers that add up to target.
 
 ---
 
 ## 💡 Intuition
 
-Check every possible pair of elements in the array one by one using a brute-force approach until finding the pair that sums to the target.
+Instead of checking every pair of numbers using nested loops, we can search for the required complement value in constant time using a hash map. For each element nums[i], the number needed to reach the target is lookupNumber = target - nums[i]. By keeping track of previously seen numbers and their indices in a hash map as we iterate, we can immediately identify if the complementary value was already encountered, allowing us to solve the problem in a single pass.
 
 ---
 
 ## 🧠 Algorithmic Pattern
 
-> **Brute Force / Nested Loops**
+> **Hash Table**
 
 ---
 
 ## 🚀 Approach
 
-1. Initialize an integer array of size 2 to hold the resulting pair of indices.
-2. Start an outer loop with index i going from 0 to the end of the array.
-3. Start an inner loop with index j going from i + 1 to the end of the array to pair nums[i] with every subsequent element.
-4. Check if nums[i] + nums[j] is equal to target.
-5. If the sum matches target, assign index i to the first element and index j to the second element of the result array.
-6. Return the result array containing the matching indices after the loops finish.
+1. Initialize an empty hash map named map to store array values as keys and their corresponding indices as values.
+2. Iterate through the array nums using a loop counter i from 0 to nums.length - 1.
+3. Calculate the required complement for the current number: lookupNumber = target - nums[i].
+4. Check if map already contains lookupNumber using map.containsKey(lookupNumber).
+5. If lookupNumber is in map, return a new integer array containing the current index i and map.get(lookupNumber).
+6. If lookupNumber is not in map, store the current element and its index by calling map.put(nums[i], i).
+7. If the loop finishes without finding a matching pair, return [-1, -1] as a fallback.
 
 ---
 
 ## ✅ Why This Works
 
-The algorithm uses nested loops to exhaustively evaluate every unique pair of indices (i, j) where j > i. Since the problem guarantees that exactly one solution exists, this exhaustive search is guaranteed to find the pair that sums to the target.
+The equation nums[i] + nums[j] = target can be rewritten as nums[j] = target - nums[i]. By inserting each element into the hash map as we iterate, every element at index j < i is available for constant-time lookup. When the loop reaches the second number of the solution pair, its complement (the first number) is already stored in the hash map, ensuring the exact indices are found without duplicate checks or using the same element twice.
 
 ---
 
@@ -47,15 +48,15 @@ The algorithm uses nested loops to exhaustively evaluate every unique pair of in
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(n^2)** |
-| Space | **O(1)** |
+| Time | **O(n)** |
+| Space | **O(n)** |
 
 ### 📊 LeetCode Performance
 
 | Metric | Result |
 |---|---|
-| Runtime | `52 ms` |
-| Memory | `47024000 MB` |
+| Runtime | `2 ms` |
+| Memory | `47.3 MB` |
 
 ---
 
@@ -67,7 +68,7 @@ The algorithm uses nested loops to exhaustively evaluate every unique pair of in
 
 ## 🎯 Key Takeaway
 
-The brute-force approach requires no extra space (O(1)), but checking all pairs results in O(n^2) time complexity. This can be optimized to O(n) time using a Hash Map.
+Using a hash map to look up complementary values (target - current_value) converts a slow O(n^2) pair search into an efficient O(n) single-pass algorithm.
 
 ---
 

@@ -5,7 +5,9 @@
   "language": "Java",
   "folder": "0001-two-sum",
   "slug": "two-sum",
-  "submission_id": "1935975802",
-  "runtime": 52,
-  "memory": 47024000
+  "submission_id": "2145075315",
+  "runtime": 2,
+  "runtime_display": "2 ms",
+  "memory": 47304000,
+  "memory_display": "47.3 MB"
 }
