@@ -7,9 +7,9 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **14** |
+| 🧩 Total Solved | **16** |
 | 🟢 Easy | **12** |
-| 🟡 Medium | **2** |
+| 🟡 Medium | **4** |
 | 🔴 Hard | **0** |
 
 ---
@@ -21,6 +21,8 @@
 | 1 | [Two Sum](solutions/0001-two-sum/) | 🟢 Easy | Java |
 | 9 | [Palindrome Number](solutions/0009-palindrome-number/) | 🟢 Easy | Java |
 | 26 | [Remove Duplicates from Sorted Array](solutions/0026-remove-duplicates-from-sorted-array/) | 🟢 Easy | Java |
+| 36 | [Valid Sudoku](solutions/0036-valid-sudoku/) | 🟡 Medium | Java |
+| 48 | [Rotate Image](solutions/0048-rotate-image/) | 🟡 Medium | Java |
 | 66 | [Plus One](solutions/0066-plus-one/) | 🟢 Easy | Java |
 | 121 | [Best Time to Buy and Sell Stock](solutions/0121-best-time-to-buy-and-sell-stock/) | 🟢 Easy | Java |
 | 122 | [Best Time to Buy and Sell Stock II](solutions/0122-best-time-to-buy-and-sell-stock-ii/) | 🟡 Medium | Java |
