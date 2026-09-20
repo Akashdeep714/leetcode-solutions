@@ -16,12 +16,23 @@
       "runtime_display": "2 ms",
       "memory": 45660000,
       "memory_display": "45.7 MB"
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2147998721",
+      "solution_hash": "e8c7a6d7a3059f37416e00ac60084c7ea3fbd9e7bfc87cd112bc4c2f03d0a54b",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 44824000,
+      "memory_display": "44.8 MB"
     }
   ],
-  "submission_id": "2147984412",
-  "runtime": 2,
-  "runtime_display": "2 ms",
-  "memory": 45660000,
-  "memory_display": "45.7 MB",
-  "solution_count": 1
+  "submission_id": "2147998721",
+  "runtime": 1,
+  "runtime_display": "1 ms",
+  "memory": 44824000,
+  "memory_display": "44.8 MB",
+  "solution_count": 2
 }

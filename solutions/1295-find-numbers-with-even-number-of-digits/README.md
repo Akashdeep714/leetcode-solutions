@@ -71,6 +71,45 @@ Converting an integer to a string is a simple and clean way to determine its dig
 
 ---
 
+---
+### 🔀 Solution 2 — Math / Logarithmic Digit Counting
+
+> **Language:** Java  
+> **Runtime:** `1 ms`  
+> **Memory:** `44.8 MB`
+
+#### 💡 Intuition
+
+To determine if an integer has an even number of digits, we need its digit count. Instead of converting each number to a string or repeatedly dividing by 10 in a loop, we can leverage the mathematical property of base-10 logarithms. For any positive integer $n$, $\log_{10}(n)$ tells us the power of 10 needed to equal $n$. Floor-evaluating this value and adding 1 gives the exact number of digits in constant time. Once we have the digit count, checking if it is even reduces to a simple modulo arithmetic check.
+
+#### 🧠 Algorithmic Pattern
+
+> **Math / Logarithmic Digit Counting**
+
+#### 🚀 Approach
+
+1. Initialize `evenCount` to 0 to keep track of integers that have an even number of digits.
+2. Iterate through each integer `num` in the array `nums`.
+3. Calculate the digit count using `digitCount = (int) Math.floor(Math.log10(num)) + 1`.
+4. Evaluate if `digitCount` is even by checking if `digitCount % 2 == 0`.
+5. If the condition is met, increment `evenCount` by 1.
+6. Return `evenCount` after processing all elements in `nums`.
+
+#### ✅ Why This Works
+
+For any positive integer $x$, the range $10^{d-1} \le x < 10^d$ corresponds to numbers with exactly $d$ digits. Taking the base-10 logarithm yields $d-1 \le \log_{10}(x) < d$. Floor-truncating $\log_{10}(x)$ rounds down to $d-1$, so adding $1$ precisely recovers the digit count $d$. Checking `digitCount % 2 == 0` correctly identifies whether $d$ is an even number.
+
+#### ⏱️ Complexity
+
+| Metric | Complexity |
+|---|---|
+| Time | **O(n) — The code iterates through the array of length $n$ once, performing an $O(1)$ logarithmic calculation for each element.** |
+| Space | **O(1) — Only a few primitive integer variables are used to maintain state, requiring $O(1)$ auxiliary space.** |
+
+#### 💻 Solution
+
+[View the complete Java solution →](./solution-2.java)
+
 ## 🔗 Useful Links
 
 - [LeetCode Problem](https://leetcode.com/problems/find-numbers-with-even-number-of-digits/)
