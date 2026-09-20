@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import re
@@ -1184,6 +1185,61 @@ def normalize_fallback_analysis(analysis, question):
         "space_complexity",
         result.get("space", "O(1)"),
     )
+
+    pattern = str(result.get("pattern", "Algorithmic Approach"))
+    time_complexity = str(result["time_complexity"]).strip()
+    space_complexity = str(result["space_complexity"]).strip()
+
+    if "time_explanation" not in result:
+        if "Digit Manipulation" in pattern and "log" in time_complexity:
+            result["time_explanation"] = (
+                "The loop processes one decimal digit per iteration, and a base-10 integer "
+                "contains a number of digits proportional to log₁₀(x)."
+            )
+        elif "Hash Map" in pattern and time_complexity == "O(n)":
+            result["time_explanation"] = (
+                "The implementation makes one pass through the input, with average O(1) hash-map "
+                "lookups and updates for each element."
+            )
+        elif "Sorting" in pattern and "n log n" in time_complexity:
+            result["time_explanation"] = (
+                "The dominant cost is sorting the input, which takes O(n log n), followed by a linear scan."
+            )
+        elif time_complexity == "O(1)":
+            result["time_explanation"] = (
+                "The amount of work does not grow with the size of the input."
+            )
+        elif time_complexity == "O(log n)":
+            result["time_explanation"] = (
+                "Each iteration reduces the remaining search or value range by a constant factor."
+            )
+        elif time_complexity == "O(n^2)":
+            result["time_explanation"] = (
+                "The implementation contains two input-dependent passes that together examine a quadratic number of combinations."
+            )
+        else:
+            result["time_explanation"] = (
+                "The running time follows the number of input-dependent operations performed by the submitted implementation."
+            )
+
+    if "space_explanation" not in result:
+        if space_complexity == "O(1)":
+            result["space_explanation"] = (
+                "The solution uses only a fixed number of variables and does not allocate memory that grows with the input size."
+            )
+        elif space_complexity == "O(n)":
+            result["space_explanation"] = (
+                "The additional data structure grows with the number of input elements."
+            )
+        elif "log n" in space_complexity:
+            result["space_explanation"] = (
+                "The additional memory grows with the depth of the logarithmic process."
+            )
+        else:
+            result["space_explanation"] = (
+                "The additional memory is determined by the data structures or recursion used by the implementation."
+            )
+
     if "problem_summary" not in result:
         title = str((question or {}).get("title", "this problem"))
         content = html_to_text((question or {}).get("content", ""))
@@ -1289,6 +1345,8 @@ why_it_works
 time_complexity
 space_complexity
 key_takeaway
+time_explanation
+space_explanation
 
 RULES:
 
@@ -1313,28 +1371,30 @@ RULES:
 9. space_complexity must contain ONLY the Big-O expression.
    Examples: O(1), O(n), O(log n).
    Do NOT include explanations, punctuation, or extra text.
+10. time_explanation must be one concise sentence explaining why the stated time complexity applies to THIS code.
+11. space_explanation must be one concise sentence explaining why the stated space complexity applies to THIS code.
 10. Account for sorting cost when sorting is used.
 11. Account for recursion depth when recursion is used.
 12. For hash maps and hash sets, use average-case complexity.
 13. Explain numeric techniques such as digit extraction when they are used.
-14. Keep the writing concise, clear and educational.
-15. Do not copy the complete problem statement.
-16. Return JSON only.
-17. If the submitted code is brute force, explicitly say that it is brute force.
-18. If a more optimal solution exists, do not replace the submitted approach
+16. Keep the writing concise, clear and educational.
+17. Do not copy the complete problem statement.
+18. Return JSON only.
+19. If the submitted code is brute force, explicitly say that it is brute force.
+20. If a more optimal solution exists, do not replace the submitted approach
     with it. You may mention the limitation briefly, but document the
     submitted implementation exactly.
-19. If the algorithm cannot be confidently inferred from the code, say so
+21. If the algorithm cannot be confidently inferred from the code, say so
     instead of inventing an explanation.
-20. Prefer correctness over sounding sophisticated.
-21. Make intuition, approach, why_it_works, and key_takeaway specific to the
+22. Prefer correctness over sounding sophisticated.
+23. Make intuition, approach, why_it_works, and key_takeaway specific to the
     actual problem and code. Never use placeholder/template language when the
     problem statement and code provide enough information.
-22. For mathematical or bit-manipulation solutions, explain the underlying
+24. For mathematical or bit-manipulation solutions, explain the underlying
     property in plain language. For data-structure solutions, explain what is
     stored and why. For brute force, explicitly describe what combinations are
     examined.
-23. key_takeaway should capture the reusable idea or pattern learned from this
+25. key_takeaway should capture the reusable idea or pattern learned from this
     particular problem in one or two sentences.
 """
 
@@ -1430,6 +1490,8 @@ RULES:
             "time_complexity",
             "space_complexity",
             "key_takeaway",
+            "time_explanation",
+            "space_explanation",
         }
 
         if not required_keys.issubset(
@@ -1495,6 +1557,15 @@ RULES:
             space_complexity
         )
 
+        result.setdefault(
+            "time_explanation",
+            "The stated running time follows the number of input-dependent operations performed by the submitted implementation.",
+        )
+        result.setdefault(
+            "space_explanation",
+            "The stated space usage follows the extra variables, data structures, and recursion used by the submitted implementation.",
+        )
+
         return result
 
     except requests.RequestException as exc:
@@ -1519,11 +1590,103 @@ RULES:
 # README generation
 # ============================================================
 
+def format_runtime_memory(submission):
+    """Return clean LeetCode runtime and memory display values."""
+    runtime_raw = (
+        submission.get("runtimeDisplay")
+        or submission.get("runtime")
+        or "N/A"
+    )
+
+    memory_raw = (
+        submission.get("memoryDisplay")
+        or submission.get("memory")
+        or "N/A"
+    )
+
+    runtime = str(runtime_raw).strip()
+    memory = str(memory_raw).strip()
+
+    if runtime != "N/A" and re.fullmatch(
+        r"\d+(?:\.\d+)?",
+        runtime,
+    ):
+        runtime = f"{runtime} ms"
+
+    if memory != "N/A" and re.fullmatch(
+        r"\d+(?:\.\d+)?",
+        memory,
+    ):
+        memory_number = float(memory)
+        memory = f"{memory_number / 1_000_000:.2f} MB"
+        memory = re.sub(r"\.00 MB$", " MB", memory)
+        memory = re.sub(r"(\.\d)0 MB$", r"\1 MB", memory)
+
+    return runtime, memory
+
+
+def _solution_block(question, solution, index):
+    analysis = solution["analysis"]
+    submission = solution["submission"]
+    code_filename = solution["code_filename"]
+    runtime, memory = format_runtime_memory(submission)
+    language = language_name(submission.get("lang"))
+
+    approach_steps = "\n".join(
+        f"{step_index}. {step}"
+        for step_index, step in enumerate(
+            analysis["approach"],
+            start=1,
+        )
+    )
+
+    label = analysis.get("pattern", f"Solution {index}")
+
+    return f"""### 🧠 Solution {index} — {label}
+
+> **Language:** {language}  
+> **Runtime:** `{runtime}`  
+> **Memory:** `{memory}`
+
+#### 💡 Intuition
+
+{analysis["intuition"]}
+
+#### 🧠 Algorithmic Pattern
+
+> **{label}**
+
+#### 🚀 Approach
+
+{approach_steps}
+
+#### ✅ Why This Works
+
+{analysis["why_it_works"]}
+
+#### ⏱️ Complexity
+
+| Metric | Complexity |
+|---|---|
+| Time | **{analysis["time_complexity"]} — {analysis["time_explanation"]}** |
+| Space | **{analysis["space_complexity"]} — {analysis["space_explanation"]}** |
+
+#### 💻 Solution
+
+[View the complete {language} solution →](./{code_filename})
+
+#### 🎯 Key Takeaway
+
+{analysis["key_takeaway"]}
+"""
+
+
 def create_problem_readme(
     question,
-    submission,
-    analysis,
-    code_filename,
+    submission=None,
+    analysis=None,
+    code_filename=None,
+    solutions=None,
 ):
     number = question.get(
         "questionFrontendId",
@@ -1546,56 +1709,10 @@ def create_problem_readme(
     )
 
     tags = [
-        tag.get(
-            "name",
-            "",
-        )
-        for tag in question.get(
-            "topicTags",
-            [],
-        )
+        tag.get("name", "")
+        for tag in question.get("topicTags", [])
         if tag.get("name")
     ]
-
-    language = language_name(
-        submission.get("lang")
-    )
-
-    runtime_raw = (
-        submission.get("runtimeDisplay")
-        or submission.get("runtime")
-        or "N/A"
-    )
-
-    memory_raw = (
-        submission.get("memoryDisplay")
-        or submission.get("memory")
-        or "N/A"
-    )
-
-    runtime = str(runtime_raw).strip()
-    memory = str(memory_raw).strip()
-
-    if runtime != "N/A" and re.fullmatch(
-        r"\d+(?:\.\d+)?",
-        runtime
-    ):
-        runtime = f"{runtime} ms"
-
-    # The raw GraphQL memory value is commonly reported as bytes.
-    # Only convert when it is a bare numeric value; otherwise preserve
-    # LeetCode's display string exactly.
-    if memory != "N/A" and re.fullmatch(
-        r"\d+(?:\.\d+)?",
-        memory
-    ):
-        memory_number = float(memory)
-        if memory_number >= 1024 * 1024:
-            memory = f"{memory_number / (1024 * 1024):.1f} MB"
-        elif memory_number >= 1024:
-            memory = f"{memory_number / 1024:.1f} KB"
-        else:
-            memory = f"{memory_number:.0f} B"
 
     tags_display = (
         " · ".join(tags)
@@ -1603,20 +1720,40 @@ def create_problem_readme(
         else "Not specified"
     )
 
-    approach_steps = "\n".join(
-        f"{index}. {step}"
-        for index, step in enumerate(
-            analysis["approach"],
-            start=1,
-        )
-    )
+    if solutions is None:
+        solutions = [
+            {
+                "analysis": analysis,
+                "submission": submission or {},
+                "code_filename": code_filename or "solution.txt",
+            }
+        ]
 
     leetcode_url = (
         "https://leetcode.com/problems/"
         f"{slug}/"
     )
 
-    return f"""# 🧩 {number}. {title}
+    first_analysis = solutions[0]["analysis"]
+    problem_summary = first_analysis["problem_summary"]
+
+    if len(solutions) == 1:
+        solution = solutions[0]
+        analysis = solution["analysis"]
+        submission_data = solution["submission"]
+        code_filename = solution["code_filename"]
+        language = language_name(submission_data.get("lang"))
+        runtime, memory = format_runtime_memory(submission_data)
+
+        approach_steps = "\n".join(
+            f"{step_index}. {step}"
+            for step_index, step in enumerate(
+                analysis["approach"],
+                start=1,
+            )
+        )
+
+        return f"""# 🧩 {number}. {title}
 
 > **Difficulty:** {difficulty_badge(difficulty)}  
 > **Topics:** {tags_display}  
@@ -1628,7 +1765,7 @@ def create_problem_readme(
 
 ## 📝 Problem
 
-{analysis["problem_summary"]}
+{problem_summary}
 
 ---
 
@@ -1660,8 +1797,8 @@ def create_problem_readme(
 
 | Metric | Complexity |
 |---|---|
-| Time | **{analysis["time_complexity"]}** |
-| Space | **{analysis["space_complexity"]}** |
+| Time | **{analysis["time_complexity"]} — {analysis["time_explanation"]}** |
+| Space | **{analysis["space_complexity"]} — {analysis["space_explanation"]}** |
 
 ### 📊 LeetCode Performance
 
@@ -1692,6 +1829,71 @@ def create_problem_readme(
 ---
 
 ⭐ Automatically synchronized from an accepted LeetCode submission.
+"""
+
+    solution_sections = "\n---\n\n".join(
+        _solution_block(question, solution, index)
+        for index, solution in enumerate(
+            solutions,
+            start=1,
+        )
+    )
+
+    languages = sorted(
+        {
+            language_name(solution["submission"].get("lang"))
+            for solution in solutions
+        }
+    )
+    language_display = " · ".join(languages)
+
+    takeaway = first_analysis["key_takeaway"]
+
+    if len(solutions) > 1:
+        takeaway = (
+            f"This repository currently contains {len(solutions)} unique approaches for this problem. "
+            "Comparing them makes the trade-off between their time, space, and implementation ideas easier to see."
+        )
+
+    return f"""# 🧩 {number}. {title}
+
+> **Difficulty:** {difficulty_badge(difficulty)}  
+> **Topics:** {tags_display}  
+> **Solutions:** {len(solutions)} unique approach(es)  
+> **Languages:** {language_display}
+
+[🔗 View Problem on LeetCode]({leetcode_url})
+
+---
+
+## 📝 Problem
+
+{problem_summary}
+
+---
+
+## 🛠️ Solutions
+
+This folder contains **{len(solutions)} unique accepted implementation(s)** for the same problem. Repeated submissions of identical code are ignored automatically.
+
+{solution_sections}
+
+---
+
+## 🎯 Key Takeaway
+
+{takeaway}
+
+---
+
+## 🔗 Useful Links
+
+- [LeetCode Problem]({leetcode_url})
+- [Solutions in this folder](.)
+
+---
+
+⭐ Automatically synchronized from accepted LeetCode submissions.
 """
 
 
@@ -1787,7 +1989,8 @@ def update_main_readme():
             f"[{item.get('title', 'Unknown')}]"
             f"(solutions/{item.get('folder', '')}/) | "
             f"{difficulty_badge(item.get('difficulty'))} | "
-            f"{item.get('language', 'Unknown')} |"
+            f"{item.get('language', 'Unknown')} | "
+            f"{item.get('solution_count', 1)} |"
         )
 
     if not rows:
@@ -1817,8 +2020,8 @@ def update_main_readme():
 
 ## 📚 Problem Archive
 
-| # | Problem | Difficulty | Language |
-|---:|---|---|---|
+| # | Problem | Difficulty | Language | Approaches |
+|---:|---|---|---|---:|
 {table}
 
 ---
@@ -1837,7 +2040,7 @@ After an accepted submission is detected, the workflow automatically:
 6. Explains why the solution works.
 7. Determines the algorithmic pattern.
 8. Documents time and space complexity.
-9. Creates the solution folder.
+9. Creates or updates the solution folder, keeping only unique implementations.
 10. Updates this archive.
 
 ### Workflow
@@ -1868,57 +2071,193 @@ patterns, and reasoning behind each solution.
 # Import a submission
 # ============================================================
 
-def import_submission(
-    submission
+def read_metadata(
+    folder
 ):
-    submission_id = str(
-        submission.get("id")
-    )
+    path = folder / "metadata.json"
 
-    title = submission.get(
-        "title",
-        "Unknown",
-    )
+    if not path.exists():
+        return {}
 
-    slug = submission.get(
-        "titleSlug",
-        "",
-    )
+    try:
+        return json.loads(
+            path.read_text(encoding="utf-8")
+        )
+    except Exception:
+        return {}
 
-    print(
-        f"\n🔎 Processing: {title}"
-    )
 
-    question = get_question(
-        slug
-    )
+def canonicalize_code(code):
+    """Normalize harmless formatting differences for duplicate detection."""
+    normalized = (code or "").replace("\r\n", "\n").replace("\r", "\n")
+    lines = [
+        line.rstrip()
+        for line in normalized.split("\n")
+        if line.strip()
+    ]
+    return "\n".join(lines).strip()
 
-    details = get_submission_details(
-        submission_id
-    )
 
-    code = details.get(
-        "code"
+def solution_fingerprint(code, language):
+    """Create a stable fingerprint for a submitted implementation."""
+    payload = (
+        str(language_name(language)).strip()
+        + "\0"
+        + canonicalize_code(code)
     )
+    return hashlib.sha256(
+        payload.encode("utf-8")
+    ).hexdigest()
 
-    if not code:
-        raise RuntimeError(
-            "LeetCode returned no source code."
+
+def solution_files_in_folder(folder):
+    """Return source files that belong to stored solutions."""
+    files = []
+    for path in folder.iterdir():
+        if not path.is_file():
+            continue
+        if path.name in {"README.md", "metadata.json"}:
+            continue
+        if path.name.startswith("solution"):
+            files.append(path)
+    return sorted(files)
+
+
+def existing_solution_fingerprints(folder):
+    """Hash every stored solution using its recorded language."""
+    fingerprints = {}
+    if not folder.exists():
+        return fingerprints
+
+    metadata = read_metadata(folder)
+    solution_languages = {}
+
+    for item in metadata.get("solutions", []) if isinstance(metadata.get("solutions"), list) else []:
+        if isinstance(item, dict) and item.get("filename"):
+            solution_languages[item["filename"]] = item.get("language", "Unknown")
+
+    default_language = metadata.get("language", "Unknown")
+
+    for path in solution_files_in_folder(folder):
+        try:
+            code = path.read_text(encoding="utf-8")
+        except Exception:
+            continue
+
+        language = solution_languages.get(
+            path.name,
+            default_language,
         )
 
-    language = language_name(
-        details.get("lang")
-    )
+        if not language or language == "Unknown":
+            language = path.suffix.lstrip(".") or "Unknown"
+
+        fingerprints[path.name] = solution_fingerprint(
+            code,
+            language,
+        )
+
+    return fingerprints
+
+
+def next_solution_filename(folder, extension):
+    """Use solution.ext for the first solution, then solution-2.ext, solution-3.ext, etc."""
+    first = folder / f"solution.{extension}"
+    if not first.exists():
+        return first.name
+
+    index = 2
+    while True:
+        candidate = folder / f"solution-{index}.{extension}"
+        if not candidate.exists():
+            return candidate.name
+        index += 1
+
+
+def migrate_solution_metadata(
+    folder,
+    question,
+):
+    """Convert old single-solution metadata into the new solutions list."""
+    metadata = read_metadata(folder)
+    if not metadata:
+        return {
+            "number": int(question["questionFrontendId"]),
+            "title": question["title"],
+            "difficulty": question["difficulty"],
+            "language": "Unknown",
+            "folder": folder.name,
+            "slug": question["titleSlug"],
+            "solutions": [],
+        }
+
+    if isinstance(metadata.get("solutions"), list):
+        return metadata
+
+    solutions = []
+    source_files = solution_files_in_folder(folder)
+
+    if source_files:
+        path = source_files[0]
+        try:
+            code = path.read_text(encoding="utf-8")
+        except Exception:
+            code = ""
+
+        old_language = metadata.get("language") or "Unknown"
+        solutions.append(
+            {
+                "number": 1,
+                "filename": path.name,
+                "language": old_language,
+                "submission_id": metadata.get("submission_id"),
+                "solution_hash": solution_fingerprint(
+                    code,
+                    old_language,
+                ),
+                "runtime": metadata.get("runtime"),
+                "runtime_display": metadata.get("runtime_display"),
+                "memory": metadata.get("memory"),
+                "memory_display": metadata.get("memory_display"),
+            }
+        )
+
+    metadata["solutions"] = solutions
+    metadata["solution_count"] = len(solutions)
+    return metadata
+
+
+def build_solution_record(
+    details,
+    filename,
+    submission_id,
+    fingerprint,
+    number,
+):
+    return {
+        "number": number,
+        "filename": filename,
+        "language": language_name(details.get("lang")),
+        "submission_id": submission_id,
+        "solution_hash": fingerprint,
+        "runtime": details.get("runtime"),
+        "runtime_display": details.get("runtimeDisplay"),
+        "memory": details.get("memory"),
+        "memory_display": details.get("memoryDisplay"),
+    }
+
+
+def analyze_submission(
+    question,
+    details,
+):
+    code = details.get("code")
+    if not code:
+        raise RuntimeError("LeetCode returned no source code.")
 
     tags = [
-        tag.get(
-            "name",
-            "",
-        )
-        for tag in question.get(
-            "topicTags",
-            [],
-        )
+        tag.get("name", "")
+        for tag in question.get("topicTags", [])
         if tag.get("name")
     ]
 
@@ -1929,319 +2268,234 @@ def import_submission(
     )
 
     if analysis:
-        explanation_source = (
-            "AI-assisted analysis"
-        )
+        print("   🧠 Explanation: AI-assisted analysis")
+        return analysis
 
-    else:
-        analysis = normalize_fallback_analysis(
-            fallback_analysis(
-                code,
-                tags,
-                question,
-            ),
+    analysis = normalize_fallback_analysis(
+        fallback_analysis(
+            code,
+            tags,
             question,
-        )
-
-        explanation_source = (
-            "deterministic fallback analysis"
-        )
-
-    print(
-        f"   🧠 Explanation: "
-        f"{explanation_source}"
-    )
-
-    number = int(
-        question[
-            "questionFrontendId"
-        ]
-    )
-
-    folder_name = (
-        f"{number:04d}-"
-        f"{safe_slug(question['title'])}"
-    )
-
-    folder = (
-        SOLUTIONS_DIR
-        / folder_name
-    )
-
-    folder.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    extension = file_extension(
-        details.get("lang")
-    )
-
-    code_filename = (
-        f"solution.{extension}"
-    )
-
-    code_path = (
-        folder
-        / code_filename
-    )
-
-    code_path.write_text(
-        code,
-        encoding="utf-8",
-    )
-
-    readme = create_problem_readme(
+        ),
         question,
-        {
-            "lang": language,
-            "runtime": details.get(
-                "runtime"
-            ),
-            "runtimeDisplay": details.get(
-                "runtimeDisplay"
-            ),
-            "memory": details.get(
-                "memory"
-            ),
-            "memoryDisplay": details.get(
-                "memoryDisplay"
-            ),
-        },
-        analysis,
-        code_filename,
     )
 
-    (
-        folder
-        / "README.md"
-    ).write_text(
-        readme,
-        encoding="utf-8",
-    )
-
-    metadata = {
-        "number": number,
-        "title": question[
-            "title"
-        ],
-        "difficulty": question[
-            "difficulty"
-        ],
-        "language": language,
-        "folder": folder_name,
-        "slug": question[
-            "titleSlug"
-        ],
-        "submission_id": submission_id,
-        "runtime": details.get(
-            "runtime"
-        ),
-        "runtime_display": details.get(
-            "runtimeDisplay"
-        ),
-        "memory": details.get(
-            "memory"
-        ),
-        "memory_display": details.get(
-            "memoryDisplay"
-        ),
-    }
-
-    (
-        folder
-        / "metadata.json"
-    ).write_text(
-        json.dumps(
-            metadata,
-            indent=2,
-            ensure_ascii=False,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
-
-    print(
-        f"   ✅ Saved: {folder}"
-    )
+    print("   🧠 Explanation: deterministic fallback analysis")
+    return analysis
 
 
-# ============================================================
-# Refresh existing README
-# ============================================================
-
-def refresh_existing_submission(
-    submission
+def solution_readme_block(
+    solution,
+    index,
+    heading_prefix="###",
 ):
-    title = submission.get(
-        "title",
-        "Unknown",
+    """Build one additional solution section without rewriting earlier README content."""
+    analysis = solution["analysis"]
+    submission = solution["submission"]
+    code_filename = solution["code_filename"]
+    runtime, memory = format_runtime_memory(submission)
+    language = language_name(submission.get("lang"))
+    pattern = analysis.get("pattern", f"Solution {index}")
+
+    approach_steps = "\n".join(
+        f"{step_index}. {step}"
+        for step_index, step in enumerate(
+            analysis["approach"],
+            start=1,
+        )
     )
 
-    slug = submission.get(
-        "titleSlug",
-        "",
+    return f"""{heading_prefix} 🔀 Solution {index} — {pattern}
+
+> **Language:** {language}  
+> **Runtime:** `{runtime}`  
+> **Memory:** `{memory}`
+
+#### 💡 Intuition
+
+{analysis["intuition"]}
+
+#### 🧠 Algorithmic Pattern
+
+> **{pattern}**
+
+#### 🚀 Approach
+
+{approach_steps}
+
+#### ✅ Why This Works
+
+{analysis["why_it_works"]}
+
+#### ⏱️ Complexity
+
+| Metric | Complexity |
+|---|---|
+| Time | **{analysis["time_complexity"]} — {analysis["time_explanation"]}** |
+| Space | **{analysis["space_complexity"]} — {analysis["space_explanation"]}** |
+
+#### 💻 Solution
+
+[View the complete {language} solution →](./{code_filename})
+"""
+
+
+def append_solution_to_readme(
+    readme_path,
+    solution,
+    index,
+):
+    """Append an additional unique solution while preserving the existing README."""
+    existing = readme_path.read_text(encoding="utf-8") if readme_path.exists() else ""
+    block = solution_readme_block(
+        solution,
+        index,
     )
 
-    submission_id = str(
-        submission.get("id")
+    # Keep Useful Links and the synchronization footer at the bottom.
+    marker = "\n## 🔗 Useful Links\n"
+    if marker in existing:
+        updated = (
+            existing.split(marker, 1)[0].rstrip()
+            + "\n\n---\n"
+            + block.lstrip().rstrip()
+            + "\n"
+            + marker
+            + existing.split(marker, 1)[1]
+        )
+    else:
+        updated = existing.rstrip() + "\n\n---\n" + block.lstrip().rstrip() + "\n"
+
+    readme_path.write_text(
+        updated,
+        encoding="utf-8",
     )
 
-    print(
-        f"\n🔄 Refreshing README: {title}"
-    )
+def import_submission(
+    submission,
+):
+    submission_id = str(submission.get("id"))
+    title = submission.get("title", "Unknown")
+    slug = submission.get("titleSlug", "")
 
-    question = get_question(
-        slug
-    )
+    print(f"\n🔎 Processing: {title}")
 
-    details = get_submission_details(
-        submission_id
-    )
-
-    code = details.get(
-        "code"
-    )
+    question = get_question(slug)
+    details = get_submission_details(submission_id)
+    code = details.get("code")
 
     if not code:
-        raise RuntimeError(
-            "No source code returned."
-        )
+        raise RuntimeError("LeetCode returned no source code.")
 
-    tags = [
-        tag.get(
-            "name",
-            "",
-        )
-        for tag in question.get(
-            "topicTags",
-            [],
-        )
-        if tag.get("name")
-    ]
-
-    analysis = ai_analysis(
-        question,
-        code,
-        tags,
-    )
-
-    if not analysis:
-        analysis = normalize_fallback_analysis(
-            fallback_analysis(
-                code,
-                tags,
-                question,
-            ),
-            question,
-        )
-
-    number = int(
-        question[
-            "questionFrontendId"
-        ]
-    )
-
+    number = int(question["questionFrontendId"])
     folder_name = (
         f"{number:04d}-"
         f"{safe_slug(question['title'])}"
     )
+    folder = SOLUTIONS_DIR / folder_name
+    folder.mkdir(parents=True, exist_ok=True)
 
-    folder = (
-        SOLUTIONS_DIR
-        / folder_name
+    fingerprint = solution_fingerprint(
+        code,
+        details.get("lang"),
     )
 
-    folder.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
+    existing = existing_solution_fingerprints(folder)
+    if fingerprint in set(existing.values()):
+        duplicate_file = next(
+            name
+            for name, value in existing.items()
+            if value == fingerprint
+        )
+        print(
+            f"   ⏭️ Duplicate solution detected; "
+            f"matches {duplicate_file}. Skipping."
+        )
+        return "duplicate"
 
-    extension = file_extension(
-        details.get("lang")
-    )
+    analysis = analyze_submission(question, details)
 
-    code_path = (
-        folder
-        / f"solution.{extension}"
+    extension = file_extension(details.get("lang"))
+    code_filename = next_solution_filename(
+        folder,
+        extension,
     )
-
+    code_path = folder / code_filename
     code_path.write_text(
         code,
         encoding="utf-8",
     )
 
-    readme = create_problem_readme(
+    metadata = migrate_solution_metadata(
+        folder,
         question,
-        {
-            "lang": details.get(
-                "lang"
-            ),
-            "runtime": details.get(
-                "runtime"
-            ),
-            "runtimeDisplay": details.get(
-                "runtimeDisplay"
-            ),
-            "memory": details.get(
-                "memory"
-            ),
-            "memoryDisplay": details.get(
-                "memoryDisplay"
-            ),
-        },
-        analysis,
-        code_path.name,
     )
 
-    (
-        folder
-        / "README.md"
-    ).write_text(
-        readme,
-        encoding="utf-8",
-    )
+    previous_count = len(metadata.get("solutions", []))
+    solution_number = previous_count + 1
 
-    metadata = read_metadata(
-        folder
+    solution_record = build_solution_record(
+        details,
+        code_filename,
+        submission_id,
+        fingerprint,
+        solution_number,
     )
+    metadata.setdefault("solutions", []).append(solution_record)
 
     metadata.update(
         {
             "number": number,
-            "title": question[
-                "title"
-            ],
-            "difficulty": question[
-                "difficulty"
-            ],
-            "language": language_name(
-                details.get("lang")
-            ),
+            "title": question["title"],
+            "difficulty": question["difficulty"],
+            "language": metadata.get("language") or language_name(details.get("lang")),
             "folder": folder_name,
-            "slug": question[
-                "titleSlug"
-            ],
+            "slug": question["titleSlug"],
             "submission_id": submission_id,
-            "runtime": details.get(
-                "runtime"
-            ),
-            "runtimeDisplay": details.get(
-                "runtimeDisplay"
-            ),
-            "memory": details.get(
-                "memory"
-            ),
-            "memoryDisplay": details.get(
-                "memoryDisplay"
-            ),
+            "runtime": details.get("runtime"),
+            "runtime_display": details.get("runtimeDisplay"),
+            "memory": details.get("memory"),
+            "memory_display": details.get("memoryDisplay"),
+            "solution_count": len(metadata["solutions"]),
         }
     )
 
-    (
-        folder
-        / "metadata.json"
-    ).write_text(
+    solution_for_readme = {
+        "analysis": analysis,
+        "submission": {
+            "lang": details.get("lang"),
+            "runtime": details.get("runtime"),
+            "runtimeDisplay": details.get("runtimeDisplay"),
+            "memory": details.get("memory"),
+            "memoryDisplay": details.get("memoryDisplay"),
+        },
+        "code_filename": code_filename,
+    }
+
+    readme_path = folder / "README.md"
+
+    if previous_count == 0:
+        # First unique solution: use the exact single-solution README format.
+        readme = create_problem_readme(
+            question,
+            submission=solution_for_readme["submission"],
+            analysis=analysis,
+            code_filename=code_filename,
+        )
+        readme_path.write_text(
+            readme,
+            encoding="utf-8",
+        )
+    else:
+        # Additional unique solution: preserve the existing README and append
+        # the new approach. This protects manually improved explanations.
+        append_solution_to_readme(
+            readme_path,
+            solution_for_readme,
+            solution_number,
+        )
+
+    (folder / "metadata.json").write_text(
         json.dumps(
             metadata,
             indent=2,
@@ -2252,34 +2506,14 @@ def refresh_existing_submission(
     )
 
     print(
-        f"   ✅ Refreshed: {folder}"
+        f"   ✅ Saved unique solution {solution_number}: "
+        f"{folder / code_filename}"
     )
-
-
-def read_metadata(
-    folder
-):
-    path = (
-        folder
-        / "metadata.json"
-    )
-
-    if not path.exists():
-        return {}
-
-    try:
-        return json.loads(
-            path.read_text(
-                encoding="utf-8"
-            )
-        )
-
-    except Exception:
-        return {}
+    return "imported"
 
 
 def repair_placeholder_readmes():
-    """Repair older generic READMEs once, without refreshing good entries."""
+    """Repair older generic READMEs once, without touching good entries."""
     if not SOLUTIONS_DIR.exists():
         return 0
 
@@ -2301,7 +2535,6 @@ def repair_placeholder_readmes():
         except Exception:
             continue
 
-        # Only repair the READMEs created by the old low-information fallback.
         placeholder_markers = (
             "Solve the problem using the submitted implementation.",
             "Recognize the algorithmic pattern and maintain the state required by the implementation.",
@@ -2318,45 +2551,48 @@ def repair_placeholder_readmes():
 
         try:
             print(
-                f"\n🛠️ Repairing placeholder README: {metadata.get('title', folder.name)}"
+                f"\n🛠️ Repairing placeholder README: "
+                f"{metadata.get('title', folder.name)}"
             )
 
             question = get_question(slug)
             details = get_submission_details(str(submission_id))
             code = details.get("code")
-
             if not code:
                 continue
-
-            tags = [
-                tag.get("name", "")
-                for tag in question.get("topicTags", [])
-                if tag.get("name")
-            ]
 
             analysis = normalize_fallback_analysis(
                 fallback_analysis(
                     code,
-                    tags,
+                    [
+                        tag.get("name", "")
+                        for tag in question.get("topicTags", [])
+                        if tag.get("name")
+                    ],
                     question,
                 ),
                 question,
             )
 
             extension = file_extension(details.get("lang"))
-            code_filename = f"solution.{extension}"
+            existing_files = solution_files_in_folder(folder)
+            code_filename = (
+                existing_files[0].name
+                if existing_files
+                else f"solution.{extension}"
+            )
 
             readme = create_problem_readme(
                 question,
-                {
+                submission={
                     "lang": details.get("lang"),
                     "runtime": details.get("runtime"),
                     "runtimeDisplay": details.get("runtimeDisplay"),
                     "memory": details.get("memory"),
                     "memoryDisplay": details.get("memoryDisplay"),
                 },
-                analysis,
-                code_filename,
+                analysis=analysis,
+                code_filename=code_filename,
             )
 
             readme_path.write_text(
@@ -2364,6 +2600,10 @@ def repair_placeholder_readmes():
                 encoding="utf-8",
             )
 
+            metadata["solution_count"] = max(
+                1,
+                metadata.get("solution_count", 1),
+            )
             metadata["runtime"] = details.get("runtime")
             metadata["runtime_display"] = details.get("runtimeDisplay")
             metadata["memory"] = details.get("memory")
@@ -2393,9 +2633,7 @@ def repair_placeholder_readmes():
 # ============================================================
 
 def main():
-    print(
-        "🚀 Starting LeetCode synchronization..."
-    )
+    print("🚀 Starting LeetCode synchronization...")
 
     SOLUTIONS_DIR.mkdir(
         parents=True,
@@ -2418,10 +2656,7 @@ def main():
     )
 
     username = get_username()
-
-    print(
-        f"👤 LeetCode user: {username}"
-    )
+    print(f"👤 LeetCode user: {username}")
 
     submissions = get_recent_accepted(
         username,
@@ -2434,15 +2669,14 @@ def main():
     )
 
     imported = 0
+    duplicate = 0
     skipped = 0
     failed = 0
 
     new_submissions = []
 
     for submission in submissions:
-        submission_id = str(
-            submission.get("id")
-        )
+        submission_id = str(submission.get("id"))
 
         if not submission_id:
             continue
@@ -2451,35 +2685,27 @@ def main():
             skipped += 1
             continue
 
-        new_submissions.append(
-            submission
-        )
+        new_submissions.append(submission)
 
     print(
         f"🆕 New accepted submissions to process: "
         f"{len(new_submissions)}"
     )
 
-    for submission in reversed(
-        new_submissions
-    ):
-        submission_id = str(
-            submission.get("id")
-        )
-
-        if not submission_id:
-            continue
+    for submission in reversed(new_submissions):
+        submission_id = str(submission.get("id"))
 
         try:
-            import_submission(
-                submission
-            )
+            result = import_submission(submission)
 
-            processed_ids.add(
-                submission_id
-            )
+            # Whether imported or duplicate, this submission ID has now been
+            # examined and should not be re-processed on the next run.
+            processed_ids.add(submission_id)
 
-            imported += 1
+            if result == "duplicate":
+                duplicate += 1
+            else:
+                imported += 1
 
         except Exception as exc:
             failed += 1
@@ -2488,50 +2714,28 @@ def main():
                 f"   ❌ Failed: "
                 f"{submission.get('title', 'Unknown')}"
             )
+            print(f"      {exc}")
 
-            print(
-                f"      {exc}"
-            )
-
-    state[
-        "processed_submission_ids"
-    ] = sorted(
+    state["processed_submission_ids"] = sorted(
         processed_ids
     )
-
-    save_state(
-        state
-    )
-
+    save_state(state)
     update_main_readme()
 
-    print(
-        "\n📊 Synchronization summary"
-    )
-
-    print(
-        f"   🆕 Imported: {imported}"
-    )
-
-    print(
-        f"   ⏭️ Skipped already processed: {skipped}"
-    )
-
-    print(
-        f"   ❌ Failed: {failed}"
-    )
+    print("\n📊 Synchronization summary")
+    print(f"   🆕 Imported unique solutions: {imported}")
+    print(f"   ♻️ Duplicate solutions skipped: {duplicate}")
+    print(f"   ⏭️ Skipped already processed: {skipped}")
+    print(f"   ❌ Failed: {failed}")
 
     if failed:
         print(
-            "\n❌ Synchronization completed "
-            "with errors."
+            "\n❌ Synchronization completed with errors."
         )
-
         sys.exit(1)
 
     print(
-        "\n✅ Synchronization completed "
-        "successfully."
+        "\n✅ Synchronization completed successfully."
     )
 
 
