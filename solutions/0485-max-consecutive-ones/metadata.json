@@ -1,0 +1,27 @@
+{
+  "number": 485,
+  "title": "Max Consecutive Ones",
+  "difficulty": "Easy",
+  "language": "Unknown",
+  "folder": "0485-max-consecutive-ones",
+  "slug": "max-consecutive-ones",
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2147931336",
+      "solution_hash": "e53aad729cbdd81a70066bfda2a352edaa042fcd5a3ff78f97771caac1e847b6",
+      "runtime": 2,
+      "runtime_display": "2 ms",
+      "memory": 52640000,
+      "memory_display": "52.6 MB"
+    }
+  ],
+  "submission_id": "2147931336",
+  "runtime": 2,
+  "runtime_display": "2 ms",
+  "memory": 52640000,
+  "memory_display": "52.6 MB",
+  "solution_count": 1
+}
