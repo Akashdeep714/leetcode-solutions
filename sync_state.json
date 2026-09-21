@@ -22,5 +22,142 @@
     "2147931336",
     "2147984412",
     "2147998721"
-  ]
+  ],
+  "historical_backfill": {
+    "complete": false,
+    "problems": [
+      {
+        "titleSlug": "palindrome-number",
+        "title": "Palindrome Number",
+        "frontendId": "9",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-06-09T21:54:35+00:00"
+      },
+      {
+        "titleSlug": "power-of-two",
+        "title": "Power of Two",
+        "frontendId": "231",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-06-10T22:33:52+00:00"
+      },
+      {
+        "titleSlug": "missing-number",
+        "title": "Missing Number",
+        "frontendId": "268",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-06-12T13:36:59+00:00"
+      },
+      {
+        "titleSlug": "remove-duplicates-from-sorted-array",
+        "title": "Remove Duplicates from Sorted Array",
+        "frontendId": "26",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-12T18:14:28+00:00"
+      },
+      {
+        "titleSlug": "best-time-to-buy-and-sell-stock",
+        "title": "Best Time to Buy and Sell Stock",
+        "frontendId": "121",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-12T19:11:11+00:00"
+      },
+      {
+        "titleSlug": "best-time-to-buy-and-sell-stock-ii",
+        "title": "Best Time to Buy and Sell Stock II",
+        "frontendId": "122",
+        "difficulty": "MEDIUM",
+        "lastSubmittedAt": "2026-09-13T04:24:59+00:00"
+      },
+      {
+        "titleSlug": "rotate-array",
+        "title": "Rotate Array",
+        "frontendId": "189",
+        "difficulty": "MEDIUM",
+        "lastSubmittedAt": "2026-09-13T05:44:18+00:00"
+      },
+      {
+        "titleSlug": "contains-duplicate",
+        "title": "Contains Duplicate",
+        "frontendId": "217",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-14T17:05:18+00:00"
+      },
+      {
+        "titleSlug": "single-number",
+        "title": "Single Number",
+        "frontendId": "136",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-14T17:42:35+00:00"
+      },
+      {
+        "titleSlug": "intersection-of-two-arrays",
+        "title": "Intersection of Two Arrays",
+        "frontendId": "349",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-15T18:32:56+00:00"
+      },
+      {
+        "titleSlug": "intersection-of-two-arrays-ii",
+        "title": "Intersection of Two Arrays II",
+        "frontendId": "350",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-15T20:00:52+00:00"
+      },
+      {
+        "titleSlug": "plus-one",
+        "title": "Plus One",
+        "frontendId": "66",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-16T18:13:11+00:00"
+      },
+      {
+        "titleSlug": "move-zeroes",
+        "title": "Move Zeroes",
+        "frontendId": "283",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-16T19:06:20+00:00"
+      },
+      {
+        "titleSlug": "two-sum",
+        "title": "Two Sum",
+        "frontendId": "1",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-17T18:32:31+00:00"
+      },
+      {
+        "titleSlug": "valid-sudoku",
+        "title": "Valid Sudoku",
+        "frontendId": "36",
+        "difficulty": "MEDIUM",
+        "lastSubmittedAt": "2026-09-19T16:59:26+00:00"
+      },
+      {
+        "titleSlug": "rotate-image",
+        "title": "Rotate Image",
+        "frontendId": "48",
+        "difficulty": "MEDIUM",
+        "lastSubmittedAt": "2026-09-19T19:06:45+00:00"
+      },
+      {
+        "titleSlug": "max-consecutive-ones",
+        "title": "Max Consecutive Ones",
+        "frontendId": "485",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-20T17:21:19+00:00"
+      },
+      {
+        "titleSlug": "find-numbers-with-even-number-of-digits",
+        "title": "Find Numbers with Even Number of Digits",
+        "frontendId": "1295",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-20T18:26:34+00:00"
+      }
+    ],
+    "problem_index": 5,
+    "processed_submission_ids": [],
+    "day": "2026-09-21",
+    "problems_completed_today": 5,
+    "gemini_requests_used_today": 0,
+    "gemini_blocked_today": false
+  }
 }
