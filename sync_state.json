@@ -151,6 +151,13 @@
         "frontendId": "1295",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-09-20T18:26:34+00:00"
+      },
+      {
+        "titleSlug": "squares-of-a-sorted-array",
+        "title": "Squares of a Sorted Array",
+        "frontendId": "977",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-21T17:50:03+00:00"
       }
     ],
     "problem_index": 5,
