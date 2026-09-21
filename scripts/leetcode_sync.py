@@ -3,6 +3,7 @@ import json
 import os
 import re
 import sys
+import time
 from pathlib import Path
 
 import requests
@@ -32,6 +33,34 @@ GEMINI_API_KEY = os.getenv(
     "GEMINI_API_KEY",
     "",
 ).strip()
+
+
+# Historical backfill controls.
+# These limits are persisted in sync_state.json, so a workflow that runs
+# every 15 minutes still processes only a small daily batch.
+MAX_HISTORICAL_PROBLEMS_PER_DAY = 5
+MAX_GEMINI_REQUESTS_PER_DAY = 8
+
+# Keep LeetCode requests gentle rather than hammering the GraphQL endpoint.
+LEETCODE_REQUEST_DELAY_SECONDS = 0.35
+
+# Number of submission-history rows requested per page.
+SUBMISSION_PAGE_SIZE = 40
+
+# Large fallback window used only when the authenticated solved-problem
+# progress endpoint is unavailable.
+RECENT_AC_FALLBACK_LIMIT = 2000
+
+
+class GeminiBackfillPaused(RuntimeError):
+    """Raised when historical backfill must wait for a later run/day."""
+
+
+GEMINI_RUNTIME = {
+    "requests_used": 0,
+    "blocked": False,
+    "last_failure": "",
+}
 
 
 # ============================================================
@@ -156,6 +185,59 @@ query recentAcSubmissions(
 """
 
 
+USER_PROGRESS_QUESTIONS_QUERY = """
+query userProgressQuestionList(
+    $filters: UserProgressQuestionListInput
+) {
+    userProgressQuestionList(
+        filters: $filters
+    ) {
+        totalNum
+        questions {
+            frontendId
+            title
+            titleSlug
+            difficulty
+            lastSubmittedAt
+            topicTags {
+                name
+                slug
+            }
+        }
+    }
+}
+"""
+
+
+QUESTION_SUBMISSION_LIST_QUERY = """
+query questionSubmissionList(
+    $offset: Int!,
+    $limit: Int!,
+    $lastKey: String,
+    $questionSlug: String!
+) {
+    questionSubmissionList(
+        offset: $offset,
+        limit: $limit,
+        lastKey: $lastKey,
+        questionSlug: $questionSlug
+    ) {
+        lastKey
+        hasNext
+        submissions {
+            id
+            statusDisplay
+            lang
+            runtime
+            timestamp
+            memory
+            isPending
+        }
+    }
+}
+"""
+
+
 SUBMISSION_DETAILS_QUERY = """
 query submissionDetails(
     $submissionId: Int!
@@ -203,11 +285,28 @@ query questionData(
 # State
 # ============================================================
 
+def default_historical_state():
+    return {
+        "complete": False,
+        "problems": [],
+        "problem_index": 0,
+        "processed_submission_ids": [],
+        "day": "",
+        "problems_completed_today": 0,
+        "gemini_requests_used_today": 0,
+        "gemini_blocked_today": False,
+    }
+
+
 def load_state():
+    """Load state while remaining compatible with the previous format."""
+    default = {
+        "processed_submission_ids": [],
+        "historical_backfill": default_historical_state(),
+    }
+
     if not STATE_FILE.exists():
-        return {
-            "processed_submission_ids": []
-        }
+        return default
 
     try:
         data = json.loads(
@@ -216,25 +315,53 @@ def load_state():
             )
         )
 
-        ids = data.get(
+        if not isinstance(data, dict):
+            return default
+
+        processed_ids = data.get(
             "processed_submission_ids",
             [],
         )
+        if not isinstance(processed_ids, list):
+            processed_ids = []
 
-        if not isinstance(ids, list):
-            ids = []
+        historical = data.get(
+            "historical_backfill",
+            {},
+        )
+        if not isinstance(historical, dict):
+            historical = {}
+
+        merged_historical = default_historical_state()
+        merged_historical.update(historical)
+
+        if not isinstance(
+            merged_historical.get("problems"),
+            list,
+        ):
+            merged_historical["problems"] = []
+
+        if not isinstance(
+            merged_historical.get("processed_submission_ids"),
+            list,
+        ):
+            merged_historical["processed_submission_ids"] = []
+
+        merged_historical["processed_submission_ids"] = [
+            str(x)
+            for x in merged_historical["processed_submission_ids"]
+        ]
 
         return {
             "processed_submission_ids": [
                 str(x)
-                for x in ids
-            ]
+                for x in processed_ids
+            ],
+            "historical_backfill": merged_historical,
         }
 
     except Exception:
-        return {
-            "processed_submission_ids": []
-        }
+        return default
 
 
 def save_state(state):
@@ -248,6 +375,53 @@ def save_state(state):
         encoding="utf-8",
     )
 
+
+def reset_daily_historical_budgets(state):
+    """
+    Reset daily counters when the UTC calendar day changes.
+
+    Because the GitHub Action may run every 15 minutes, these persisted
+    counters prevent the historical batch from being repeated every run.
+    """
+    historical = state["historical_backfill"]
+    day_key = time.strftime(
+        "%Y-%m-%d",
+        time.gmtime(),
+    )
+
+    if historical.get("day") != day_key:
+        historical["day"] = day_key
+        historical["problems_completed_today"] = 0
+        historical["gemini_requests_used_today"] = 0
+        historical["gemini_blocked_today"] = False
+
+    GEMINI_RUNTIME["requests_used"] = int(
+        historical.get(
+            "gemini_requests_used_today",
+            0,
+        )
+        or 0
+    )
+
+    GEMINI_RUNTIME["blocked"] = bool(
+        historical.get(
+            "gemini_blocked_today",
+            False,
+        )
+    )
+
+    GEMINI_RUNTIME["last_failure"] = ""
+
+
+def sync_runtime_to_state(state):
+    """Persist Gemini's daily counters in sync_state.json."""
+    state["historical_backfill"][
+        "gemini_requests_used_today"
+    ] = GEMINI_RUNTIME["requests_used"]
+
+    state["historical_backfill"][
+        "gemini_blocked_today"
+    ] = GEMINI_RUNTIME["blocked"]
 
 # ============================================================
 # LeetCode API functions
@@ -285,7 +459,7 @@ def get_username():
 
 def get_recent_accepted(
     username,
-    limit=2000,
+    limit=RECENT_AC_FALLBACK_LIMIT,
 ):
     data = graphql(
         RECENT_ACCEPTED_QUERY,
@@ -302,6 +476,376 @@ def get_recent_accepted(
         )
         or []
     )
+
+
+def get_all_solved_problems():
+    """
+    Discover every solved problem available from the authenticated
+    LeetCode progress endpoint.
+    """
+    all_questions = []
+    skip = 0
+    page_size = 1000
+
+    while True:
+        data = graphql(
+            USER_PROGRESS_QUESTIONS_QUERY,
+            {
+                "filters": {
+                    "questionStatus": "SOLVED",
+                    "skip": skip,
+                    "limit": page_size,
+                }
+            },
+            operation_name="userProgressQuestionList",
+        )
+
+        result = data.get(
+            "userProgressQuestionList"
+        ) or {}
+
+        questions = result.get(
+            "questions"
+        ) or []
+
+        all_questions.extend(
+            questions
+        )
+
+        total = int(
+            result.get(
+                "totalNum",
+                len(all_questions),
+            )
+            or len(all_questions)
+        )
+
+        if (
+            not questions
+            or len(all_questions) >= total
+        ):
+            break
+
+        skip += len(questions)
+
+        if len(questions) < page_size:
+            break
+
+        time.sleep(
+            LEETCODE_REQUEST_DELAY_SECONDS
+        )
+
+    by_slug = {}
+
+    for question in all_questions:
+        slug = str(
+            question.get(
+                "titleSlug",
+                "",
+            )
+        ).strip()
+
+        if slug:
+            by_slug[slug] = question
+
+    questions = list(
+        by_slug.values()
+    )
+
+    # Oldest last-touched problem first gives a stable backfill order.
+    questions.sort(
+        key=lambda question: (
+            str(
+                question.get(
+                    "lastSubmittedAt",
+                    "",
+                )
+            ),
+            int(
+                question.get(
+                    "frontendId",
+                    0,
+                )
+                or 0
+            ),
+            str(
+                question.get(
+                    "titleSlug",
+                    "",
+                )
+            ),
+        )
+    )
+
+    return questions
+
+
+def discover_solved_problems(username):
+    """
+    Prefer the authenticated solved-problem list. Fall back to recent AC
+    submissions if that endpoint is unavailable.
+    """
+    try:
+        questions = get_all_solved_problems()
+
+        if questions:
+            print(
+                f"📚 Discovered {len(questions)} solved problem(s) "
+                "from LeetCode progress."
+            )
+            return questions
+
+    except Exception as exc:
+        print(
+            "⚠️ Could not use LeetCode's solved-problem progress endpoint: "
+            f"{exc}"
+        )
+
+    recent = get_recent_accepted(
+        username,
+        limit=RECENT_AC_FALLBACK_LIMIT,
+    )
+
+    by_slug = {}
+
+    for submission in recent:
+        slug = str(
+            submission.get(
+                "titleSlug",
+                "",
+            )
+        ).strip()
+
+        if not slug:
+            continue
+
+        by_slug[slug] = {
+            "frontendId": "",
+            "title": submission.get(
+                "title",
+                slug,
+            ),
+            "titleSlug": slug,
+            "difficulty": "Unknown",
+            "lastSubmittedAt": submission.get(
+                "timestamp",
+                "",
+            ),
+            "topicTags": [],
+        }
+
+    questions = list(
+        by_slug.values()
+    )
+
+    questions.sort(
+        key=lambda question: (
+            str(
+                question.get(
+                    "lastSubmittedAt",
+                    "",
+                )
+            ),
+            str(
+                question.get(
+                    "titleSlug",
+                    "",
+                )
+            ),
+        )
+    )
+
+    print(
+        f"📚 Fallback discovered {len(questions)} problem(s) "
+        "from the recent accepted-submission window."
+    )
+    print(
+        "   ⚠️ This fallback may miss problems outside that window."
+    )
+
+    return questions
+
+
+def get_all_accepted_submissions_for_problem(
+    title_slug,
+):
+    """
+    Fetch every accepted submission for one problem by walking the
+    per-problem submission history page by page.
+    """
+    all_accepted = []
+    seen_ids = set()
+
+    offset = 0
+    last_key = None
+    page_number = 0
+    fallback_mode = False
+
+    while True:
+        page_number += 1
+
+        if not fallback_mode:
+            try:
+                data = graphql(
+                    QUESTION_SUBMISSION_LIST_QUERY,
+                    {
+                        "offset": offset,
+                        "limit": SUBMISSION_PAGE_SIZE,
+                        "lastKey": last_key,
+                        "questionSlug": title_slug,
+                    },
+                    operation_name="questionSubmissionList",
+                )
+            except Exception as exc:
+                print(
+                    "   ⚠️ questionSubmissionList unavailable; "
+                    "trying submissionList compatibility mode."
+                )
+                print(
+                    f"      {exc}"
+                )
+                fallback_mode = True
+
+        if fallback_mode:
+            fallback_query = """
+            query submissionList(
+                $offset: Int!,
+                $limit: Int!,
+                $lastKey: String,
+                $questionSlug: String!
+            ) {
+                submissionList(
+                    offset: $offset,
+                    limit: $limit,
+                    lastKey: $lastKey,
+                    questionSlug: $questionSlug
+                ) {
+                    lastKey
+                    hasNext
+                    submissions {
+                        id
+                        statusDisplay
+                        lang
+                        runtime
+                        timestamp
+                        memory
+                        isPending
+                    }
+                }
+            }
+            """
+
+            data = graphql(
+                fallback_query,
+                {
+                    "offset": offset,
+                    "limit": SUBMISSION_PAGE_SIZE,
+                    "lastKey": last_key,
+                    "questionSlug": title_slug,
+                },
+                operation_name="submissionList",
+            )
+
+        result = (
+            data.get(
+                "questionSubmissionList"
+            )
+            or data.get(
+                "submissionList"
+            )
+            or {}
+        )
+
+        submissions = result.get(
+            "submissions"
+        ) or []
+
+        new_rows = 0
+
+        for submission in submissions:
+            submission_id = str(
+                submission.get(
+                    "id",
+                    "",
+                )
+            ).strip()
+
+            if (
+                not submission_id
+                or submission_id in seen_ids
+            ):
+                continue
+
+            seen_ids.add(
+                submission_id
+            )
+            new_rows += 1
+
+            if (
+                submission.get(
+                    "statusDisplay"
+                )
+                == "Accepted"
+                and not submission.get(
+                    "isPending",
+                    False,
+                )
+            ):
+                all_accepted.append(
+                    submission
+                )
+
+        has_next = bool(
+            result.get(
+                "hasNext",
+                False,
+            )
+        )
+
+        next_last_key = result.get(
+            "lastKey"
+        )
+
+        if (
+            not has_next
+            or not submissions
+            or new_rows == 0
+        ):
+            break
+
+        offset += len(submissions)
+        last_key = next_last_key
+
+        time.sleep(
+            LEETCODE_REQUEST_DELAY_SECONDS
+        )
+
+        if page_number > 1000:
+            raise RuntimeError(
+                f"Submission history pagination exceeded 1000 pages "
+                f"for {title_slug}."
+            )
+
+    all_accepted.sort(
+        key=lambda submission: (
+            int(
+                submission.get(
+                    "timestamp",
+                    0,
+                )
+                or 0
+            ),
+            int(
+                submission.get(
+                    "id",
+                    0,
+                )
+                or 0
+            ),
+        )
+    )
+
+    return all_accepted
 
 
 def get_submission_details(
@@ -1289,10 +1833,34 @@ def ai_analysis(
 
     if not GEMINI_API_KEY:
         print(
-            "⚠️ GEMINI_API_KEY is not configured. "
-            "Using deterministic fallback."
+            "❌ GEMINI_API_KEY is not configured."
+        )
+        GEMINI_RUNTIME["blocked"] = True
+        GEMINI_RUNTIME["last_failure"] = (
+            "GEMINI_API_KEY is not configured."
         )
         return None
+
+    if GEMINI_RUNTIME["blocked"]:
+        print(
+            "⏸️ Gemini is already blocked for today."
+        )
+        return None
+
+    if (
+        GEMINI_RUNTIME["requests_used"]
+        >= MAX_GEMINI_REQUESTS_PER_DAY
+    ):
+        GEMINI_RUNTIME["blocked"] = True
+        GEMINI_RUNTIME["last_failure"] = (
+            "Daily Gemini request budget reached."
+        )
+        print(
+            "⏸️ Gemini daily request budget reached."
+        )
+        return None
+
+    GEMINI_RUNTIME["requests_used"] += 1
 
     problem_text = html_to_text(
         question.get("content", "")
@@ -1412,7 +1980,21 @@ RULES:
             timeout=90,
         )
 
+        if response.status_code == 429:
+            GEMINI_RUNTIME["blocked"] = True
+            GEMINI_RUNTIME["last_failure"] = (
+                "Gemini returned HTTP 429 (quota/rate limit)."
+            )
+            print(
+                "⏸️ Gemini returned HTTP 429. "
+                "Historical backfill will resume on a later run/day."
+            )
+            return None
+
         if response.status_code != 200:
+            GEMINI_RUNTIME["last_failure"] = (
+                f"Gemini request failed with HTTP {response.status_code}."
+            )
             print(
                 "⚠️ Gemini request failed: "
                 f"HTTP {response.status_code}"
@@ -1566,6 +2148,7 @@ RULES:
             "The stated space usage follows the extra variables, data structures, and recursion used by the submitted implementation.",
         )
 
+        GEMINI_RUNTIME["last_failure"] = ""
         return result
 
     except requests.RequestException as exc:
@@ -1895,6 +2478,506 @@ This folder contains **{len(solutions)} unique accepted implementation(s)** for 
 
 ⭐ Automatically synchronized from accepted LeetCode submissions.
 """
+
+
+# ============================================================
+# Historical backfill
+# ============================================================
+
+def merge_discovered_problems(
+    historical,
+    discovered_questions,
+):
+    """Add newly discovered solved problems to the persisted backfill queue."""
+    existing = {
+        str(
+            item.get(
+                "titleSlug",
+                "",
+            )
+        ): item
+        for item in historical.get(
+            "problems",
+            []
+        )
+        if isinstance(item, dict)
+        and item.get("titleSlug")
+    }
+
+    for question in discovered_questions:
+        slug = str(
+            question.get(
+                "titleSlug",
+                "",
+            )
+        ).strip()
+
+        if not slug:
+            continue
+
+        if slug not in existing:
+            entry = {
+                "titleSlug": slug,
+                "title": question.get(
+                    "title",
+                    slug,
+                ),
+                "frontendId": question.get(
+                    "frontendId",
+                    "",
+                ),
+                "difficulty": question.get(
+                    "difficulty",
+                    "Unknown",
+                ),
+                "lastSubmittedAt": question.get(
+                    "lastSubmittedAt",
+                    "",
+                ),
+            }
+
+            historical["problems"].append(
+                entry
+            )
+            existing[slug] = entry
+
+
+def historical_backfill(
+    state,
+    username,
+):
+    """
+    Scan every accepted submission for each solved problem while limiting
+    work to five completed problems or eight Gemini requests per day.
+
+    Historical submission IDs have their own state list so the first backfill
+    can rescan older submissions even when an older version of the script
+    already marked some IDs as processed.
+    """
+    historical = state["historical_backfill"]
+
+    if historical.get(
+        "complete",
+        False,
+    ):
+        return {
+            "imported": 0,
+            "duplicate": 0,
+            "skipped": 0,
+            "failed": 0,
+            "paused": False,
+            "completed_problems": 0,
+        }
+
+    discovered = discover_solved_problems(
+        username
+    )
+
+    merge_discovered_problems(
+        historical,
+        discovered,
+    )
+
+    problems = historical.get(
+        "problems",
+        []
+    )
+
+    problem_index = int(
+        historical.get(
+            "problem_index",
+            0,
+        )
+        or 0
+    )
+
+    if problem_index >= len(problems):
+        historical["complete"] = True
+        print(
+            "🎉 Historical backfill is complete."
+        )
+
+        return {
+            "imported": 0,
+            "duplicate": 0,
+            "skipped": 0,
+            "failed": 0,
+            "paused": False,
+            "completed_problems": 0,
+        }
+
+    today_completed = int(
+        historical.get(
+            "problems_completed_today",
+            0,
+        )
+        or 0
+    )
+
+    if today_completed >= MAX_HISTORICAL_PROBLEMS_PER_DAY:
+        print(
+            "⏸️ Daily historical problem budget reached "
+            f"({MAX_HISTORICAL_PROBLEMS_PER_DAY})."
+        )
+        print(
+            "   The next calendar day will continue automatically."
+        )
+
+        return {
+            "imported": 0,
+            "duplicate": 0,
+            "skipped": 0,
+            "failed": 0,
+            "paused": True,
+            "completed_problems": 0,
+        }
+
+    if (
+        GEMINI_RUNTIME["blocked"]
+        or GEMINI_RUNTIME["requests_used"]
+        >= MAX_GEMINI_REQUESTS_PER_DAY
+    ):
+        print(
+            "⏸️ Daily Gemini explanation budget is exhausted "
+            "or Gemini is blocked for today."
+        )
+        print(
+            "   The next calendar day will continue automatically."
+        )
+
+        return {
+            "imported": 0,
+            "duplicate": 0,
+            "skipped": 0,
+            "failed": 0,
+            "paused": True,
+            "completed_problems": 0,
+        }
+
+    historical_processed = set(
+        str(x)
+        for x in historical.get(
+            "processed_submission_ids",
+            []
+        )
+    )
+
+    imported = 0
+    duplicate = 0
+    skipped = 0
+    failed = 0
+    completed_problems = 0
+
+    while (
+        problem_index < len(problems)
+        and today_completed < MAX_HISTORICAL_PROBLEMS_PER_DAY
+    ):
+        problem = problems[
+            problem_index
+        ]
+
+        slug = str(
+            problem.get(
+                "titleSlug",
+                "",
+            )
+        ).strip()
+
+        title = problem.get(
+            "title",
+            slug,
+        )
+
+        if not slug:
+            problem_index += 1
+            historical["problem_index"] = problem_index
+            continue
+
+        print(
+            "\n"
+            + "=" * 68
+        )
+        print(
+            f"📚 Historical problem "
+            f"{problem_index + 1}/{len(problems)}: {title}"
+        )
+        print("=" * 68)
+
+        try:
+            submissions = get_all_accepted_submissions_for_problem(
+                slug
+            )
+
+            print(
+                f"   📥 Found {len(submissions)} accepted "
+                "submission(s) for this problem."
+            )
+
+        except Exception as exc:
+            failed += 1
+            print(
+                f"   ❌ Could not retrieve submission history: {exc}"
+            )
+            break
+
+        problem_complete = True
+
+        for submission in submissions:
+            submission_id = str(
+                submission.get(
+                    "id",
+                    "",
+                )
+            ).strip()
+
+            if not submission_id:
+                continue
+
+            if submission_id in historical_processed:
+                skipped += 1
+                continue
+
+            try:
+                result = import_submission(
+                    submission,
+                    require_gemini=True,
+                )
+
+                historical_processed.add(
+                    submission_id
+                )
+
+                historical["processed_submission_ids"] = sorted(
+                    historical_processed
+                )
+
+                normal_processed = set(
+                    str(x)
+                    for x in state.get(
+                        "processed_submission_ids",
+                        []
+                    )
+                )
+
+                normal_processed.add(
+                    submission_id
+                )
+
+                state["processed_submission_ids"] = sorted(
+                    normal_processed
+                )
+
+                if result == "duplicate":
+                    duplicate += 1
+                else:
+                    imported += 1
+
+                sync_runtime_to_state(
+                    state
+                )
+                save_state(
+                    state
+                )
+
+            except GeminiBackfillPaused as exc:
+                print(
+                    "   ⏸️ Pausing historical backfill: "
+                    f"{exc}"
+                )
+
+                problem_complete = False
+
+                sync_runtime_to_state(
+                    state
+                )
+                save_state(
+                    state
+                )
+                break
+
+            except Exception as exc:
+                failed += 1
+
+                print(
+                    f"   ❌ Failed historical submission "
+                    f"{submission_id}: {exc}"
+                )
+
+                # Keep this ID unprocessed so a later run retries it.
+                problem_complete = False
+
+                save_state(
+                    state
+                )
+                break
+
+        if not problem_complete:
+            break
+
+        today_completed += 1
+        completed_problems += 1
+
+        historical["problems_completed_today"] = today_completed
+
+        problem_index += 1
+        historical["problem_index"] = problem_index
+
+        sync_runtime_to_state(
+            state
+        )
+        save_state(
+            state
+        )
+
+        print(
+            f"   ✅ Historical problem completed: {title}"
+        )
+
+    if problem_index >= len(problems):
+        historical["complete"] = True
+
+        print(
+            "\n🎉 All discovered historical problems have been scanned."
+        )
+
+    sync_runtime_to_state(
+        state
+    )
+    save_state(
+        state
+    )
+
+    return {
+        "imported": imported,
+        "duplicate": duplicate,
+        "skipped": skipped,
+        "failed": failed,
+        "paused": (
+            not historical.get(
+                "complete",
+                False,
+            )
+            and (
+                today_completed
+                >= MAX_HISTORICAL_PROBLEMS_PER_DAY
+                or GEMINI_RUNTIME["requests_used"]
+                >= MAX_GEMINI_REQUESTS_PER_DAY
+                or GEMINI_RUNTIME["blocked"]
+            )
+        ),
+        "completed_problems": completed_problems,
+    }
+
+
+# ============================================================
+# Incremental synchronization
+# ============================================================
+
+def incremental_sync(
+    state,
+    username,
+):
+    """Normal post-backfill mode: inspect only unseen recent submissions."""
+    processed_ids = set(
+        str(x)
+        for x in state.get(
+            "processed_submission_ids",
+            []
+        )
+    )
+
+    submissions = get_recent_accepted(
+        username,
+        limit=RECENT_AC_FALLBACK_LIMIT,
+    )
+
+    print(
+        f"📥 Found {len(submissions)} "
+        "accepted submissions in the sync window."
+    )
+
+    imported = 0
+    duplicate = 0
+    skipped = 0
+    failed = 0
+
+    new_submissions = []
+
+    for submission in submissions:
+        submission_id = str(
+            submission.get(
+                "id",
+                "",
+            )
+        ).strip()
+
+        if not submission_id:
+            continue
+
+        if submission_id in processed_ids:
+            skipped += 1
+            continue
+
+        new_submissions.append(
+            submission
+        )
+
+    print(
+        f"🆕 New accepted submissions to process: "
+        f"{len(new_submissions)}"
+    )
+
+    for submission in reversed(
+        new_submissions
+    ):
+        submission_id = str(
+            submission.get(
+                "id",
+                "",
+            )
+        ).strip()
+
+        try:
+            result = import_submission(
+                submission
+            )
+
+            processed_ids.add(
+                submission_id
+            )
+
+            if result == "duplicate":
+                duplicate += 1
+            else:
+                imported += 1
+
+        except Exception as exc:
+            failed += 1
+
+            print(
+                f"   ❌ Failed: "
+                f"{submission.get('title', 'Unknown')}"
+            )
+            print(
+                f"      {exc}"
+            )
+
+    state["processed_submission_ids"] = sorted(
+        processed_ids
+    )
+
+    save_state(
+        state
+    )
+
+    return {
+        "imported": imported,
+        "duplicate": duplicate,
+        "skipped": skipped,
+        "failed": failed,
+        "paused": False,
+        "completed_problems": 0,
+    }
 
 
 # ============================================================
@@ -2250,6 +3333,7 @@ def build_solution_record(
 def analyze_submission(
     question,
     details,
+    require_gemini=False,
 ):
     code = details.get("code")
     if not code:
@@ -2270,6 +3354,15 @@ def analyze_submission(
     if analysis:
         print("   🧠 Explanation: AI-assisted analysis")
         return analysis
+
+    if require_gemini:
+        reason = (
+            GEMINI_RUNTIME.get(
+                "last_failure"
+            )
+            or "Gemini did not return a usable explanation."
+        )
+        raise GeminiBackfillPaused(reason)
 
     analysis = normalize_fallback_analysis(
         fallback_analysis(
@@ -2373,6 +3466,7 @@ def append_solution_to_readme(
 
 def import_submission(
     submission,
+    require_gemini=False,
 ):
     submission_id = str(submission.get("id"))
     title = submission.get("title", "Unknown")
@@ -2413,7 +3507,11 @@ def import_submission(
         )
         return "duplicate"
 
-    analysis = analyze_submission(question, details)
+    analysis = analyze_submission(
+        question,
+        details,
+        require_gemini=require_gemini,
+    )
 
     extension = file_extension(details.get("lang"))
     code_filename = next_solution_filename(
@@ -2633,102 +3731,126 @@ def repair_placeholder_readmes():
 # ============================================================
 
 def main():
-    print("🚀 Starting LeetCode synchronization...")
+    print(
+        "🚀 Starting LeetCode synchronization..."
+    )
 
     SOLUTIONS_DIR.mkdir(
         parents=True,
         exist_ok=True,
     )
 
+    state = load_state()
+
+    reset_daily_historical_budgets(
+        state
+    )
+
+    username = get_username()
+
+    print(
+        f"👤 LeetCode user: {username}"
+    )
+
     repaired = repair_placeholder_readmes()
+
     if repaired:
         print(
             f"\n🛠️ Repaired {repaired} placeholder README(s)."
         )
 
-    state = load_state()
-
-    processed_ids = set(
-        state.get(
-            "processed_submission_ids",
-            [],
+    if not state["historical_backfill"].get(
+        "complete",
+        False,
+    ):
+        print(
+            "\n🧭 Mode: HISTORICAL BACKFILL"
         )
+        print(
+            f"   Daily problem budget: "
+            f"{MAX_HISTORICAL_PROBLEMS_PER_DAY}"
+        )
+        print(
+            f"   Daily Gemini budget: "
+            f"{MAX_GEMINI_REQUESTS_PER_DAY}"
+        )
+
+        result = historical_backfill(
+            state,
+            username,
+        )
+
+    else:
+        print(
+            "\n🧭 Mode: INCREMENTAL SYNC"
+        )
+
+        result = incremental_sync(
+            state,
+            username,
+        )
+
+    sync_runtime_to_state(
+        state
     )
 
-    username = get_username()
-    print(f"👤 LeetCode user: {username}")
-
-    submissions = get_recent_accepted(
-        username,
-        limit=2000,
+    save_state(
+        state
     )
 
-    print(
-        f"📥 Found {len(submissions)} "
-        "accepted submissions in the sync window."
-    )
-
-    imported = 0
-    duplicate = 0
-    skipped = 0
-    failed = 0
-
-    new_submissions = []
-
-    for submission in submissions:
-        submission_id = str(submission.get("id"))
-
-        if not submission_id:
-            continue
-
-        if submission_id in processed_ids:
-            skipped += 1
-            continue
-
-        new_submissions.append(submission)
-
-    print(
-        f"🆕 New accepted submissions to process: "
-        f"{len(new_submissions)}"
-    )
-
-    for submission in reversed(new_submissions):
-        submission_id = str(submission.get("id"))
-
-        try:
-            result = import_submission(submission)
-
-            # Whether imported or duplicate, this submission ID has now been
-            # examined and should not be re-processed on the next run.
-            processed_ids.add(submission_id)
-
-            if result == "duplicate":
-                duplicate += 1
-            else:
-                imported += 1
-
-        except Exception as exc:
-            failed += 1
-
-            print(
-                f"   ❌ Failed: "
-                f"{submission.get('title', 'Unknown')}"
-            )
-            print(f"      {exc}")
-
-    state["processed_submission_ids"] = sorted(
-        processed_ids
-    )
-    save_state(state)
     update_main_readme()
 
-    print("\n📊 Synchronization summary")
-    print(f"   🆕 Imported unique solutions: {imported}")
-    print(f"   ♻️ Duplicate solutions skipped: {duplicate}")
-    print(f"   ⏭️ Skipped already processed: {skipped}")
-    print(f"   ❌ Failed: {failed}")
+    print(
+        "\n📊 Synchronization summary"
+    )
+    print(
+        f"   🆕 Imported unique solutions: "
+        f"{result.get('imported', 0)}"
+    )
+    print(
+        f"   ♻️ Duplicate solutions skipped: "
+        f"{result.get('duplicate', 0)}"
+    )
+    print(
+        f"   ⏭️ Skipped already processed: "
+        f"{result.get('skipped', 0)}"
+    )
+    print(
+        f"   ❌ Failed: "
+        f"{result.get('failed', 0)}"
+    )
 
-    if failed:
+    if state["historical_backfill"].get(
+        "complete",
+        False,
+    ):
+        print(
+            "   ✅ Historical backfill status: COMPLETE"
+        )
+    else:
+        print(
+            "   ⏳ Historical backfill status: IN PROGRESS"
+        )
+
+    print(
+        f"   🤖 Gemini requests used today: "
+        f"{GEMINI_RUNTIME['requests_used']}/"
+        f"{MAX_GEMINI_REQUESTS_PER_DAY}"
+    )
+
+    if result.get(
+        "paused",
+        False,
+    ):
+        print(
+            "\n⏸️ Historical backfill paused safely. "
+            "It will continue on a later run/day without losing progress."
+        )
+
+    if result.get(
+        "failed",
+        0,
+    ):
         print(
             "\n❌ Synchronization completed with errors."
         )
