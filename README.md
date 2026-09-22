@@ -30,7 +30,7 @@
 | 189 | [Rotate Array](solutions/0189-rotate-array/) | 🟡 Medium | Java | 1 |
 | 217 | [Contains Duplicate](solutions/0217-contains-duplicate/) | 🟢 Easy | Java | 1 |
 | 231 | [Power of Two](solutions/0231-power-of-two/) | 🟢 Easy | Java | 1 |
-| 268 | [Missing Number](solutions/0268-missing-number/) | 🟢 Easy | Java | 1 |
+| 268 | [Missing Number](solutions/0268-missing-number/) | 🟢 Easy | Java | 2 |
 | 283 | [Move Zeroes](solutions/0283-move-zeroes/) | 🟢 Easy | Java | 1 |
 | 349 | [Intersection of Two Arrays](solutions/0349-intersection-of-two-arrays/) | 🟢 Easy | Java | 1 |
 | 350 | [Intersection of Two Arrays II](solutions/0350-intersection-of-two-arrays-ii/) | 🟢 Easy | Java | 1 |

@@ -5,9 +5,34 @@
   "language": "Java",
   "folder": "0268-missing-number",
   "slug": "missing-number",
-  "submission_id": "2030853058",
+  "submission_id": "2030849021",
   "runtime": 0,
-  "memory": 47100000,
+  "memory": 47260000,
   "runtime_display": "0 ms",
-  "memory_display": "47.1 MB"
+  "memory_display": "47.3 MB",
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2030853058",
+      "solution_hash": "17e5c7646b0d4105d3f0d4edb6dde4703b0f92f7b135f31ee2781fe82b8919a8",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 47100000,
+      "memory_display": "47.1 MB"
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2030849021",
+      "solution_hash": "17e5c7646b0d4105d3f0d4edb6dde4703b0f92f7b135f31ee2781fe82b8919a8",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 47260000,
+      "memory_display": "47.3 MB"
+    }
+  ],
+  "solution_count": 2
 }
