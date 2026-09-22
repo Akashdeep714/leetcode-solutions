@@ -138,6 +138,20 @@
         "frontendId": "977",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-09-21T17:50:03+00:00"
+      },
+      {
+        "titleSlug": "duplicate-zeros",
+        "title": "Duplicate Zeros",
+        "frontendId": "1089",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-22T18:45:40+00:00"
+      },
+      {
+        "titleSlug": "merge-sorted-array",
+        "title": "Merge Sorted Array",
+        "frontendId": "88",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-22T18:59:21+00:00"
       }
     ],
     "problem_index": 2,
@@ -147,7 +161,7 @@
     ],
     "day": "2026-09-22",
     "problems_completed_today": 2,
-    "gemini_requests_used_today": 1,
+    "gemini_requests_used_today": 2,
     "gemini_blocked_today": false
   }
 }
