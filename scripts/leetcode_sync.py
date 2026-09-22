@@ -214,18 +214,24 @@ query questionSubmissionList(
     $offset: Int!,
     $limit: Int!,
     $lastKey: String,
-    $questionSlug: String!
+    $questionSlug: String!,
+    $status: Int,
+    $lang: Int
 ) {
     questionSubmissionList(
         offset: $offset,
         limit: $limit,
         lastKey: $lastKey,
-        questionSlug: $questionSlug
+        questionSlug: $questionSlug,
+        status: $status,
+        lang: $lang
     ) {
         lastKey
         hasNext
         submissions {
             id
+            titleSlug
+            status
             statusDisplay
             lang
             runtime
@@ -666,64 +672,67 @@ def discover_solved_problems(username):
     return questions
 
 
+def _fetch_submission_history_page(
+    query,
+    operation_name,
+    variables,
+):
+    """Fetch one authenticated submission-history page."""
+    data = graphql(
+        query,
+        variables,
+        operation_name=operation_name,
+    )
+
+    if operation_name == "questionSubmissionList":
+        result = data.get("questionSubmissionList") or {}
+    else:
+        result = data.get("submissionList") or {}
+
+    return result
+
+
 def get_all_accepted_submissions_for_problem(
     title_slug,
 ):
     """
-    Fetch every accepted submission for one problem by walking the
-    per-problem submission history page by page.
+    Fetch the complete accepted-submission history for one problem.
+
+    LeetCode currently exposes submission history through more than one
+    GraphQL operation. We use the authenticated questionSubmissionList with
+    the explicit Accepted status filter first, then fall back to the older
+    submissionList operation if the first operation returns no rows or is
+    rejected by the current schema.
     """
-    all_accepted = []
-    seen_ids = set()
-
-    offset = 0
-    last_key = None
-    page_number = 0
-    fallback_mode = False
-
-    while True:
-        page_number += 1
-
-        if not fallback_mode:
-            try:
-                data = graphql(
-                    QUESTION_SUBMISSION_LIST_QUERY,
-                    {
-                        "offset": offset,
-                        "limit": SUBMISSION_PAGE_SIZE,
-                        "lastKey": last_key,
-                        "questionSlug": title_slug,
-                    },
-                    operation_name="questionSubmissionList",
-                )
-            except Exception as exc:
-                print(
-                    "   ⚠️ questionSubmissionList unavailable; "
-                    "trying submissionList compatibility mode."
-                )
-                print(
-                    f"      {exc}"
-                )
-                fallback_mode = True
-
-        if fallback_mode:
-            fallback_query = """
+    queries = [
+        (
+            QUESTION_SUBMISSION_LIST_QUERY,
+            "questionSubmissionList",
+        ),
+        (
+            """
             query submissionList(
                 $offset: Int!,
                 $limit: Int!,
                 $lastKey: String,
-                $questionSlug: String!
+                $questionSlug: String!,
+                $status: Int,
+                $lang: Int
             ) {
                 submissionList(
                     offset: $offset,
                     limit: $limit,
                     lastKey: $lastKey,
-                    questionSlug: $questionSlug
+                    questionSlug: $questionSlug,
+                    status: $status,
+                    lang: $lang
                 ) {
                     lastKey
                     hasNext
                     submissions {
                         id
+                        titleSlug
+                        status
                         statusDisplay
                         lang
                         runtime
@@ -733,41 +742,89 @@ def get_all_accepted_submissions_for_problem(
                     }
                 }
             }
-            """
+            """,
+            "submissionList",
+        ),
+    ]
 
-            data = graphql(
-                fallback_query,
-                {
-                    "offset": offset,
-                    "limit": SUBMISSION_PAGE_SIZE,
-                    "lastKey": last_key,
-                    "questionSlug": title_slug,
-                },
-                operation_name="submissionList",
+    all_accepted = []
+
+    for query, operation_name in queries:
+        try:
+            accepted, success = _walk_submission_history(
+                query,
+                operation_name,
+                title_slug,
             )
 
-        result = (
-            data.get(
-                "questionSubmissionList"
+            if success:
+                return accepted
+
+        except Exception as exc:
+            print(
+                f"   ⚠️ {operation_name} history lookup failed: {exc}"
             )
-            or data.get(
-                "submissionList"
-            )
-            or {}
+
+    raise RuntimeError(
+        f"LeetCode returned no usable submission history for {title_slug}. "
+        "The problem was NOT marked complete."
+    )
+
+
+def _walk_submission_history(
+    query,
+    operation_name,
+    title_slug,
+):
+    """
+    Walk every page of a submission-history endpoint.
+
+    The explicit status=10 filter asks LeetCode for Accepted submissions,
+    reducing unnecessary rows and making the historical backfill much more
+    reliable for solved problems.
+    """
+    all_accepted = []
+    seen_ids = set()
+
+    offset = 0
+    last_key = None
+    page_number = 0
+    saw_usable_response = False
+
+    while True:
+        page_number += 1
+
+        result = _fetch_submission_history_page(
+            query,
+            operation_name,
+            {
+                "offset": offset,
+                "limit": SUBMISSION_PAGE_SIZE,
+                "lastKey": last_key,
+                "questionSlug": title_slug,
+                "status": 10,
+                "lang": None,
+            },
         )
 
-        submissions = result.get(
-            "submissions"
-        ) or []
+        if not result:
+            return [], False
+
+        saw_usable_response = True
+
+        submissions = result.get("submissions") or []
+
+        if page_number == 1:
+            print(
+                f"   🔍 {operation_name}: returned "
+                f"{len(submissions)} history row(s) on page 1."
+            )
 
         new_rows = 0
 
         for submission in submissions:
             submission_id = str(
-                submission.get(
-                    "id",
-                    "",
-                )
+                submission.get("id", "")
             ).strip()
 
             if (
@@ -776,35 +833,26 @@ def get_all_accepted_submissions_for_problem(
             ):
                 continue
 
-            seen_ids.add(
-                submission_id
-            )
+            seen_ids.add(submission_id)
             new_rows += 1
 
+            status_display = str(
+                submission.get("statusDisplay", "")
+            ).strip().lower()
+
+            status_code = submission.get("status")
+
             if (
-                submission.get(
-                    "statusDisplay"
-                )
-                == "Accepted"
-                and not submission.get(
-                    "isPending",
-                    False,
-                )
-            ):
-                all_accepted.append(
-                    submission
-                )
+                status_display == "accepted"
+                or status_code == 10
+            ) and not submission.get("isPending", False):
+                all_accepted.append(submission)
 
         has_next = bool(
-            result.get(
-                "hasNext",
-                False,
-            )
+            result.get("hasNext", False)
         )
 
-        next_last_key = result.get(
-            "lastKey"
-        )
+        next_last_key = result.get("lastKey")
 
         if (
             not has_next
@@ -829,23 +877,20 @@ def get_all_accepted_submissions_for_problem(
     all_accepted.sort(
         key=lambda submission: (
             int(
-                submission.get(
-                    "timestamp",
-                    0,
-                )
+                submission.get("timestamp", 0)
                 or 0
             ),
             int(
-                submission.get(
-                    "id",
-                    0,
-                )
+                submission.get("id", 0)
                 or 0
             ),
         )
     )
 
-    return all_accepted
+    if not saw_usable_response:
+        return [], False
+
+    return all_accepted, True
 
 
 def get_submission_details(
