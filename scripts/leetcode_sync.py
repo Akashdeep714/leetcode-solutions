@@ -820,6 +820,15 @@ def _walk_submission_history(
                 f"{len(submissions)} history row(s) on page 1."
             )
 
+            for sample in submissions[:3]:
+                print(
+                    "   🧪 History sample: "
+                    f"id={sample.get('id')} "
+                    f"status={sample.get('status')!r} "
+                    f"statusDisplay={sample.get('statusDisplay')!r} "
+                    f"isPending={sample.get('isPending')!r}"
+                )
+
         new_rows = 0
 
         for submission in submissions:
@@ -840,12 +849,23 @@ def _walk_submission_history(
                 submission.get("statusDisplay", "")
             ).strip().lower()
 
-            status_code = submission.get("status")
+            # LeetCode has returned the numeric status as either an int or
+            # a string in different GraphQL responses. Normalize it before
+            # checking so an Accepted row is not accidentally discarded.
+            status_code = str(
+                submission.get("status", "")
+            ).strip().lower()
 
-            if (
-                status_display == "accepted"
-                or status_code == 10
-            ) and not submission.get("isPending", False):
+            is_accepted = (
+                status_display in {"accepted", "ac"}
+                or status_code in {"10", "accepted", "ac"}
+            )
+
+            is_pending = submission.get("isPending", False)
+            if isinstance(is_pending, str):
+                is_pending = is_pending.strip().lower() == "true"
+
+            if is_accepted and not is_pending:
                 all_accepted.append(submission)
 
         has_next = bool(
