@@ -5,9 +5,34 @@
   "language": "Java",
   "folder": "0189-rotate-array",
   "slug": "rotate-array",
-  "submission_id": "2140291269",
-  "runtime": 8,
-  "runtime_display": "8 ms",
-  "memory": 268728000,
-  "memory_display": "268.7 MB"
+  "submission_id": "2140264267",
+  "runtime": 5,
+  "runtime_display": "5 ms",
+  "memory": 268640000,
+  "memory_display": "268.6 MB",
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2140291269",
+      "solution_hash": "b7543268b79caa81a47532b18a64b7c372d98d160eb722c56040abfcc927ac00",
+      "runtime": 8,
+      "runtime_display": "8 ms",
+      "memory": 268728000,
+      "memory_display": "268.7 MB"
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2140264267",
+      "solution_hash": "b7543268b79caa81a47532b18a64b7c372d98d160eb722c56040abfcc927ac00",
+      "runtime": 5,
+      "runtime_display": "5 ms",
+      "memory": 268640000,
+      "memory_display": "268.6 MB"
+    }
+  ],
+  "solution_count": 2
 }
