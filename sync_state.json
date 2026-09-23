@@ -166,6 +166,13 @@
         "frontendId": "88",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-09-22T18:59:21+00:00"
+      },
+      {
+        "titleSlug": "remove-element",
+        "title": "Remove Element",
+        "frontendId": "27",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-23T16:40:11+00:00"
       }
     ],
     "problem_index": 10,
