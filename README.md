@@ -26,13 +26,13 @@
 | 66 | [Plus One](solutions/0066-plus-one/) | 🟢 Easy | Java | 1 |
 | 121 | [Best Time to Buy and Sell Stock](solutions/0121-best-time-to-buy-and-sell-stock/) | 🟢 Easy | Java | 1 |
 | 122 | [Best Time to Buy and Sell Stock II](solutions/0122-best-time-to-buy-and-sell-stock-ii/) | 🟡 Medium | Java | 1 |
-| 136 | [Single Number](solutions/0136-single-number/) | 🟢 Easy | Java | 1 |
+| 136 | [Single Number](solutions/0136-single-number/) | 🟢 Easy | Java | 2 |
 | 189 | [Rotate Array](solutions/0189-rotate-array/) | 🟡 Medium | Java | 2 |
-| 217 | [Contains Duplicate](solutions/0217-contains-duplicate/) | 🟢 Easy | Java | 1 |
+| 217 | [Contains Duplicate](solutions/0217-contains-duplicate/) | 🟢 Easy | Java | 2 |
 | 231 | [Power of Two](solutions/0231-power-of-two/) | 🟢 Easy | Java | 1 |
 | 268 | [Missing Number](solutions/0268-missing-number/) | 🟢 Easy | Java | 2 |
 | 283 | [Move Zeroes](solutions/0283-move-zeroes/) | 🟢 Easy | Java | 1 |
-| 349 | [Intersection of Two Arrays](solutions/0349-intersection-of-two-arrays/) | 🟢 Easy | Java | 1 |
+| 349 | [Intersection of Two Arrays](solutions/0349-intersection-of-two-arrays/) | 🟢 Easy | Java | 2 |
 | 350 | [Intersection of Two Arrays II](solutions/0350-intersection-of-two-arrays-ii/) | 🟢 Easy | Java | 1 |
 | 485 | [Max Consecutive Ones](solutions/0485-max-consecutive-ones/) | 🟢 Easy | Unknown | 1 |
 | 1295 | [Find Numbers with Even Number of Digits](solutions/1295-find-numbers-with-even-number-of-digits/) | 🟢 Easy | Unknown | 2 |

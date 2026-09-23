@@ -70,6 +70,45 @@ Sorting reorganizes data so that identical elements are adjacent, simplifying pa
 
 ---
 
+---
+### 🔀 Solution 2 — Hash Set
+
+> **Language:** Java  
+> **Runtime:** `18 ms`  
+> **Memory:** `108.2 MB`
+
+#### 💡 Intuition
+
+To check for duplicates efficiently, we need a fast way to remember which numbers we have already encountered. Instead of comparing each number against all previous numbers using nested loops, we can store visited elements in a hash set. As we iterate through the array, the hash set allows us to check whether the current number has been seen before in $O(1)$ average time, enabling an immediate return of `true` upon finding the first duplicate.
+
+#### 🧠 Algorithmic Pattern
+
+> **Hash Set**
+
+#### 🚀 Approach
+
+1. Initialize an empty hash set `set` to keep track of elements seen so far.
+2. Iterate through each integer `i` in the input array `nums`.
+3. Check if `set` already contains the current integer `i` using `set.contains(i)`.
+4. If `i` is already in `set`, immediately return `true` as a duplicate exists.
+5. If `i` is not in `set`, add it using `set.add(i)` so it can be recognized if encountered again.
+6. If the loop finishes without finding any duplicates, return `false`.
+
+#### ✅ Why This Works
+
+The algorithm maintains the invariant that `set` holds all distinct elements visited up to the current index. Because a hash set enforces uniqueness and provides average $O(1)$ lookup and insertion time, checking membership before adding an element guarantees that the very first repeated element will be caught, accurately returning `true` without needing further iterations.
+
+#### ⏱️ Complexity
+
+| Metric | Complexity |
+|---|---|
+| Time | **O(n) — Iterating through the $n$ elements takes $O(n)$ time because hash set lookup and insertion operations take $O(1)$ time on average.** |
+| Space | **O(n) — In the worst case where all elements are distinct, the hash set stores all $n$ integers from the array, using $O(n)$ auxiliary memory.** |
+
+#### 💻 Solution
+
+[View the complete Java solution →](./solution-2.java)
+
 ## 🔗 Useful Links
 
 - [LeetCode Problem](https://leetcode.com/problems/contains-duplicate/)

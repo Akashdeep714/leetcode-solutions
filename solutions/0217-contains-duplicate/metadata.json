@@ -5,9 +5,34 @@
   "language": "Java",
   "folder": "0217-contains-duplicate",
   "slug": "contains-duplicate",
-  "submission_id": "2141807052",
-  "runtime": 26,
-  "runtime_display": "26 ms",
-  "memory": 81620000,
-  "memory_display": "81.6 MB"
+  "submission_id": "2141801267",
+  "runtime": 18,
+  "runtime_display": "18 ms",
+  "memory": 108180000,
+  "memory_display": "108.2 MB",
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2141807052",
+      "solution_hash": "6ce917140966aac4bb7f93077388b12ee4262625d41fe947a8594b8c9243ca96",
+      "runtime": 26,
+      "runtime_display": "26 ms",
+      "memory": 81620000,
+      "memory_display": "81.6 MB"
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2141801267",
+      "solution_hash": "6ce917140966aac4bb7f93077388b12ee4262625d41fe947a8594b8c9243ca96",
+      "runtime": 18,
+      "runtime_display": "18 ms",
+      "memory": 108180000,
+      "memory_display": "108.2 MB"
+    }
+  ],
+  "solution_count": 2
 }

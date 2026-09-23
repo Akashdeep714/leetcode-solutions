@@ -5,9 +5,34 @@
   "language": "Java",
   "folder": "0349-intersection-of-two-arrays",
   "slug": "intersection-of-two-arrays",
-  "submission_id": "2142970678",
-  "runtime": 2,
-  "runtime_display": "2 ms",
-  "memory": 44328000,
-  "memory_display": "44.3 MB"
+  "submission_id": "2142890597",
+  "runtime": 3,
+  "runtime_display": "3 ms",
+  "memory": 45248000,
+  "memory_display": "45.2 MB",
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2142970678",
+      "solution_hash": "cb0b1ff1d14bb66d9bde9c62c432f06e9292ef733e51bc6a3e19272873f7724e",
+      "runtime": 2,
+      "runtime_display": "2 ms",
+      "memory": 44328000,
+      "memory_display": "44.3 MB"
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2142890597",
+      "solution_hash": "cb0b1ff1d14bb66d9bde9c62c432f06e9292ef733e51bc6a3e19272873f7724e",
+      "runtime": 3,
+      "runtime_display": "3 ms",
+      "memory": 45248000,
+      "memory_display": "45.2 MB"
+    }
+  ],
+  "solution_count": 2
 }

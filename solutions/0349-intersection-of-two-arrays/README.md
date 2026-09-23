@@ -72,6 +72,46 @@ Calling Set.remove() inside a conditional check serves as both a membership test
 
 ---
 
+---
+### 🔀 Solution 2 — Hash Table
+
+> **Language:** Java  
+> **Runtime:** `3 ms`  
+> **Memory:** `45.2 MB`
+
+#### 💡 Intuition
+
+To find common elements between two arrays while ensuring the output contains no duplicates, we need both rapid element lookup and duplicate filtering. Converting each array into a hash set automatically eliminates duplicate values within the same array. By iterating through the unique elements of one set and checking for their presence in the second set using average O(1) lookups, we can efficiently extract only the shared unique values.
+
+#### 🧠 Algorithmic Pattern
+
+> **Hash Table**
+
+#### 🚀 Approach
+
+1. Initialize two hash sets, `s1` and `s2`, to store unique integers.
+2. Iterate through `nums1` and add every element into `s1`.
+3. Iterate through `nums2` and add every element into `s2`.
+4. Allocate a result array `res` with size equal to `s1.size()` and set a pointer `k = 0`.
+5. Iterate through each unique element `num` in `s1` and check if `s2.contains(num)` is true.
+6. If `num` is present in `s2`, write `num` to `res[k]` and increment `k`.
+7. Return the sliced array containing only the populated elements from index `0` up to `k` using `Arrays.copyOfRange(res, 0, k)`.
+
+#### ✅ Why This Works
+
+Inserting array values into hash sets enforces uniqueness by discarding duplicates. Iterating over `s1` guarantees that each candidate value is evaluated only once, and checking `s2.contains(num)` confirms that the value exists in both original arrays. This directly satisfies the set intersection property without producing duplicate elements in the final output.
+
+#### ⏱️ Complexity
+
+| Metric | Complexity |
+|---|---|
+| Time | **O(n + m) — Inserting elements into hash sets and performing set membership checks takes average O(1) time per element, leading to O(n + m) total time where n and m are the lengths of nums1 and nums2.** |
+| Space | **O(n + m) — Storing the unique elements of nums1 and nums2 in two hash sets plus allocating the temporary result array requires O(n + m) auxiliary space.** |
+
+#### 💻 Solution
+
+[View the complete Java solution →](./solution-2.java)
+
 ## 🔗 Useful Links
 
 - [LeetCode Problem](https://leetcode.com/problems/intersection-of-two-arrays/)
