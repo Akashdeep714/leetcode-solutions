@@ -190,6 +190,46 @@ Any valid pair of numbers at distinct indices i and j satisfying nums[i] + nums[
 
 [View the complete Java solution →](./solution-4.java)
 
+---
+### 🔀 Solution 5 — Hash Map / One-pass Hash Table
+
+> **Language:** Java  
+> **Runtime:** `2 ms`  
+> **Memory:** `47.2 MB`
+
+#### 💡 Intuition
+
+Instead of checking every pair of numbers with nested loops in $O(n^2)$ time, we can rewrite the equation $a + b = \text{target}$ as $b = \text{target} - a$. As we iterate through the array, each number $a$ requires a specific complement $b$ to reach the target. By keeping track of previously seen numbers and their indices in a hash map, we can check if the complement $b$ has already been processed in $O(1)$ average time, completing the search in a single pass.
+
+#### 🧠 Algorithmic Pattern
+
+> **Hash Map / One-pass Hash Table**
+
+#### 🚀 Approach
+
+1. Initialize an empty hash map `map` to store each number as a key and its index as the value.
+2. Iterate through the array `nums` from index `i = 0` to `nums.length - 1`.
+3. For the current element `nums[i]`, compute its complement `lookupNumber = target - nums[i]`.
+4. Check if `map.containsKey(lookupNumber)` evaluates to true.
+5. If the complement exists in `map`, return an array containing `i` and `map.get(lookupNumber)`.
+6. If the complement is not present, store the current number and index by calling `map.put(nums[i], i)`.
+7. Return `{-1, -1}` as a fallback if the loop completes without finding a valid pair.
+
+#### ✅ Why This Works
+
+By adding elements to the hash map as we iterate rather than pre-populating it, any lookup for `target - nums[i]` will only match elements at indices strictly less than `i`. This naturally prevents an element from being paired with itself. Because exactly one valid pair exists, the second element of the target pair will always find the first element already stored in the hash map.
+
+#### ⏱️ Complexity
+
+| Metric | Complexity |
+|---|---|
+| Time | **O(n) — We iterate through the array of length $n$ once, performing average $O(1)$ hash map lookup and insertion operations for each element.** |
+| Space | **O(n) — In the worst case, the hash map stores up to $n - 1$ elements before finding the target pair.** |
+
+#### 💻 Solution
+
+[View the complete Java solution →](./solution-5.java)
+
 ## 🔗 Useful Links
 
 - [LeetCode Problem](https://leetcode.com/problems/two-sum/)

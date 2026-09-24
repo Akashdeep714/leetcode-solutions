@@ -5,11 +5,11 @@
   "language": "Java",
   "folder": "0001-two-sum",
   "slug": "two-sum",
-  "submission_id": "2145070757",
-  "runtime": 5,
-  "runtime_display": "5 ms",
-  "memory": 46696000,
-  "memory_display": "46.7 MB",
+  "submission_id": "2145073823",
+  "runtime": 2,
+  "runtime_display": "2 ms",
+  "memory": 47248000,
+  "memory_display": "47.2 MB",
   "solutions": [
     {
       "number": 1,
@@ -54,7 +54,18 @@
       "runtime_display": "5 ms",
       "memory": 46696000,
       "memory_display": "46.7 MB"
+    },
+    {
+      "number": 5,
+      "filename": "solution-5.java",
+      "language": "Java",
+      "submission_id": "2145073823",
+      "solution_hash": "affa5d79cb574601ccf06be82538eeb51b51bcbfed52d0747d55d510fec00ec3",
+      "runtime": 2,
+      "runtime_display": "2 ms",
+      "memory": 47248000,
+      "memory_display": "47.2 MB"
     }
   ],
-  "solution_count": 4
+  "solution_count": 5
 }

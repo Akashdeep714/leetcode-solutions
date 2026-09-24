@@ -18,7 +18,7 @@
 
 | # | Problem | Difficulty | Language | Approaches |
 |---:|---|---|---|---:|
-| 1 | [Two Sum](solutions/0001-two-sum/) | 🟢 Easy | Java | 4 |
+| 1 | [Two Sum](solutions/0001-two-sum/) | 🟢 Easy | Java | 5 |
 | 9 | [Palindrome Number](solutions/0009-palindrome-number/) | 🟢 Easy | Java | 1 |
 | 26 | [Remove Duplicates from Sorted Array](solutions/0026-remove-duplicates-from-sorted-array/) | 🟢 Easy | Java | 1 |
 | 36 | [Valid Sudoku](solutions/0036-valid-sudoku/) | 🟡 Medium | Java | 1 |
