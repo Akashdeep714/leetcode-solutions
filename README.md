@@ -18,7 +18,7 @@
 
 | # | Problem | Difficulty | Language | Approaches |
 |---:|---|---|---|---:|
-| 1 | [Two Sum](solutions/0001-two-sum/) | 🟢 Easy | Java | 1 |
+| 1 | [Two Sum](solutions/0001-two-sum/) | 🟢 Easy | Java | 4 |
 | 9 | [Palindrome Number](solutions/0009-palindrome-number/) | 🟢 Easy | Java | 1 |
 | 26 | [Remove Duplicates from Sorted Array](solutions/0026-remove-duplicates-from-sorted-array/) | 🟢 Easy | Java | 1 |
 | 36 | [Valid Sudoku](solutions/0036-valid-sudoku/) | 🟡 Medium | Java | 1 |
@@ -31,9 +31,9 @@
 | 217 | [Contains Duplicate](solutions/0217-contains-duplicate/) | 🟢 Easy | Java | 2 |
 | 231 | [Power of Two](solutions/0231-power-of-two/) | 🟢 Easy | Java | 1 |
 | 268 | [Missing Number](solutions/0268-missing-number/) | 🟢 Easy | Java | 2 |
-| 283 | [Move Zeroes](solutions/0283-move-zeroes/) | 🟢 Easy | Java | 1 |
+| 283 | [Move Zeroes](solutions/0283-move-zeroes/) | 🟢 Easy | Java | 2 |
 | 349 | [Intersection of Two Arrays](solutions/0349-intersection-of-two-arrays/) | 🟢 Easy | Java | 2 |
-| 350 | [Intersection of Two Arrays II](solutions/0350-intersection-of-two-arrays-ii/) | 🟢 Easy | Java | 1 |
+| 350 | [Intersection of Two Arrays II](solutions/0350-intersection-of-two-arrays-ii/) | 🟢 Easy | Java | 2 |
 | 485 | [Max Consecutive Ones](solutions/0485-max-consecutive-ones/) | 🟢 Easy | Unknown | 1 |
 | 1295 | [Find Numbers with Even Number of Digits](solutions/1295-find-numbers-with-even-number-of-digits/) | 🟢 Easy | Unknown | 2 |
 

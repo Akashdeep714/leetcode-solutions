@@ -72,6 +72,45 @@ Using a two-pointer read/write strategy allows reordering array elements in-plac
 
 ---
 
+---
+### 🔀 Solution 2 — Two Pointers
+
+> **Language:** Java  
+> **Runtime:** `2 ms`  
+> **Memory:** `47.4 MB`
+
+#### 💡 Intuition
+
+Instead of swapping elements whenever a non-zero value is encountered, we can overwrite elements from the beginning of the array. By maintaining a write pointer that tracks the position for the next non-zero element, we can perform a single pass to copy all non-zero numbers to the front in their original relative order. Once all non-zero elements are placed, any remaining indices from the write pointer to the end of the array must be filled with zeroes in a second pass.
+
+#### 🧠 Algorithmic Pattern
+
+> **Two Pointers**
+
+#### 🚀 Approach
+
+1. Initialize a write pointer `j = 0` to track the destination index for non-zero elements.
+2. Iterate through the array with a read pointer `i` from `0` to `nums.length - 1`.
+3. For each element `nums[i]`, check if it is non-zero; if so, assign `nums[j] = nums[i]` and increment `j`.
+4. After the loop finishes, `j` points to the start of the trailing section that should contain zeroes.
+5. Start a second loop while `j < nums.length`.
+6. Set `nums[j] = 0` and increment `j` at each step until the array end is reached.
+
+#### ✅ Why This Works
+
+During the first pass, the loop invariant maintains that `nums[0...j-1]` contains all non-zero elements seen so far in `nums[0...i]` while preserving their original order. When `i` finishes scanning the entire array, `j` exactly equals the total count of non-zero elements. Filling the remaining indices from `j` to `nums.length - 1` with zeroes ensures that all zero values are placed at the end without corrupting the non-zero sequence.
+
+#### ⏱️ Complexity
+
+| Metric | Complexity |
+|---|---|
+| Time | **O(n) — The algorithm processes the array in two sequential linear passes, taking O(n) total time where n is the length of the array.** |
+| Space | **O(1) — The operations are performed directly on the input array using only a single integer variable `j`, requiring O(1) auxiliary space.** |
+
+#### 💻 Solution
+
+[View the complete Java solution →](./solution-2.java)
+
 ## 🔗 Useful Links
 
 - [LeetCode Problem](https://leetcode.com/problems/move-zeroes/)

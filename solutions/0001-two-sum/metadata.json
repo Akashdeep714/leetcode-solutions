@@ -5,9 +5,56 @@
   "language": "Java",
   "folder": "0001-two-sum",
   "slug": "two-sum",
-  "submission_id": "2145075315",
-  "runtime": 2,
-  "runtime_display": "2 ms",
-  "memory": 47304000,
-  "memory_display": "47.3 MB"
+  "submission_id": "2145070757",
+  "runtime": 5,
+  "runtime_display": "5 ms",
+  "memory": 46696000,
+  "memory_display": "46.7 MB",
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2145075315",
+      "solution_hash": "8957bc06da26698ff3352d46136c561752eda0006954f3ca6181c4b683244739",
+      "runtime": 2,
+      "runtime_display": "2 ms",
+      "memory": 47304000,
+      "memory_display": "47.3 MB"
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "1935966863",
+      "solution_hash": "8957bc06da26698ff3352d46136c561752eda0006954f3ca6181c4b683244739",
+      "runtime": 98,
+      "runtime_display": "98 ms",
+      "memory": 46768000,
+      "memory_display": "46.8 MB"
+    },
+    {
+      "number": 3,
+      "filename": "solution-3.java",
+      "language": "Java",
+      "submission_id": "1935975802",
+      "solution_hash": "aa969b3803bc99301e8ee3f1fb36323e960f32f901a548a63940c210096daa3b",
+      "runtime": 52,
+      "runtime_display": "52 ms",
+      "memory": 47024000,
+      "memory_display": "47 MB"
+    },
+    {
+      "number": 4,
+      "filename": "solution-4.java",
+      "language": "Java",
+      "submission_id": "2145070757",
+      "solution_hash": "4b4786b8ea77314aecd3842b8530d2a85b98e82e3c9daa8262fa6f3e85b9fa19",
+      "runtime": 5,
+      "runtime_display": "5 ms",
+      "memory": 46696000,
+      "memory_display": "46.7 MB"
+    }
+  ],
+  "solution_count": 4
 }

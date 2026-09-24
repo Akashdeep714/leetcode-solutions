@@ -5,9 +5,34 @@
   "language": "Java",
   "folder": "0283-move-zeroes",
   "slug": "move-zeroes",
-  "submission_id": "2144048643",
+  "submission_id": "2144021190",
   "runtime": 2,
   "runtime_display": "2 ms",
-  "memory": 47764000,
-  "memory_display": "47.8 MB"
+  "memory": 47352000,
+  "memory_display": "47.4 MB",
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2144048643",
+      "solution_hash": "0a506ebb245fc919a9c736bce323f7301823981ed5233224368f9544b1e87673",
+      "runtime": 2,
+      "runtime_display": "2 ms",
+      "memory": 47764000,
+      "memory_display": "47.8 MB"
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2144021190",
+      "solution_hash": "0a506ebb245fc919a9c736bce323f7301823981ed5233224368f9544b1e87673",
+      "runtime": 2,
+      "runtime_display": "2 ms",
+      "memory": 47352000,
+      "memory_display": "47.4 MB"
+    }
+  ],
+  "solution_count": 2
 }

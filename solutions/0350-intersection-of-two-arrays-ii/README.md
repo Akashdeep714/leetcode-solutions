@@ -71,6 +71,45 @@ Sorting enables a two-pointer linear scan that finds the intersection of two arr
 
 ---
 
+---
+### 🔀 Solution 2 — Hash Table / Frequency Counting
+
+> **Language:** Java  
+> **Runtime:** `3 ms`  
+> **Memory:** `44.9 MB`
+
+#### 💡 Intuition
+
+To handle duplicate elements correctly, we need to track how many times each number appears in the first array and decrement that available count whenever a match is found in the second array. A hash map allows us to store the frequency of each element in `nums1` in linear time. As we traverse `nums2`, any element present in the map with a non-zero count is added to our result set, ensuring each common number appears in the intersection exactly $\min(\text{count}_1, \text{count}_2)$ times.
+
+#### 🧠 Algorithmic Pattern
+
+> **Hash Table / Frequency Counting**
+
+#### 🚀 Approach
+
+1. Initialize a hash map `map` to store the frequency of each integer in `nums1`.
+2. Iterate through `nums1` and increment the count for each number in `map` using `map.put(num, map.getOrDefault(num, 0) + 1)`.
+3. Allocate an integer array `res` of size `nums1.length` to hold result elements, and initialize index pointer `k = 0`.
+4. Iterate through each number `num` in `nums2`.
+5. Retrieve the remaining count of `num` from `map`; if the count is greater than 0, place `num` into `res[k]`, increment `k`, and decrement the count of `num` in `map` by 1.
+6. Return the trimmed sub-array `Arrays.copyOfRange(res, 0, k)` containing only the filled intersection elements.
+
+#### ✅ Why This Works
+
+By recording the exact count of each element in `nums1` and decrementing the frequency in `map` every time a match is found in `nums2`, the code guarantees that no element is added to the result array more times than it appears in either `nums1` or `nums2`. This correctly computes the multiset intersection based on element frequencies.
+
+#### ⏱️ Complexity
+
+| Metric | Complexity |
+|---|---|
+| Time | **O(m + n) — Populating the hash map takes $O(m)$ average time for `nums1` of length $m$, and scanning `nums2` of length $n$ takes $O(n)$ average time, yielding $O(m + n)$ total time.** |
+| Space | **O(m) — The hash map stores up to $m$ unique elements from `nums1`, requiring $O(m)$ auxiliary space.** |
+
+#### 💻 Solution
+
+[View the complete Java solution →](./solution-2.java)
+
 ## 🔗 Useful Links
 
 - [LeetCode Problem](https://leetcode.com/problems/intersection-of-two-arrays-ii/)
