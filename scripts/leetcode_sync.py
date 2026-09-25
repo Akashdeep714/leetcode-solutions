@@ -41,6 +41,10 @@ GEMINI_API_KEY = os.getenv(
 MAX_HISTORICAL_PROBLEMS_PER_DAY = 5
 MAX_GEMINI_REQUESTS_PER_DAY = 8
 
+# Bump this whenever the historical-backfill algorithm changes in a way
+# that requires previously processed problems to be reconciled again.
+HISTORICAL_BACKFILL_VERSION = 3
+
 # Keep LeetCode requests gentle rather than hammering the GraphQL endpoint.
 LEETCODE_REQUEST_DELAY_SECONDS = 0.35
 
@@ -293,6 +297,7 @@ query questionData(
 
 def default_historical_state():
     return {
+        "version": HISTORICAL_BACKFILL_VERSION,
         "complete": False,
         "problems": [],
         "problem_index": 0,
@@ -1925,8 +1930,6 @@ def ai_analysis(
         )
         return None
 
-    GEMINI_RUNTIME["requests_used"] += 1
-
     problem_text = html_to_text(
         question.get("content", "")
     )
@@ -2213,6 +2216,7 @@ RULES:
             "The stated space usage follows the extra variables, data structures, and recursion used by the submitted implementation.",
         )
 
+        GEMINI_RUNTIME["requests_used"] += 1
         GEMINI_RUNTIME["last_failure"] = ""
         return result
 
@@ -2233,6 +2237,478 @@ RULES:
             f"⚠️ Gemini analysis failed: {exc}"
         )
         return None
+
+# ============================================================
+# Semantic historical clustering
+# ============================================================
+
+AI_ANALYSIS_KEYS = {
+    "pattern",
+    "problem_summary",
+    "intuition",
+    "approach",
+    "why_it_works",
+    "time_complexity",
+    "space_complexity",
+    "key_takeaway",
+    "time_explanation",
+    "space_explanation",
+}
+
+
+def _parse_gemini_text(body):
+    """Extract text from the Gemini Interactions response."""
+    output_text = body.get("output_text")
+
+    if not output_text:
+        for step in body.get("steps", []):
+            if step.get("type") != "model_output":
+                continue
+            for item in step.get("content", []):
+                if item.get("type") == "text":
+                    output_text = item.get("text", "")
+                    break
+            if output_text:
+                break
+
+    if not output_text:
+        return ""
+
+    output_text = str(output_text).strip()
+
+    if output_text.startswith("```"):
+        output_text = re.sub(r"^```(?:json)?\s*", "", output_text)
+        output_text = re.sub(r"\s*```$", "", output_text)
+
+    return output_text.strip()
+
+
+def _validate_analysis(result):
+    """Validate one Gemini solution explanation."""
+    if not isinstance(result, dict):
+        return False
+
+    if not AI_ANALYSIS_KEYS.issubset(result.keys()):
+        return False
+
+    if not isinstance(result.get("approach"), list):
+        return False
+
+    if not (4 <= len(result["approach"]) <= 8):
+        return False
+
+    complexity_pattern = re.compile(r"^O\(.+\)$")
+    if not complexity_pattern.match(str(result.get("time_complexity", "")).strip()):
+        return False
+    if not complexity_pattern.match(str(result.get("space_complexity", "")).strip()):
+        return False
+
+    return True
+
+
+def gemini_cluster_problem(question, candidates):
+    """
+    Ask Gemini ONCE for an entire problem to cluster equivalent submissions
+    into genuinely different algorithmic approaches and write the final
+    explanations for one representative implementation from each cluster.
+
+    candidates: list of dicts with submission_id, language, code, timestamp,
+    and exact_fingerprint.
+    """
+    if not candidates:
+        return []
+
+    if not GEMINI_API_KEY:
+        GEMINI_RUNTIME["blocked"] = True
+        GEMINI_RUNTIME["last_failure"] = "GEMINI_API_KEY is not configured."
+        return None
+
+    if GEMINI_RUNTIME["blocked"]:
+        return None
+
+    if GEMINI_RUNTIME["requests_used"] >= MAX_GEMINI_REQUESTS_PER_DAY:
+        GEMINI_RUNTIME["blocked"] = True
+        GEMINI_RUNTIME["last_failure"] = "Daily Gemini request budget reached."
+        return None
+
+    problem_text = html_to_text(question.get("content", ""))
+    if len(problem_text) > 10000:
+        problem_text = problem_text[:10000]
+
+    candidate_sections = []
+    for index, candidate in enumerate(candidates, start=1):
+        code = candidate.get("code", "")
+        # Keep one problem's clustering request bounded even when a user has
+        # unusually large submissions. The first 12000 chars normally contain
+        # the algorithm; the representative code is later fetched in full.
+        truncated = False
+        if len(code) > 12000:
+            code = code[:12000]
+            truncated = True
+
+        candidate_sections.append(
+            "\n".join(
+                [
+                    f"CANDIDATE {index}",
+                    f"submission_id: {candidate['submission_id']}",
+                    f"language: {candidate['language']}",
+                    f"timestamp: {candidate.get('timestamp', '')}",
+                    f"code_truncated: {truncated}",
+                    "code:",
+                    code,
+                ]
+            )
+        )
+
+    prompt = f"""
+You are an expert algorithms educator and code reviewer.
+
+We are rebuilding the user's GitHub archive from ALL accepted submissions
+for ONE LeetCode problem. Your job is to identify genuinely different
+ALGORITHMIC APPROACHES, not merely different source-code versions.
+
+IMPORTANT DISTINCTION:
+- Different variable names, formatting, blank lines, helper naming, loop
+  style, or small refactoring are NOT different approaches.
+- Equivalent implementations of the same algorithm/data structure are ONE
+  approach.
+- A different core strategy, data structure, mathematical trick, traversal,
+  or asymptotic method IS a different approach.
+- Different programming LANGUAGES must remain separate approaches, even when
+  the underlying algorithm is the same.
+- Do not create multiple clusters just because two accepted submissions have
+  different code text.
+- Do not merge two solutions when their core algorithmic strategy is meaningfully
+  different.
+
+Examples for Two Sum:
+- nested loops / brute force = one approach
+- hash map complement lookup = a different approach
+- sorting + two pointers = another approach
+Five small variations of hash-map code should still become ONE hash-map approach.
+
+PROBLEM
+=======
+{problem_text}
+
+TOPICS
+======
+{", ".join(tag.get("name", "") for tag in question.get("topicTags", []) if tag.get("name"))}
+
+ACCEPTED SUBMISSION CANDIDATES
+==============================
+{"\n\n".join(candidate_sections)}
+
+TASK
+====
+1. Cluster every candidate into exactly one semantic approach.
+2. Use the representative submission that best demonstrates that approach;
+   prefer the earliest accepted candidate when there is no meaningful reason
+   to choose another.
+3. For every cluster, include ALL submission IDs that belong to it.
+4. Generate a high-quality explanation for the REPRESENTATIVE CODE ONLY.
+5. The explanation must accurately describe the actual submitted code and
+   must not substitute another algorithm.
+6. The explanation style should match a strong human-written LeetCode note:
+   specific, beginner-friendly, concrete, and useful.
+
+RETURN ONLY VALID JSON:
+{{
+  "solutions": [
+    {{
+      "approach_key": "stable-short-semantic-key",
+      "approach_name": "Human-readable algorithmic approach",
+      "language": "Java",
+      "submission_ids": ["..."],
+      "representative_submission_id": "...",
+      "cluster_reason": "Why these submissions are the same approach.",
+      "analysis": {{
+        "pattern": "...",
+        "problem_summary": "...",
+        "intuition": "...",
+        "approach": ["step 1", "step 2", "step 3", "step 4"],
+        "why_it_works": "...",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "...",
+        "time_explanation": "...",
+        "space_explanation": "..."
+      }}
+    }}
+  ]
+}}
+
+CLUSTERING RULES
+================
+- Every candidate submission_id must appear exactly once across all
+  submission_ids arrays.
+- representative_submission_id must belong to its own submission_ids array.
+- language must exactly match the representative candidate language.
+- Never split one core algorithm into separate clusters merely because the
+  code is written differently.
+- Never merge different languages.
+- Never call a refactor or formatting change a new approach.
+- A meaningful algorithm/data-structure change should become a new approach.
+
+EXPLANATION RULES
+=================
+- analysis describes the representative's ACTUAL code.
+- approach contains 4 to 8 concrete ordered steps.
+- time_complexity and space_complexity contain ONLY Big-O expressions.
+- Explain sorting, hashing, recursion, bit tricks, digit extraction, pointer
+  movement, etc. when present.
+- Do not invent an optimization or data structure absent from the code.
+- Prefer correctness over sophistication.
+- Return JSON only.
+"""
+
+    try:
+        response = requests.post(
+            "https://generativelanguage.googleapis.com/v1beta/interactions",
+            headers={
+                "Content-Type": "application/json",
+                "x-goog-api-key": GEMINI_API_KEY,
+            },
+            json={
+                "model": "gemini-3.6-flash",
+                "input": prompt,
+            },
+            timeout=120,
+        )
+
+        if response.status_code == 429:
+            GEMINI_RUNTIME["blocked"] = True
+            GEMINI_RUNTIME["last_failure"] = "Gemini returned HTTP 429 (quota/rate limit)."
+            print("⏸️ Gemini returned HTTP 429. Historical backfill will resume later.")
+            return None
+
+        if response.status_code in {500, 502, 503, 504}:
+            GEMINI_RUNTIME["last_failure"] = (
+                f"Temporary Gemini service error HTTP {response.status_code}."
+            )
+            print(
+                f"⚠️ Gemini temporarily unavailable (HTTP {response.status_code})."
+            )
+            return None
+
+        if response.status_code != 200:
+            GEMINI_RUNTIME["last_failure"] = (
+                f"Gemini clustering failed with HTTP {response.status_code}."
+            )
+            print(
+                f"⚠️ Gemini clustering failed: HTTP {response.status_code}"
+            )
+            print(response.text[:1000])
+            return None
+
+        body = response.json()
+        output_text = _parse_gemini_text(body)
+        if not output_text:
+            GEMINI_RUNTIME["last_failure"] = "Gemini returned no text output."
+            return None
+
+        result = json.loads(output_text)
+        solutions = result.get("solutions")
+        if not isinstance(solutions, list) or not solutions:
+            GEMINI_RUNTIME["last_failure"] = "Gemini returned no solution clusters."
+            return None
+
+        candidate_map = {
+            str(item["submission_id"]): item
+            for item in candidates
+        }
+        expected_ids = set(candidate_map)
+        assigned_ids = []
+
+        for cluster in solutions:
+            cluster_ids = [str(x) for x in cluster.get("submission_ids", [])]
+            representative_id = str(cluster.get("representative_submission_id", ""))
+            language = str(cluster.get("language", "")).strip()
+            analysis = cluster.get("analysis")
+
+            if not cluster_ids or representative_id not in cluster_ids:
+                return None
+            if any(item_id not in expected_ids for item_id in cluster_ids):
+                return None
+            if not _validate_analysis(analysis):
+                return None
+
+            rep = candidate_map[representative_id]
+            if language != rep["language"]:
+                return None
+
+            assigned_ids.extend(cluster_ids)
+
+        if len(assigned_ids) != len(set(assigned_ids)):
+            return None
+        if set(assigned_ids) != expected_ids:
+            print(
+                "⚠️ Gemini did not assign every candidate exactly once. "
+                "Historical problem will be retried."
+            )
+            return None
+
+        # Only a successful, fully validated request consumes one Gemini call.
+        GEMINI_RUNTIME["requests_used"] += 1
+        GEMINI_RUNTIME["last_failure"] = ""
+        return solutions
+
+    except (requests.RequestException, json.JSONDecodeError) as exc:
+        GEMINI_RUNTIME["last_failure"] = f"Gemini clustering error: {exc}"
+        print(f"⚠️ Gemini clustering error: {exc}")
+        return None
+    except Exception as exc:
+        GEMINI_RUNTIME["last_failure"] = f"Gemini clustering error: {exc}"
+        print(f"⚠️ Gemini clustering error: {exc}")
+        return None
+
+
+def load_existing_solution_catalog(folder):
+    """Load existing solution files + metadata for semantic reconciliation."""
+    catalog = []
+    if not folder.exists():
+        return catalog
+
+    metadata = read_metadata(folder)
+    metadata_solutions = metadata.get("solutions", [])
+    by_filename = {
+        item.get("filename"): item
+        for item in metadata_solutions
+        if isinstance(item, dict) and item.get("filename")
+    } if isinstance(metadata_solutions, list) else {}
+
+    for path in solution_files_in_folder(folder):
+        try:
+            code = path.read_text(encoding="utf-8")
+        except Exception:
+            continue
+        item = by_filename.get(path.name, {})
+        language = item.get("language") or metadata.get("language") or path.suffix.lstrip(".")
+        catalog.append({
+            "filename": path.name,
+            "language": language_name(language),
+            "fingerprint": solution_fingerprint(code, language),
+            "code": code,
+        })
+
+    return catalog
+
+
+def rebuild_problem_from_clusters(question, candidates, clusters):
+    """
+    Reconcile one problem folder so it represents the semantic clusters, not
+    every syntactically different accepted submission.
+    """
+    number = int(question["questionFrontendId"])
+    folder_name = f"{number:04d}-{safe_slug(question['title'])}"
+    folder = SOLUTIONS_DIR / folder_name
+    folder.mkdir(parents=True, exist_ok=True)
+    readme_path = folder / "README.md"
+    metadata_path = folder / "metadata.json"
+
+    candidate_map = {str(item["submission_id"]): item for item in candidates}
+    existing_catalog = load_existing_solution_catalog(folder)
+
+    selected = []
+    used_existing_files = set()
+
+    for index, cluster in enumerate(clusters, start=1):
+        representative_id = str(cluster["representative_submission_id"])
+        representative = candidate_map[representative_id]
+        fingerprint = representative["exact_fingerprint"]
+
+        reuse = next(
+            (
+                item
+                for item in existing_catalog
+                if item["fingerprint"] == fingerprint
+                and item["filename"] not in used_existing_files
+            ),
+            None,
+        )
+
+        if reuse:
+            code_filename = reuse["filename"]
+            used_existing_files.add(code_filename)
+        else:
+            extension = file_extension(representative["language"])
+            code_filename = f"solution.{extension}" if index == 1 else f"solution-{index}.{extension}"
+
+        code_path = folder / code_filename
+        code_path.write_text(representative["code"], encoding="utf-8")
+
+        selected.append({
+            "analysis": cluster["analysis"],
+            "submission": {
+                "lang": representative["language"],
+                "runtime": representative.get("runtime"),
+                "runtimeDisplay": representative.get("runtimeDisplay"),
+                "memory": representative.get("memory"),
+                "memoryDisplay": representative.get("memoryDisplay"),
+            },
+            "code_filename": code_filename,
+            "approach_key": cluster.get("approach_key", ""),
+            "approach_name": cluster.get("approach_name", ""),
+            "submission_ids": [str(x) for x in cluster.get("submission_ids", [])],
+            "representative_submission_id": representative_id,
+            "solution_hash": fingerprint,
+        })
+
+    # Remove stale solution files created by an earlier, purely textual
+    # deduplication run. Do this only for files matching the automated naming
+    # convention.
+    keep_names = {item["code_filename"] for item in selected}
+    for path in solution_files_in_folder(folder):
+        if path.name not in keep_names:
+            path.unlink()
+
+    metadata_solutions = []
+    for index, item in enumerate(selected, start=1):
+        submission = item["submission"]
+        metadata_solutions.append({
+            "number": index,
+            "filename": item["code_filename"],
+            "language": language_name(submission.get("lang")),
+            "submission_id": item["representative_submission_id"],
+            "submission_ids": item["submission_ids"],
+            "solution_hash": item["solution_hash"],
+            "approach_key": item["approach_key"],
+            "approach_name": item["approach_name"],
+            "runtime": submission.get("runtime"),
+            "runtime_display": submission.get("runtimeDisplay"),
+            "memory": submission.get("memory"),
+            "memory_display": submission.get("memoryDisplay"),
+            "analysis": item["analysis"],
+        })
+
+    metadata = {
+        "number": number,
+        "title": question["title"],
+        "difficulty": question["difficulty"],
+        "language": language_name(selected[0]["submission"].get("lang")) if selected else "Unknown",
+        "folder": folder_name,
+        "slug": question["titleSlug"],
+        "submission_id": selected[0]["representative_submission_id"] if selected else None,
+        "runtime": selected[0]["submission"].get("runtime") if selected else None,
+        "runtime_display": selected[0]["submission"].get("runtimeDisplay") if selected else None,
+        "memory": selected[0]["submission"].get("memory") if selected else None,
+        "memory_display": selected[0]["submission"].get("memoryDisplay") if selected else None,
+        "solution_count": len(selected),
+        "solutions": metadata_solutions,
+        "historical_backfill_version": HISTORICAL_BACKFILL_VERSION,
+    }
+
+    readme = create_problem_readme(question, solutions=selected)
+    readme_path.write_text(readme, encoding="utf-8")
+    metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+    return {
+        "folder": folder,
+        "selected": selected,
+        "exact_candidates": len(candidates),
+        "semantic_clusters": len(clusters),
+    }
+
 
 # ============================================================
 # README generation
@@ -2612,321 +3088,241 @@ def historical_backfill(
     username,
 ):
     """
-    Scan every accepted submission for each solved problem while limiting
-    work to five completed problems or eight Gemini requests per day.
+    Full historical migration.
 
-    Historical submission IDs have their own state list so the first backfill
-    can rescan older submissions even when an older version of the script
-    already marked some IDs as processed.
+    For each problem we:
+      1. fetch every accepted submission;
+      2. remove exact duplicate source code locally;
+      3. send the remaining candidates to Gemini ONCE for semantic clustering;
+      4. save one representative solution per genuinely different approach.
+
+    This is deliberately problem-oriented: five code variations of the same
+    HashMap approach become one stored solution instead of five.
     """
     historical = state["historical_backfill"]
 
-    if historical.get(
-        "complete",
-        False,
-    ):
+    # The semantic-clustering migration is different from the old hash-only
+    # migration. Force a one-time full rescan so bad historical counts are
+    # repaired automatically without asking the user to manually delete state.
+    if int(historical.get("version", 0) or 0) != HISTORICAL_BACKFILL_VERSION:
+        print(
+            "\n🔄 Historical backfill algorithm changed. "
+            "Resetting historical progress for one full reconciliation pass."
+        )
+        historical["version"] = HISTORICAL_BACKFILL_VERSION
+        historical["complete"] = False
+        historical["problem_index"] = 0
+        historical["problems_completed_today"] = 0
+        historical["processed_submission_ids"] = []
+
+    if historical.get("complete", False):
         return {
             "imported": 0,
             "duplicate": 0,
+            "semantic_merged": 0,
             "skipped": 0,
             "failed": 0,
             "paused": False,
             "completed_problems": 0,
         }
 
-    discovered = discover_solved_problems(
-        username
-    )
+    discovered = discover_solved_problems(username)
+    merge_discovered_problems(historical, discovered)
+    problems = historical.get("problems", [])
 
-    merge_discovered_problems(
-        historical,
-        discovered,
-    )
-
-    problems = historical.get(
-        "problems",
-        []
-    )
-
-    problem_index = int(
-        historical.get(
-            "problem_index",
-            0,
-        )
-        or 0
-    )
-
+    problem_index = int(historical.get("problem_index", 0) or 0)
     if problem_index >= len(problems):
         historical["complete"] = True
-        print(
-            "🎉 Historical backfill is complete."
-        )
-
+        print("🎉 Historical backfill is complete.")
         return {
             "imported": 0,
             "duplicate": 0,
+            "semantic_merged": 0,
             "skipped": 0,
             "failed": 0,
             "paused": False,
             "completed_problems": 0,
         }
 
-    today_completed = int(
-        historical.get(
-            "problems_completed_today",
-            0,
-        )
-        or 0
-    )
-
+    today_completed = int(historical.get("problems_completed_today", 0) or 0)
     if today_completed >= MAX_HISTORICAL_PROBLEMS_PER_DAY:
         print(
             "⏸️ Daily historical problem budget reached "
             f"({MAX_HISTORICAL_PROBLEMS_PER_DAY})."
         )
-        print(
-            "   The next calendar day will continue automatically."
-        )
-
         return {
             "imported": 0,
             "duplicate": 0,
+            "semantic_merged": 0,
             "skipped": 0,
             "failed": 0,
             "paused": True,
             "completed_problems": 0,
         }
 
-    if (
-        GEMINI_RUNTIME["blocked"]
-        or GEMINI_RUNTIME["requests_used"]
-        >= MAX_GEMINI_REQUESTS_PER_DAY
-    ):
-        print(
-            "⏸️ Daily Gemini explanation budget is exhausted "
-            "or Gemini is blocked for today."
-        )
-        print(
-            "   The next calendar day will continue automatically."
-        )
-
+    if GEMINI_RUNTIME["blocked"] or GEMINI_RUNTIME["requests_used"] >= MAX_GEMINI_REQUESTS_PER_DAY:
+        print("⏸️ Daily Gemini explanation budget is exhausted or Gemini is blocked for today.")
         return {
             "imported": 0,
             "duplicate": 0,
+            "semantic_merged": 0,
             "skipped": 0,
             "failed": 0,
             "paused": True,
             "completed_problems": 0,
         }
-
-    historical_processed = set(
-        str(x)
-        for x in historical.get(
-            "processed_submission_ids",
-            []
-        )
-    )
 
     imported = 0
     duplicate = 0
+    semantic_merged = 0
     skipped = 0
     failed = 0
     completed_problems = 0
 
-    while (
-        problem_index < len(problems)
-        and today_completed < MAX_HISTORICAL_PROBLEMS_PER_DAY
-    ):
-        problem = problems[
-            problem_index
-        ]
+    while problem_index < len(problems) and today_completed < MAX_HISTORICAL_PROBLEMS_PER_DAY:
+        problem = problems[problem_index]
+        slug = str(problem.get("titleSlug", "")).strip()
+        title = problem.get("title", slug)
 
-        slug = str(
-            problem.get(
-                "titleSlug",
-                "",
-            )
-        ).strip()
-
-        title = problem.get(
-            "title",
-            slug,
-        )
-
-        if not slug:
-            problem_index += 1
-            historical["problem_index"] = problem_index
-            continue
-
-        print(
-            "\n"
-            + "=" * 68
-        )
-        print(
-            f"📚 Historical problem "
-            f"{problem_index + 1}/{len(problems)}: {title}"
-        )
+        print("\n" + "=" * 68)
+        print(f"📚 Historical problem {problem_index + 1}/{len(problems)}: {title}")
         print("=" * 68)
 
         try:
-            submissions = get_all_accepted_submissions_for_problem(
-                slug
-            )
-
-            print(
-                f"   📥 Found {len(submissions)} accepted "
-                "submission(s) for this problem."
-            )
-
+            full_question = get_question(slug)
+            submissions = get_all_accepted_submissions_for_problem(slug)
+            print(f"   📥 Found {len(submissions)} accepted submission(s) for this problem.")
         except Exception as exc:
             failed += 1
-            print(
-                f"   ❌ Could not retrieve submission history: {exc}"
-            )
+            print(f"   ❌ Could not retrieve submission history: {exc}")
             break
 
-        problem_complete = True
+        # Fetch code/details for every accepted submission first. This is
+        # required before semantic clustering can decide whether two codes
+        # are the same underlying approach.
+        candidate_by_fingerprint = {}
+        submission_ids_for_problem = []
 
-        for submission in submissions:
-            submission_id = str(
-                submission.get(
-                    "id",
-                    "",
-                )
-            ).strip()
+        try:
+            for submission in submissions:
+                submission_id = str(submission.get("id", "")).strip()
+                if not submission_id:
+                    continue
 
-            if not submission_id:
-                continue
+                submission_ids_for_problem.append(submission_id)
+                details = get_submission_details(submission_id)
+                code = details.get("code") or ""
+                if not code:
+                    raise RuntimeError(f"Submission {submission_id} returned no source code.")
 
-            if submission_id in historical_processed:
-                skipped += 1
-                continue
+                language = language_name(details.get("lang"))
+                fingerprint = solution_fingerprint(code, language)
 
-            try:
-                result = import_submission(
-                    submission,
-                    require_gemini=True,
-                )
-
-                historical_processed.add(
-                    submission_id
-                )
-
-                historical["processed_submission_ids"] = sorted(
-                    historical_processed
-                )
-
-                normal_processed = set(
-                    str(x)
-                    for x in state.get(
-                        "processed_submission_ids",
-                        []
-                    )
-                )
-
-                normal_processed.add(
-                    submission_id
-                )
-
-                state["processed_submission_ids"] = sorted(
-                    normal_processed
-                )
-
-                if result == "duplicate":
+                if fingerprint in candidate_by_fingerprint:
                     duplicate += 1
-                else:
-                    imported += 1
+                    continue
 
-                sync_runtime_to_state(
-                    state
-                )
-                save_state(
-                    state
-                )
+                candidate_by_fingerprint[fingerprint] = {
+                    "submission_id": submission_id,
+                    "language": language,
+                    "code": code,
+                    "timestamp": submission.get("timestamp", ""),
+                    "runtime": details.get("runtime"),
+                    "runtimeDisplay": details.get("runtimeDisplay"),
+                    "memory": details.get("memory"),
+                    "memoryDisplay": details.get("memoryDisplay"),
+                    "exact_fingerprint": fingerprint,
+                }
 
-            except GeminiBackfillPaused as exc:
+            candidates = list(candidate_by_fingerprint.values())
+            print(f"   🧹 Exact-code unique candidates: {len(candidates)}")
+            print(f"   ♻️ Exact duplicates removed in this problem: {len(submissions) - len(candidates)}")
+
+            if not candidates:
+                problem_result = rebuild_problem_from_clusters(problem, [], [])
+                clusters = []
+            else:
                 print(
-                    "   ⏸️ Pausing historical backfill: "
-                    f"{exc}"
+                    f"   🧠 Asking Gemini to cluster {len(candidates)} candidate implementation(s) "
+                    "into genuinely different approaches..."
+                )
+                clusters = gemini_cluster_problem(
+                    full_question,
+                    candidates,
                 )
 
-                problem_complete = False
+                if clusters is None:
+                    raise GeminiBackfillPaused(
+                        GEMINI_RUNTIME.get("last_failure")
+                        or "Gemini did not return a valid semantic clustering."
+                    )
 
-                sync_runtime_to_state(
-                    state
-                )
-                save_state(
-                    state
-                )
-                break
-
-            except Exception as exc:
-                failed += 1
-
+                print(f"   🧠 Semantic approaches found: {len(clusters)}")
                 print(
-                    f"   ❌ Failed historical submission "
-                    f"{submission_id}: {exc}"
+                    "   ✅ These are algorithmically distinct approaches; "
+                    "minor code variations are intentionally merged."
+                )
+                semantic_merged += len(candidates) - len(clusters)
+                imported += len(clusters)
+
+                # If an earlier hash-only run created 5 variants of the same
+                # approach, this reconciliation rewrites the folder to the
+                # correct semantic count.
+                problem_result = rebuild_problem_from_clusters(
+                    full_question,
+                    candidates,
+                    clusters,
                 )
 
-                # Keep this ID unprocessed so a later run retries it.
-                problem_complete = False
+            # Mark every accepted submission for this problem as processed for
+            # future incremental sync only after the whole problem is safely
+            # reconciled.
+            normal_processed = set(str(x) for x in state.get("processed_submission_ids", []))
+            normal_processed.update(submission_ids_for_problem)
+            state["processed_submission_ids"] = sorted(normal_processed)
 
-                save_state(
-                    state
-                )
-                break
+            today_completed += 1
+            completed_problems += 1
+            historical["problems_completed_today"] = today_completed
+            problem_index += 1
+            historical["problem_index"] = problem_index
+            sync_runtime_to_state(state)
+            save_state(state)
 
-        if not problem_complete:
+            print(
+                f"   ✅ Historical problem reconciled: {title} — "
+                f"{len(clusters)} genuinely different approach(es) stored."
+            )
+
+        except GeminiBackfillPaused as exc:
+            print(f"   ⏸️ Pausing historical backfill: {exc}")
+            sync_runtime_to_state(state)
+            save_state(state)
             break
-
-        today_completed += 1
-        completed_problems += 1
-
-        historical["problems_completed_today"] = today_completed
-
-        problem_index += 1
-        historical["problem_index"] = problem_index
-
-        sync_runtime_to_state(
-            state
-        )
-        save_state(
-            state
-        )
-
-        print(
-            f"   ✅ Historical problem completed: {title}"
-        )
+        except Exception as exc:
+            failed += 1
+            print(f"   ❌ Failed historical problem {title}: {exc}")
+            save_state(state)
+            break
 
     if problem_index >= len(problems):
         historical["complete"] = True
+        print("\n🎉 All discovered historical problems have been semantically reconciled.")
 
-        print(
-            "\n🎉 All discovered historical problems have been scanned."
-        )
-
-    sync_runtime_to_state(
-        state
-    )
-    save_state(
-        state
-    )
+    sync_runtime_to_state(state)
+    save_state(state)
 
     return {
         "imported": imported,
         "duplicate": duplicate,
+        "semantic_merged": semantic_merged,
         "skipped": skipped,
         "failed": failed,
         "paused": (
-            not historical.get(
-                "complete",
-                False,
-            )
+            not historical.get("complete", False)
             and (
-                today_completed
-                >= MAX_HISTORICAL_PROBLEMS_PER_DAY
-                or GEMINI_RUNTIME["requests_used"]
-                >= MAX_GEMINI_REQUESTS_PER_DAY
+                today_completed >= MAX_HISTORICAL_PROBLEMS_PER_DAY
+                or GEMINI_RUNTIME["requests_used"] >= MAX_GEMINI_REQUESTS_PER_DAY
                 or GEMINI_RUNTIME["blocked"]
             )
         ),
@@ -2963,6 +3359,7 @@ def incremental_sync(
 
     imported = 0
     duplicate = 0
+    semantic_merged = 0
     skipped = 0
     failed = 0
 
@@ -3873,8 +4270,12 @@ def main():
         f"{result.get('imported', 0)}"
     )
     print(
-        f"   ♻️ Duplicate solutions skipped: "
+        f"   ♻️ Exact duplicate submissions removed: "
         f"{result.get('duplicate', 0)}"
+    )
+    print(
+        f"   🧠 Equivalent code variants merged into existing approaches: "
+        f"{result.get('semantic_merged', 0)}"
     )
     print(
         f"   ⏭️ Skipped already processed: "
