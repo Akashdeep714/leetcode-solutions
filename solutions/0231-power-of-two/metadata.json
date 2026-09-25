@@ -7,7 +7,44 @@
   "slug": "power-of-two",
   "submission_id": "2029112103",
   "runtime": 1,
-  "memory": 42724000,
   "runtime_display": "1 ms",
-  "memory_display": "42.7 MB"
+  "memory": 42724000,
+  "memory_display": "42.7 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2029112103",
+      "submission_ids": [
+        "2029112103"
+      ],
+      "solution_hash": "860997f32cc9057ee19f6ff212b8458ac2864bf93ef21cae9130da1b44cc5114",
+      "approach_key": "iterative-division",
+      "approach_name": "Iterative Division by Two",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 42724000,
+      "memory_display": "42.7 MB",
+      "analysis": {
+        "pattern": "Iterative Division / Math",
+        "problem_summary": "Determine whether a given integer n is a power of two.",
+        "intuition": "A positive integer is a power of two if repeatedly dividing it by 2 yields 1 without encountering any odd factor greater than 1.",
+        "approach": [
+          "Return false immediately if n <= 0, as non-positive numbers cannot be powers of two.",
+          "Iteratively divide n by 2 as long as n is even (n % 2 == 0).",
+          "After loop termination, check if the remaining value of n is 1.",
+          "Return true if n == 1; otherwise, return false."
+        ],
+        "why_it_works": "Any positive integer can be represented as n = 2^x * m, where m is an odd number. Repeatedly dividing by 2 strips the 2^x factor. If m equals 1, then original n was purely a power of two.",
+        "time_complexity": "O(log n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Repeated division reduces the input size exponentially each step, leading to logarithmic time execution without extra memory.",
+        "time_explanation": "In the worst case, n is divided by 2 in each iteration, running at most log2(n) times.",
+        "space_explanation": "The algorithm operates using only a constant number of primitive state variables without extra memory allocation."
+      }
+    }
+  ],
+  "historical_backfill_version": 4
 }

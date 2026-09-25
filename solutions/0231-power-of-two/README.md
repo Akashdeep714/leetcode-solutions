@@ -10,34 +10,34 @@
 
 ## 📝 Problem
 
-Determine whether an integer is a power of two.
+Determine whether a given integer n is a power of two.
 
 ---
 
 ## 💡 Intuition
 
-Powers of two can be reduced by dividing by two repeatedly. A valid power reaches 1 without leaving a remainder at any step.
+A positive integer is a power of two if repeatedly dividing it by 2 yields 1 without encountering any odd factor greater than 1.
 
 ---
 
 ## 🧠 Algorithmic Pattern
 
-> **🔁 Repeated Division / Recursion**
+> **Iterative Division / Math**
 
 ---
 
 ## 🚀 Approach
 
-1. Reject values that are not positive.
-2. Repeatedly reduce the value according to the submitted implementation.
-3. Check that each required division is valid.
-4. Accept the number when the process reaches the valid base case.
+1. Return false immediately if n <= 0, as non-positive numbers cannot be powers of two.
+2. Iteratively divide n by 2 as long as n is even (n % 2 == 0).
+3. After loop termination, check if the remaining value of n is 1.
+4. Return true if n == 1; otherwise, return false.
 
 ---
 
 ## ✅ Why This Works
 
-Every positive power of two can be reduced to 1 by repeatedly dividing by two exactly, while any other positive integer eventually leaves a remainder or fails the base condition.
+Any positive integer can be represented as n = 2^x * m, where m is an odd number. Repeatedly dividing by 2 strips the 2^x factor. If m equals 1, then original n was purely a power of two.
 
 ---
 
@@ -45,8 +45,8 @@ Every positive power of two can be reduced to 1 by repeatedly dividing by two ex
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(log n)** |
-| Space | **O(1)** |
+| Time | **O(log n) — In the worst case, n is divided by 2 in each iteration, running at most log2(n) times.** |
+| Space | **O(1) — The algorithm operates using only a constant number of primitive state variables without extra memory allocation.** |
 
 ### 📊 LeetCode Performance
 
@@ -65,7 +65,7 @@ Every positive power of two can be reduced to 1 by repeatedly dividing by two ex
 
 ## 🎯 Key Takeaway
 
-Repeated division works because the exponent determines how many times the value can be divided by two before reaching 1.
+Repeated division reduces the input size exponentially each step, leading to logarithmic time execution without extra memory.
 
 ---
 
