@@ -35,6 +35,7 @@
     "2147998721"
   ],
   "historical_backfill": {
+    "version": 3,
     "complete": false,
     "problems": [
       {
@@ -204,6 +205,13 @@
         "frontendId": "941",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-09-24T17:26:32+00:00"
+      },
+      {
+        "titleSlug": "replace-elements-with-greatest-element-on-right-side",
+        "title": "Replace Elements with Greatest Element on Right Side",
+        "frontendId": "1299",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-25T17:51:58+00:00"
       }
     ],
     "problem_index": 17,
