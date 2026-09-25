@@ -110,6 +110,47 @@ For any positive integer $x$, the range $10^{d-1} \le x < 10^d$ corresponds to n
 
 [View the complete Java solution →](./solution-2.java)
 
+---
+### 🔀 Solution 3 — Digit Extraction / Array Iteration
+
+> **Language:** Java  
+> **Runtime:** `1 ms`  
+> **Memory:** `44.7 MB`
+
+#### 💡 Intuition
+
+To determine whether an integer has an even digit count, we can continuously strip off its least significant digit by dividing by 10 until the number becomes zero. Counting the total number of divisions gives us the exact digit count. If this count is divisible by 2, the number has an even number of digits. By iterating over the array and applying this digit-counting helper, we can accumulate the total count of valid numbers.
+
+#### 🧠 Algorithmic Pattern
+
+> **Digit Extraction / Array Iteration**
+
+#### 🚀 Approach
+
+1. Initialize `evenCount` to `0` to keep track of how many numbers meet the even digit count condition.
+2. Loop through the `nums` array from index `0` to `nums.length - 1`.
+3. For each number, call the helper function `numberHasEvenDigits(nums[i])`.
+4. Inside `numberHasEvenDigits`, initialize a counter `digitsCount` to `0`.
+5. Execute a `while` loop while `num != 0`: perform integer division `num = num / 10` to remove the last digit and increment `digitsCount` by `1`.
+6. Return `true` if `digitsCount % 2 == 0` (even), or `false` otherwise.
+7. If `numberHasEvenDigits` returns `true`, increment `evenCount` by `1`.
+8. After checking all numbers in the array, return `evenCount`.
+
+#### ✅ Why This Works
+
+In base-10 arithmetic, integer division by 10 truncates the rightmost digit of a positive integer. Repeatedly performing this division until the value reaches 0 guarantees that every digit is processed exactly once, yielding the total digit count. Applying the modulo operator `% 2` on `digitsCount` correctly evaluates parity, returning `true` for even digit counts and `false` for odd ones.
+
+#### ⏱️ Complexity
+
+| Metric | Complexity |
+|---|---|
+| Time | **O(n) — Iterating through the array of size $n$ takes $O(n)$ time, and since each number is bounded by $10^5$, counting its digits takes at most 6 operations, which is $O(1)$ work per number.** |
+| Space | **O(1) — The implementation only uses a few local integer variables (`evenCount`, `digitsCount`, loop index) without allocating any additional memory structures.** |
+
+#### 💻 Solution
+
+[View the complete Java solution →](./solution-3.java)
+
 ## 🔗 Useful Links
 
 - [LeetCode Problem](https://leetcode.com/problems/find-numbers-with-even-number-of-digits/)

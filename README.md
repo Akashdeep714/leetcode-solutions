@@ -22,7 +22,7 @@
 | 9 | [Palindrome Number](solutions/0009-palindrome-number/) | 🟢 Easy | Java | 1 |
 | 26 | [Remove Duplicates from Sorted Array](solutions/0026-remove-duplicates-from-sorted-array/) | 🟢 Easy | Java | 1 |
 | 36 | [Valid Sudoku](solutions/0036-valid-sudoku/) | 🟡 Medium | Java | 1 |
-| 48 | [Rotate Image](solutions/0048-rotate-image/) | 🟡 Medium | Java | 1 |
+| 48 | [Rotate Image](solutions/0048-rotate-image/) | 🟡 Medium | Java | 2 |
 | 66 | [Plus One](solutions/0066-plus-one/) | 🟢 Easy | Java | 1 |
 | 121 | [Best Time to Buy and Sell Stock](solutions/0121-best-time-to-buy-and-sell-stock/) | 🟢 Easy | Java | 1 |
 | 122 | [Best Time to Buy and Sell Stock II](solutions/0122-best-time-to-buy-and-sell-stock-ii/) | 🟡 Medium | Java | 1 |
@@ -35,7 +35,7 @@
 | 349 | [Intersection of Two Arrays](solutions/0349-intersection-of-two-arrays/) | 🟢 Easy | Java | 2 |
 | 350 | [Intersection of Two Arrays II](solutions/0350-intersection-of-two-arrays-ii/) | 🟢 Easy | Java | 2 |
 | 485 | [Max Consecutive Ones](solutions/0485-max-consecutive-ones/) | 🟢 Easy | Unknown | 1 |
-| 1295 | [Find Numbers with Even Number of Digits](solutions/1295-find-numbers-with-even-number-of-digits/) | 🟢 Easy | Unknown | 2 |
+| 1295 | [Find Numbers with Even Number of Digits](solutions/1295-find-numbers-with-even-number-of-digits/) | 🟢 Easy | Unknown | 3 |
 
 ---
 

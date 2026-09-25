@@ -71,6 +71,44 @@ In-place matrix rotations can be achieved by partitioning the matrix into concen
 
 ---
 
+---
+### 🔀 Solution 2 — Matrix Transposition and Reflection
+
+> **Language:** Java  
+> **Runtime:** `0 ms`  
+> **Memory:** `44 MB`
+
+#### 💡 Intuition
+
+Rotating a grid 90 degrees clockwise maps each element at position (r, c) to position (c, n - 1 - r). Directly shifting elements in 4-way cycles can be tricky to index, but we can achieve the exact same coordinate transformation by combining two simpler matrix operations: matrix transposition followed by horizontal row reversal. Transposing swaps element (i, j) with (j, i), moving (r, c) to (c, r). Reversing each row then flips (c, r) horizontally to (c, n - 1 - r). Performing these two steps sequentially produces a clean, easy-to-implement in-place 90-degree clockwise rotation.
+
+#### 🧠 Algorithmic Pattern
+
+> **Matrix Transposition and Reflection**
+
+#### 🚀 Approach
+
+1. Determine the matrix dimension n using matrix.length.
+2. Iterate through the upper triangle of the matrix using row index i from 0 to n - 1 and column index j from i + 1 to n - 1.
+3. Swap matrix[i][j] with matrix[j][i] using a temporary variable temp to transpose the matrix in-place.
+4. Iterate through each row i from 0 to n - 1 and the left half of the columns j from 0 to n / 2 - 1.
+5. Swap matrix[i][j] with its horizontally opposite element matrix[i][n - 1 - j] using temp to reverse each row in-place.
+
+#### ✅ Why This Works
+
+Transposing a matrix converts rows into columns, shifting each element from coordinate (r, c) to (c, r). Reversing each individual row horizontally moves an element from position (c, r) to (c, n - 1 - r). Mathematically, a 90-degree clockwise rotation maps an element from (r, c) to (c, n - 1 - r). Since the composition of transposition and row reversal yields the exact target coordinate for every single cell, the two-step transformation guarantees a correct clockwise rotation.
+
+#### ⏱️ Complexity
+
+| Metric | Complexity |
+|---|---|
+| Time | **O(n^2) — Transposing the matrix performs n(n - 1)/2 swaps and reversing all rows performs n * (n / 2) swaps, making the overall time complexity O(n^2) where n is the grid dimension.** |
+| Space | **O(1) — All swapping operations are done directly within the given matrix using a single primitive temporary variable temp, requiring O(1) auxiliary space.** |
+
+#### 💻 Solution
+
+[View the complete Java solution →](./solution-2.java)
+
 ## 🔗 Useful Links
 
 - [LeetCode Problem](https://leetcode.com/problems/rotate-image/)

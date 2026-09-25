@@ -5,9 +5,34 @@
   "language": "Java",
   "folder": "0048-rotate-image",
   "slug": "rotate-image",
-  "submission_id": "2146981523",
+  "submission_id": "2146956412",
   "runtime": 0,
   "runtime_display": "0 ms",
-  "memory": 43688000,
-  "memory_display": "43.7 MB"
+  "memory": 43996000,
+  "memory_display": "44 MB",
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2146981523",
+      "solution_hash": "de2f5a7b5f97ce28eff523cb0de77f67d80f4070f96cbfd50a0d6a7051c6f0d3",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 43688000,
+      "memory_display": "43.7 MB"
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2146956412",
+      "solution_hash": "de2f5a7b5f97ce28eff523cb0de77f67d80f4070f96cbfd50a0d6a7051c6f0d3",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 43996000,
+      "memory_display": "44 MB"
+    }
+  ],
+  "solution_count": 2
 }
