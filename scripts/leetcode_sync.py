@@ -43,7 +43,7 @@ MAX_GEMINI_REQUESTS_PER_DAY = 8
 
 # Bump this whenever the historical-backfill algorithm changes in a way
 # that requires previously processed problems to be reconciled again.
-HISTORICAL_BACKFILL_VERSION = 3
+HISTORICAL_BACKFILL_VERSION = 4
 
 # Keep LeetCode requests gentle rather than hammering the GraphQL endpoint.
 LEETCODE_REQUEST_DELAY_SECONDS = 0.35
@@ -2306,14 +2306,369 @@ def _validate_analysis(result):
     return True
 
 
+def _normalize_semantic_label(value):
+    """Normalize an approach label for conservative post-clustering checks."""
+    value = str(value or "").lower()
+    value = re.sub(r"[^a-z0-9]+", " ", value)
+    stop_words = {
+        "solution", "approach", "algorithm", "method", "using",
+        "with", "the", "a", "an", "of", "for", "and", "plus",
+    }
+    words = [word for word in value.split() if word not in stop_words]
+    return " ".join(words).strip()
+
+
+def _cluster_has_weak_separation(clusters, candidates):
+    """
+    Detect likely over-segmentation before accepting Gemini's answer.
+
+    This is intentionally conservative: when several one-item clusters all
+    describe the same broad pattern, we ask Gemini to perform a second,
+    stricter merge review rather than trusting the first answer blindly.
+    """
+    if not clusters or len(candidates) <= 1:
+        return False
+
+    if len(clusters) < len(candidates):
+        return False
+
+    # Every candidate becoming its own cluster is the strongest over-splitting
+    # signal we can observe without understanding the code ourselves.
+    singleton_only = all(
+        len(cluster.get("submission_ids", [])) == 1
+        for cluster in clusters
+    )
+
+    if not singleton_only:
+        return False
+
+    patterns = {
+        _normalize_semantic_label(
+            cluster.get("analysis", {}).get("pattern", "")
+        )
+        for cluster in clusters
+    }
+    names = {
+        _normalize_semantic_label(cluster.get("approach_name", ""))
+        for cluster in clusters
+    }
+    keys = {
+        _normalize_semantic_label(cluster.get("approach_key", ""))
+        for cluster in clusters
+    }
+
+    if len(patterns) == 1 and patterns != {""}:
+        return True
+    if len(names) == 1 and names != {""}:
+        return True
+    if len(keys) == 1 and keys != {""}:
+        return True
+
+    return False
+
+
+def _validate_clusters(clusters, candidates):
+    """Validate a Gemini cluster list against every candidate submission."""
+    if not isinstance(clusters, list) or not clusters:
+        return False
+
+    candidate_map = {
+        str(item["submission_id"]): item
+        for item in candidates
+    }
+    expected_ids = set(candidate_map)
+    assigned_ids = []
+
+    for cluster in clusters:
+        if not isinstance(cluster, dict):
+            return False
+
+        cluster_ids = [
+            str(x)
+            for x in cluster.get("submission_ids", [])
+        ]
+        representative_id = str(
+            cluster.get("representative_submission_id", "")
+        )
+        language = str(
+            cluster.get("language", "")
+        ).strip()
+        approach_key = str(
+            cluster.get("approach_key", "")
+        ).strip()
+        approach_name = str(
+            cluster.get("approach_name", "")
+        ).strip()
+        cluster_reason = str(
+            cluster.get("cluster_reason", "")
+        ).strip()
+        analysis = cluster.get("analysis")
+
+        if not cluster_ids:
+            return False
+        if representative_id not in cluster_ids:
+            return False
+        if any(item_id not in expected_ids for item_id in cluster_ids):
+            return False
+        if not language or not approach_key or not approach_name or not cluster_reason:
+            return False
+        if not _validate_analysis(analysis):
+            return False
+
+        representative = candidate_map[representative_id]
+        if language != representative["language"]:
+            return False
+
+        assigned_ids.extend(cluster_ids)
+
+    if len(assigned_ids) != len(set(assigned_ids)):
+        return False
+
+    return set(assigned_ids) == expected_ids
+
+
+def _gemini_post_cluster_review(question, candidates, clusters):
+    """
+    Second-pass review used only when Gemini appears to have over-split a
+    problem. It is deliberately stricter: merge unless a concrete algorithmic
+    difference can be demonstrated from the code.
+    """
+    if not candidates or not clusters:
+        return clusters
+
+    if GEMINI_RUNTIME["blocked"]:
+        return None
+
+    if GEMINI_RUNTIME["requests_used"] >= MAX_GEMINI_REQUESTS_PER_DAY:
+        GEMINI_RUNTIME["last_failure"] = (
+            "No Gemini request budget remains for the clustering audit."
+        )
+        return None
+
+    problem_text = html_to_text(question.get("content", ""))
+    if len(problem_text) > 8000:
+        problem_text = problem_text[:8000]
+
+    candidate_map = {
+        str(item["submission_id"]): item
+        for item in candidates
+    }
+
+    sections = []
+    for index, cluster in enumerate(clusters, start=1):
+        representative_id = str(
+            cluster["representative_submission_id"]
+        )
+        representative = candidate_map[representative_id]
+        code = representative.get("code", "")
+        if len(code) > 9000:
+            code = code[:9000]
+
+        sections.append(
+            "\n".join(
+                [
+                    f"INITIAL CLUSTER {index}",
+                    f"approach_key: {cluster.get('approach_key', '')}",
+                    f"approach_name: {cluster.get('approach_name', '')}",
+                    f"language: {cluster.get('language', '')}",
+                    f"submission_ids: {cluster.get('submission_ids', [])}",
+                    f"cluster_reason: {cluster.get('cluster_reason', '')}",
+                    f"representative_submission_id: {representative_id}",
+                    "representative_code:",
+                    code,
+                ]
+            )
+        )
+
+    prompt = f"""
+You are the final semantic auditor for a LeetCode solution archive.
+
+We have accepted-submission candidates for ONE problem and an initial Gemini
+clustering. The initial clustering may be OVER-SPLIT. Re-review the actual
+representative code and merge clusters whenever they use the same core
+algorithmic idea.
+
+This archive is meant to store genuinely different approaches, NOT every
+source-code variation.
+
+CONSERVATIVE RULE:
+If two implementations could be explained by the same algorithmic idea,
+same main data structure, same mathematical trick, and same asymptotic method,
+MERGE them. When uncertain, MERGE rather than split.
+
+Do NOT treat these as different approaches:
+- variable names
+- formatting/comments
+- changing for-loop syntax to while-loop syntax
+- helper methods or small refactors
+- different but equivalent expressions
+- changing the order of harmless operations
+
+Treat these as different only when there is a concrete difference such as:
+- brute force versus hashing
+- sorting + two pointers versus hashing
+- binary search versus linear scan
+- XOR versus arithmetic sum
+- recursion versus iterative state when that changes the algorithmic method
+- a materially different data structure or mathematical property
+- different programming languages
+
+For every retained cluster, provide a concrete cluster_reason grounded in the
+representative code. Do not preserve separate clusters just to reflect that
+there were separate submissions.
+
+PROBLEM
+=======
+{problem_text}
+
+INITIAL CLUSTERS
+================
+{"\n\n".join(sections)}
+
+RETURN ONLY VALID JSON in exactly this form:
+{{
+  "solutions": [
+    {{
+      "approach_key": "stable-short-semantic-key",
+      "approach_name": "Human-readable algorithmic approach",
+      "language": "Java",
+      "submission_ids": ["..."],
+      "representative_submission_id": "...",
+      "cluster_reason": "Concrete reason this cluster is one approach.",
+      "analysis": {{
+        "pattern": "...",
+        "problem_summary": "...",
+        "intuition": "...",
+        "approach": ["step 1", "step 2", "step 3", "step 4"],
+        "why_it_works": "...",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "...",
+        "time_explanation": "...",
+        "space_explanation": "..."
+      }}
+    }}
+  ]
+}}
+
+Every candidate submission_id must appear exactly once across the final
+clusters. The representative must belong to its cluster, and language must
+match the representative candidate exactly.
+"""
+
+    try:
+        response = requests.post(
+            "https://generativelanguage.googleapis.com/v1beta/interactions",
+            headers={
+                "Content-Type": "application/json",
+                "x-goog-api-key": GEMINI_API_KEY,
+            },
+            json={
+                "model": "gemini-3.6-flash",
+                "input": prompt,
+            },
+            timeout=120,
+        )
+
+        if response.status_code == 429:
+            GEMINI_RUNTIME["blocked"] = True
+            GEMINI_RUNTIME["last_failure"] = (
+                "Gemini returned HTTP 429 (quota/rate limit) during clustering audit."
+            )
+            print(
+                "⏸️ Gemini returned HTTP 429 during clustering audit."
+            )
+            return None
+
+        if response.status_code in {500, 502, 503, 504}:
+            GEMINI_RUNTIME["last_failure"] = (
+                f"Temporary Gemini service error HTTP {response.status_code} during clustering audit."
+            )
+            print(
+                f"⚠️ Gemini clustering audit temporarily unavailable (HTTP {response.status_code})."
+            )
+            return None
+
+        if response.status_code != 200:
+            GEMINI_RUNTIME["last_failure"] = (
+                f"Gemini clustering audit failed with HTTP {response.status_code}."
+            )
+            print(
+                f"⚠️ Gemini clustering audit failed: HTTP {response.status_code}"
+            )
+            return None
+
+        result = json.loads(_parse_gemini_text(response.json()))
+        reviewed = result.get("solutions")
+
+        if not _validate_clusters(reviewed, candidates):
+            GEMINI_RUNTIME["last_failure"] = (
+                "Gemini clustering audit returned an invalid or incomplete cluster set."
+            )
+            print(
+                "⚠️ Gemini clustering audit returned an invalid cluster set."
+            )
+            return None
+
+        GEMINI_RUNTIME["requests_used"] += 1
+        GEMINI_RUNTIME["last_failure"] = ""
+        return reviewed
+
+    except (requests.RequestException, json.JSONDecodeError) as exc:
+        GEMINI_RUNTIME["last_failure"] = (
+            f"Gemini clustering audit error: {exc}"
+        )
+        print(f"⚠️ Gemini clustering audit error: {exc}")
+        return None
+    except Exception as exc:
+        GEMINI_RUNTIME["last_failure"] = (
+            f"Gemini clustering audit error: {exc}"
+        )
+        print(f"⚠️ Gemini clustering audit error: {exc}")
+        return None
+
+
+def _merge_identical_semantic_keys(clusters):
+    """Merge clusters that Gemini itself labeled with the same semantic key."""
+    merged = []
+    positions = {}
+
+    for cluster in clusters:
+        language = _normalize_semantic_label(cluster.get("language", ""))
+        key = _normalize_semantic_label(
+            cluster.get("approach_key", "")
+        )
+        name = _normalize_semantic_label(
+            cluster.get("approach_name", "")
+        )
+        merge_key = (language, key, name)
+
+        if key and name and merge_key in positions:
+            target = merged[positions[merge_key]]
+            target["submission_ids"] = list(
+                dict.fromkeys(
+                    target.get("submission_ids", [])
+                    + cluster.get("submission_ids", [])
+                )
+            )
+            target["cluster_reason"] = (
+                target.get("cluster_reason", "").rstrip()
+                + " "
+                + cluster.get("cluster_reason", "").strip()
+            ).strip()
+        else:
+            positions[merge_key] = len(merged)
+            merged.append(cluster)
+
+    return merged
+
+
 def gemini_cluster_problem(question, candidates):
     """
-    Ask Gemini ONCE for an entire problem to cluster equivalent submissions
-    into genuinely different algorithmic approaches and write the final
-    explanations for one representative implementation from each cluster.
-
-    candidates: list of dicts with submission_id, language, code, timestamp,
-    and exact_fingerprint.
+    Ask Gemini to identify genuinely different algorithmic approaches for one
+    problem. Equivalent code variants should be merged. A suspiciously
+    over-split result receives a second, stricter audit before it can affect
+    GitHub.
     """
     if not candidates:
         return []
@@ -2338,9 +2693,6 @@ def gemini_cluster_problem(question, candidates):
     candidate_sections = []
     for index, candidate in enumerate(candidates, start=1):
         code = candidate.get("code", "")
-        # Keep one problem's clustering request bounded even when a user has
-        # unusually large submissions. The first 12000 chars normally contain
-        # the algorithm; the representative code is later fetched in full.
         truncated = False
         if len(code) > 12000:
             code = code[:12000]
@@ -2364,28 +2716,29 @@ def gemini_cluster_problem(question, candidates):
 You are an expert algorithms educator and code reviewer.
 
 We are rebuilding the user's GitHub archive from ALL accepted submissions
-for ONE LeetCode problem. Your job is to identify genuinely different
-ALGORITHMIC APPROACHES, not merely different source-code versions.
+for ONE LeetCode problem. Identify genuinely different ALGORITHMIC APPROACHES,
+not merely different source-code versions.
 
-IMPORTANT DISTINCTION:
-- Different variable names, formatting, blank lines, helper naming, loop
-  style, or small refactoring are NOT different approaches.
-- Equivalent implementations of the same algorithm/data structure are ONE
-  approach.
-- A different core strategy, data structure, mathematical trick, traversal,
-  or asymptotic method IS a different approach.
-- Different programming LANGUAGES must remain separate approaches, even when
-  the underlying algorithm is the same.
-- Do not create multiple clusters just because two accepted submissions have
-  different code text.
-- Do not merge two solutions when their core algorithmic strategy is meaningfully
-  different.
+ARCHIVE POLICY — BE CONSERVATIVE:
+- Store one approach per core algorithmic idea.
+- Different variable names, formatting, comments, loop syntax, helper methods,
+  harmless refactors, or equivalent expressions are NOT new approaches.
+- Equivalent implementations using the same main data structure and same core
+  reasoning are ONE approach.
+- Create a new approach ONLY when there is a concrete change in the core
+  strategy, data structure, mathematical property, traversal/search method,
+  or asymptotic technique.
+- When uncertain, MERGE rather than split.
+- Different programming languages remain separate approaches.
 
 Examples for Two Sum:
 - nested loops / brute force = one approach
-- hash map complement lookup = a different approach
-- sorting + two pointers = another approach
-Five small variations of hash-map code should still become ONE hash-map approach.
+- hash map complement lookup = one approach
+- sorting + two pointers = one approach
+- Five small variations of hash-map code MUST remain ONE hash-map approach.
+
+Do not try to make the number of clusters equal to the number of candidates.
+The expected result is usually much smaller than the number of submissions.
 
 PROBLEM
 =======
@@ -2402,17 +2755,18 @@ ACCEPTED SUBMISSION CANDIDATES
 TASK
 ====
 1. Cluster every candidate into exactly one semantic approach.
-2. Use the representative submission that best demonstrates that approach;
+2. Merge implementation variants of the same approach.
+3. Use the representative submission that best demonstrates each approach;
    prefer the earliest accepted candidate when there is no meaningful reason
    to choose another.
-3. For every cluster, include ALL submission IDs that belong to it.
-4. Generate a high-quality explanation for the REPRESENTATIVE CODE ONLY.
-5. The explanation must accurately describe the actual submitted code and
-   must not substitute another algorithm.
-6. The explanation style should match a strong human-written LeetCode note:
-   specific, beginner-friendly, concrete, and useful.
+4. For every cluster, include ALL submission IDs that belong to it.
+5. Give a concrete cluster_reason explaining why the submissions share one
+   algorithmic idea.
+6. Generate the high-quality explanation for the REPRESENTATIVE CODE ONLY.
+7. Before producing JSON, internally audit the clustering for over-splitting.
 
-RETURN ONLY VALID JSON:
+RETURN ONLY VALID JSON using the same structure as requested below.
+
 {{
   "solutions": [
     {{
@@ -2421,7 +2775,7 @@ RETURN ONLY VALID JSON:
       "language": "Java",
       "submission_ids": ["..."],
       "representative_submission_id": "...",
-      "cluster_reason": "Why these submissions are the same approach.",
+      "cluster_reason": "Concrete reason these submissions are one approach.",
       "analysis": {{
         "pattern": "...",
         "problem_summary": "...",
@@ -2438,28 +2792,14 @@ RETURN ONLY VALID JSON:
   ]
 }}
 
-CLUSTERING RULES
-================
-- Every candidate submission_id must appear exactly once across all
-  submission_ids arrays.
-- representative_submission_id must belong to its own submission_ids array.
-- language must exactly match the representative candidate language.
-- Never split one core algorithm into separate clusters merely because the
-  code is written differently.
+VALIDATION RULES:
+- Every candidate submission_id appears exactly once.
+- representative_submission_id belongs to its own cluster.
+- language exactly matches the representative candidate.
+- Never split a core algorithm merely because code text differs.
 - Never merge different languages.
-- Never call a refactor or formatting change a new approach.
-- A meaningful algorithm/data-structure change should become a new approach.
-
-EXPLANATION RULES
-=================
-- analysis describes the representative's ACTUAL code.
-- approach contains 4 to 8 concrete ordered steps.
-- time_complexity and space_complexity contain ONLY Big-O expressions.
-- Explain sorting, hashing, recursion, bit tricks, digit extraction, pointer
-  movement, etc. when present.
-- Do not invent an optimization or data structure absent from the code.
-- Prefer correctness over sophistication.
-- Return JSON only.
+- Never invent an optimization or data structure.
+- Prefer merging when the distinction is only implementation style.
 """
 
     try:
@@ -2508,50 +2848,51 @@ EXPLANATION RULES
             return None
 
         result = json.loads(output_text)
-        solutions = result.get("solutions")
-        if not isinstance(solutions, list) or not solutions:
-            GEMINI_RUNTIME["last_failure"] = "Gemini returned no solution clusters."
-            return None
+        clusters = result.get("solutions")
 
-        candidate_map = {
-            str(item["submission_id"]): item
-            for item in candidates
-        }
-        expected_ids = set(candidate_map)
-        assigned_ids = []
-
-        for cluster in solutions:
-            cluster_ids = [str(x) for x in cluster.get("submission_ids", [])]
-            representative_id = str(cluster.get("representative_submission_id", ""))
-            language = str(cluster.get("language", "")).strip()
-            analysis = cluster.get("analysis")
-
-            if not cluster_ids or representative_id not in cluster_ids:
-                return None
-            if any(item_id not in expected_ids for item_id in cluster_ids):
-                return None
-            if not _validate_analysis(analysis):
-                return None
-
-            rep = candidate_map[representative_id]
-            if language != rep["language"]:
-                return None
-
-            assigned_ids.extend(cluster_ids)
-
-        if len(assigned_ids) != len(set(assigned_ids)):
-            return None
-        if set(assigned_ids) != expected_ids:
+        if not _validate_clusters(clusters, candidates):
+            GEMINI_RUNTIME["last_failure"] = (
+                "Gemini returned an invalid or incomplete semantic clustering."
+            )
             print(
-                "⚠️ Gemini did not assign every candidate exactly once. "
-                "Historical problem will be retried."
+                "⚠️ Gemini returned an invalid or incomplete semantic clustering."
             )
             return None
 
-        # Only a successful, fully validated request consumes one Gemini call.
+        # Gemini successfully completed the primary clustering request.
         GEMINI_RUNTIME["requests_used"] += 1
         GEMINI_RUNTIME["last_failure"] = ""
-        return solutions
+
+        clusters = _merge_identical_semantic_keys(clusters)
+
+        if _cluster_has_weak_separation(clusters, candidates):
+            print(
+                "   ⚠️ Primary clustering looks over-split; requesting a strict "
+                "semantic merge audit..."
+            )
+
+            reviewed = _gemini_post_cluster_review(
+                question,
+                candidates,
+                clusters,
+            )
+
+            if reviewed is None:
+                return None
+
+            clusters = _merge_identical_semantic_keys(reviewed)
+
+            if _cluster_has_weak_separation(clusters, candidates):
+                GEMINI_RUNTIME["last_failure"] = (
+                    "Gemini still returned an over-split clustering after the strict audit."
+                )
+                print(
+                    "⚠️ Clustering remains ambiguous after the audit; "
+                    "historical problem will be retried instead of being written incorrectly."
+                )
+                return None
+
+        return clusters
 
     except (requests.RequestException, json.JSONDecodeError) as exc:
         GEMINI_RUNTIME["last_failure"] = f"Gemini clustering error: {exc}"
