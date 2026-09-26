@@ -10,13 +10,13 @@
 
 ## 📝 Problem
 
-Remove duplicate elements in-place from a non-decreasingly sorted integer array `nums` such that each unique element appears once, and return the count $k$ of unique elements.
+Remove duplicate values from a sorted array in-place, keeping unique elements at the start and returning the count of unique elements.
 
 ---
 
 ## 💡 Intuition
 
-Because the array is already sorted, duplicate values are guaranteed to be adjacent. This allows us to detect every new unique element simply by comparing the current element with the element immediately before it. We can maintain a write pointer `k` that tracks where the next unique element should be stored in-place. Since the very first element `nums[0]` is always unique, `k` starts at index 1, and a read pointer `j` scans the array starting from index 1. Whenever `nums[j]` differs from `nums[j-1]`, we have encountered a new unique value, which we copy to `nums[k]` before advancing `k`.
+Because the array is already sorted in non-decreasing order, any duplicate values are guaranteed to be adjacent. By using a fast reader pointer to scan adjacent pairs and a slow writer pointer to place unique elements, we can compress the array in a single pass.
 
 ---
 
@@ -28,18 +28,17 @@ Because the array is already sorted, duplicate values are guaranteed to be adjac
 
 ## 🚀 Approach
 
-1. Initialize the write pointer `k = 1` because the first element `nums[0]` is always unique and remains at index 0.
-2. Loop through the array using a fast read pointer `j` starting from index `1` up to `nums.length - 1`.
-3. Inside the loop, check if `nums[j] != nums[j-1]` to determine if `nums[j]` is a newly encountered unique element.
-4. If the condition holds, copy `nums[j]` into `nums[k]` to overwrite any existing duplicate at index `k`.
-5. Increment `k` by `1` so it points to the next write position.
-6. After the loop finishes, return `k`, which represents both the length of the deduplicated subarray and the total count of unique elements.
+1. Initialize a writer pointer `k = 1`, assuming the first element at index 0 is always unique.
+2. Iterate a reader pointer `j` from index 1 to the end of the array.
+3. Compare `nums[j]` with `nums[j - 1]` to check if a new unique value is encountered.
+4. If `nums[j] != nums[j - 1]`, write `nums[j]` to `nums[k]` and increment `k`.
+5. Return `k`, which represents the number of unique elements in the array.
 
 ---
 
 ## ✅ Why This Works
 
-The non-decreasing order of `nums` guarantees that equal elements form contiguous blocks. Checking `nums[j] != nums[j-1]` correctly identifies the first occurrence of each distinct number. Throughout the iteration, the algorithm maintains the invariant that `nums[0...k-1]` contains all unique elements seen so far in sorted order. Because the read pointer `j` is always greater than or equal to the write pointer `k`, writing to `nums[k]` never overwrites unprocessed elements.
+Contiguous duplicates are skipped by the equality check. Only the first occurrence of each unique number triggers a write to `nums[k]`, effectively overwriting older duplicate values without disturbing the relative order.
 
 ---
 
@@ -47,8 +46,8 @@ The non-decreasing order of `nums` guarantees that equal elements form contiguou
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(n)** |
-| Space | **O(1)** |
+| Time | **O(n) — The algorithm inspects each element of the array of size `n` exactly once in a single linear loop, leading to O(n) time complexity.** |
+| Space | **O(1) — The deduplication is done strictly in-place using only a few primitive integer pointer variables, requiring O(1) auxiliary space.** |
 
 ### 📊 LeetCode Performance
 
@@ -67,7 +66,7 @@ The non-decreasing order of `nums` guarantees that equal elements form contiguou
 
 ## 🎯 Key Takeaway
 
-When modifying a sorted array in-place, a two-pointer read/write strategy leverages adjacency to filter out redundant elements in linear time with $O(1)$ extra space.
+When modifying sorted arrays in-place to remove duplicates or filter elements, maintaining separate read and write pointers provides an efficient O(n) time and O(1) space solution.
 
 ---
 

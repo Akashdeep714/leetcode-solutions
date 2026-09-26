@@ -9,5 +9,43 @@
   "runtime": 0,
   "runtime_display": "0 ms",
   "memory": 46536000,
-  "memory_display": "46.5 MB"
+  "memory_display": "46.5 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2140238492",
+      "submission_ids": [
+        "2140238492"
+      ],
+      "solution_hash": "b58d70e4e48ba124055b54fd1f5a2c76939eea22bf7ee9caf4a333c6bde75a81",
+      "approach_key": "greedy-sum-of-positive-differences",
+      "approach_name": "Greedy Sum of Positive Differences",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 46536000,
+      "memory_display": "46.5 MB",
+      "analysis": {
+        "pattern": "Greedy Algorithm",
+        "problem_summary": "Find the maximum total profit from buying and selling a stock multiple times, holding at most one share at any time.",
+        "intuition": "Since we can buy and sell on the same day, capturing any multi-day price increase (e.g., buying on day A and selling on day C) is mathematically identical to accumulating every consecutive daily price increase along that upward trend (A to B, then B to C). Therefore, we simply add up every positive price difference between consecutive days.",
+        "approach": [
+          "Initialize `maxProfit` to 0.",
+          "Iterate through the price array starting from index 1 to the end.",
+          "For each day `i`, compare `prices[i]` with the previous day's price `prices[i - 1]`.",
+          "If `prices[i] > prices[i - 1]`, add the difference `prices[i] - prices[i - 1]` to `maxProfit`.",
+          "Return `maxProfit` after examining all consecutive price pairs."
+        ],
+        "why_it_works": "Any profit over a strictly increasing sequence $p_1 \\le p_2 \\le \\dots \\le p_k$ equals $(p_k - p_1)$, which can be decomposed into $(p_2 - p_1) + (p_3 - p_2) + \\dots + (p_k - p_{k-1})$. On decreasing steps, we abstain from trading (0 profit contribution). Summing all positive single-day differences captures the global optimal profit without needing explicit state management.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "When unlimited transactions are permitted without transaction fees, maximizing total profit reduces to collecting every positive single-step gradient.",
+        "time_explanation": "The algorithm iterates through the `prices` array of size $n$ exactly once, performing constant-time comparisons and additions at each step.",
+        "space_explanation": "Only a single variable (`maxProfit`) is used to maintain the running total profit, requiring $O(1)$ extra space."
+      }
+    }
+  ],
+  "historical_backfill_version": 4
 }

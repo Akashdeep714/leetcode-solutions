@@ -7,32 +7,77 @@
   "slug": "missing-number",
   "submission_id": "2030849021",
   "runtime": 0,
-  "memory": 47260000,
   "runtime_display": "0 ms",
+  "memory": 47260000,
   "memory_display": "47.3 MB",
+  "solution_count": 2,
   "solutions": [
     {
       "number": 1,
       "filename": "solution-2.java",
       "language": "Java",
-      "submission_id": "2030853058",
-      "solution_hash": "17e5c7646b0d4105d3f0d4edb6dde4703b0f92f7b135f31ee2781fe82b8919a8",
-      "runtime": 0,
-      "runtime_display": "0 ms",
-      "memory": 47100000,
-      "memory_display": "47.1 MB"
-    },
-    {
-      "number": 2,
-      "filename": "solution-2.java",
-      "language": "Java",
       "submission_id": "2030849021",
+      "submission_ids": [
+        "2030849021"
+      ],
       "solution_hash": "17e5c7646b0d4105d3f0d4edb6dde4703b0f92f7b135f31ee2781fe82b8919a8",
+      "approach_key": "gauss-sum-formula",
+      "approach_name": "Arithmetic Series Sum (Gauss Formula)",
       "runtime": 0,
       "runtime_display": "0 ms",
       "memory": 47260000,
-      "memory_display": "47.3 MB"
+      "memory_display": "47.3 MB",
+      "analysis": {
+        "pattern": "Math / Summation Formula",
+        "problem_summary": "Find the single missing number from an array of n distinct numbers in the range [0, n].",
+        "intuition": "The sum of all consecutive integers from 0 to n is known via Gauss's formula, n * (n + 1) / 2. Subtracting the actual sum of array elements from this expected total directly yields the missing number.",
+        "approach": [
+          "Calculate the expected sum of numbers from 0 to n using the formula n * (n + 1) / 2.",
+          "Iterate through the array nums to calculate the actual sum of all elements.",
+          "Subtract the actual sum from the expected sum.",
+          "Return the difference as the missing number."
+        ],
+        "why_it_works": "Since the range [0, n] contains n + 1 elements and nums contains n elements with all values unique except for one missing value, the difference between the complete set's sum and the array's sum is exactly the missing element.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Mathematical summation formulas allow computing missing elements in O(n) time and O(1) auxiliary space without extra data structures.",
+        "time_explanation": "A single linear pass over the array of length n is performed to compute the sum of elements.",
+        "space_explanation": "Only a few primitive integer variables are used to keep track of the sums, using constant O(1) space."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2030853058",
+      "submission_ids": [
+        "2030853058"
+      ],
+      "solution_hash": "3070d55ae6c804b17073983cd8e40d8763607c256845b1ef47189a1a524888d1",
+      "approach_key": "bit-manipulation-xor",
+      "approach_name": "Bit Manipulation (XOR)",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 47100000,
+      "memory_display": "47.1 MB",
+      "analysis": {
+        "pattern": "Bit Manipulation",
+        "problem_summary": "Find the single missing number from an array of n distinct numbers in the range [0, n].",
+        "intuition": "XORing a number with itself yields zero (x ^ x = 0) and XORing with zero leaves the number unchanged (x ^ 0 = x). If we XOR all indices from 0 to n together with all values present in nums, every present number appears twice (once as an index or n, and once as an array element) and cancels out to 0, leaving only the missing number.",
+        "approach": [
+          "Initialize an accumulator variable xor with value n (the length of the array).",
+          "Iterate through each index i from 0 to n - 1.",
+          "In each iteration, update xor by XORing it with both index i and array element nums[i].",
+          "Return xor, which holds the missing number after all present pairs cancel out."
+        ],
+        "why_it_works": "Because XOR is commutative and associative, pairing each index i with array element nums[i] creates pairs for every present number. The missing number appears only once (as an index/length value) and remains after all pairs evaluate to 0.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Bitwise XOR is an optimal technique for missing or unique element problems because it operates in O(1) space and avoids potential integer overflow issues inherent to addition-based approaches.",
+        "time_explanation": "The algorithm makes a single pass through the array of length n, performing constant-time XOR operations per iteration.",
+        "space_explanation": "Only a single primitive integer variable is maintained, resulting in O(1) auxiliary space."
+      }
     }
   ],
-  "solution_count": 2
+  "historical_backfill_version": 4
 }

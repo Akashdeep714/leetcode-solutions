@@ -2,7 +2,8 @@
 
 > **Difficulty:** 🟢 Easy  
 > **Topics:** Array · Hash Table · Math · Binary Search · Bit Manipulation · Sorting  
-> **Language:** Java
+> **Solutions:** 2 unique approach(es)  
+> **Languages:** Java
 
 [🔗 View Problem on LeetCode](https://leetcode.com/problems/missing-number/)
 
@@ -10,68 +11,15 @@
 
 ## 📝 Problem
 
-Find the one missing value from an array containing distinct numbers chosen from the range 0 through n.
+Find the single missing number from an array of n distinct numbers in the range [0, n].
 
 ---
 
-## 💡 Intuition
+## 🛠️ Solutions
 
-XOR cancels equal values. Combine the expected range with the values in the array so every present number cancels itself, leaving only the missing number.
+This folder contains **2 unique accepted implementation(s)** for the same problem. Repeated submissions of identical code are ignored automatically.
 
----
-
-## 🧠 Algorithmic Pattern
-
-> **🔀 XOR**
-
----
-
-## 🚀 Approach
-
-1. Initialize the XOR accumulator with the required range state.
-2. Traverse the array and XOR each present value into the accumulator.
-3. Also XOR the corresponding range values.
-4. Let equal values cancel each other through XOR.
-5. Return the value left in the accumulator.
-
----
-
-## ✅ Why This Works
-
-Because x ^ x = 0 and x ^ 0 = x, every value that exists in both the range and the array cancels. The only value without a matching partner is the missing number.
-
----
-
-## ⏱️ Complexity
-
-| Metric | Complexity |
-|---|---|
-| Time | **O(n)** |
-| Space | **O(1)** |
-
-### 📊 LeetCode Performance
-
-| Metric | Result |
-|---|---|
-| Runtime | `0 ms` |
-| Memory | `47.1 MB` |
-
----
-
-## 💻 Solution
-
-[View the complete Java solution →](./solution.java)
-
----
-
-## 🎯 Key Takeaway
-
-XOR is a useful way to find one missing value without extra storage.
-
----
-
----
-### 🔀 Solution 2 — Math
+### 🧠 Solution 1 — Math / Summation Formula
 
 > **Language:** Java  
 > **Runtime:** `0 ms`  
@@ -79,40 +27,94 @@ XOR is a useful way to find one missing value without extra storage.
 
 #### 💡 Intuition
 
-The sum of all integers from 0 to n can be calculated in O(1) time using Gauss's summation formula, n * (n + 1) / 2. Since the input array contains every number in this range except one, the sum of the array's elements will be smaller than the expected total by exactly the missing number. Subtracting the actual sum of elements in the array from the expected sum directly isolates the missing value.
+The sum of all consecutive integers from 0 to n is known via Gauss's formula, n * (n + 1) / 2. Subtracting the actual sum of array elements from this expected total directly yields the missing number.
 
 #### 🧠 Algorithmic Pattern
 
-> **Math**
+> **Math / Summation Formula**
 
 #### 🚀 Approach
 
-1. Determine the size of the input array nums as n.
-2. Calculate the total expected sum of integers from 0 to n using the formula n * (n + 1) / 2.
-3. Initialize an integer variable actual to 0 to store the sum of all elements present in nums.
-4. Iterate through each number num in nums and add it to actual.
-5. Subtract actual from expected and return the difference as the missing number.
+1. Calculate the expected sum of numbers from 0 to n using the formula n * (n + 1) / 2.
+2. Iterate through the array nums to calculate the actual sum of all elements.
+3. Subtract the actual sum from the expected sum.
+4. Return the difference as the missing number.
 
 #### ✅ Why This Works
 
-The set of numbers from 0 to n has a fixed mathematical sum of n * (n + 1) / 2. By linear equation, Sum(0..n) = Sum(nums) + missing_number. Subtracting the sum of the array elements from the total theoretical sum leaves only the missing number, regardless of the order in which elements appear in the array.
+Since the range [0, n] contains n + 1 elements and nums contains n elements with all values unique except for one missing value, the difference between the complete set's sum and the array's sum is exactly the missing element.
 
 #### ⏱️ Complexity
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(n) — The algorithm iterates through the array of length n once to compute the sum of its elements, resulting in O(n) runtime.** |
-| Space | **O(1) — The algorithm only uses a few scalar variables (n, expected, actual) to hold intermediate arithmetic results, using O(1) extra space.** |
+| Time | **O(n) — A single linear pass over the array of length n is performed to compute the sum of elements.** |
+| Space | **O(1) — Only a few primitive integer variables are used to keep track of the sums, using constant O(1) space.** |
 
 #### 💻 Solution
 
 [View the complete Java solution →](./solution-2.java)
 
-## 🔗 Useful Links
+#### 🎯 Key Takeaway
 
-- [LeetCode Problem](https://leetcode.com/problems/missing-number/)
-- [My Solution](./solution.java)
+Mathematical summation formulas allow computing missing elements in O(n) time and O(1) auxiliary space without extra data structures.
 
 ---
 
-⭐ Automatically synchronized from an accepted LeetCode submission.
+### 🧠 Solution 2 — Bit Manipulation
+
+> **Language:** Java  
+> **Runtime:** `0 ms`  
+> **Memory:** `47.1 MB`
+
+#### 💡 Intuition
+
+XORing a number with itself yields zero (x ^ x = 0) and XORing with zero leaves the number unchanged (x ^ 0 = x). If we XOR all indices from 0 to n together with all values present in nums, every present number appears twice (once as an index or n, and once as an array element) and cancels out to 0, leaving only the missing number.
+
+#### 🧠 Algorithmic Pattern
+
+> **Bit Manipulation**
+
+#### 🚀 Approach
+
+1. Initialize an accumulator variable xor with value n (the length of the array).
+2. Iterate through each index i from 0 to n - 1.
+3. In each iteration, update xor by XORing it with both index i and array element nums[i].
+4. Return xor, which holds the missing number after all present pairs cancel out.
+
+#### ✅ Why This Works
+
+Because XOR is commutative and associative, pairing each index i with array element nums[i] creates pairs for every present number. The missing number appears only once (as an index/length value) and remains after all pairs evaluate to 0.
+
+#### ⏱️ Complexity
+
+| Metric | Complexity |
+|---|---|
+| Time | **O(n) — The algorithm makes a single pass through the array of length n, performing constant-time XOR operations per iteration.** |
+| Space | **O(1) — Only a single primitive integer variable is maintained, resulting in O(1) auxiliary space.** |
+
+#### 💻 Solution
+
+[View the complete Java solution →](./solution.java)
+
+#### 🎯 Key Takeaway
+
+Bitwise XOR is an optimal technique for missing or unique element problems because it operates in O(1) space and avoids potential integer overflow issues inherent to addition-based approaches.
+
+
+---
+
+## 🎯 Key Takeaway
+
+This repository currently contains 2 unique approaches for this problem. Comparing them makes the trade-off between their time, space, and implementation ideas easier to see.
+
+---
+
+## 🔗 Useful Links
+
+- [LeetCode Problem](https://leetcode.com/problems/missing-number/)
+- [Solutions in this folder](.)
+
+---
+
+⭐ Automatically synchronized from accepted LeetCode submissions.

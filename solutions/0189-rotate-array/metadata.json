@@ -10,29 +10,76 @@
   "runtime_display": "5 ms",
   "memory": 268640000,
   "memory_display": "268.6 MB",
+  "solution_count": 2,
   "solutions": [
     {
       "number": 1,
       "filename": "solution-2.java",
       "language": "Java",
-      "submission_id": "2140291269",
-      "solution_hash": "b7543268b79caa81a47532b18a64b7c372d98d160eb722c56040abfcc927ac00",
-      "runtime": 8,
-      "runtime_display": "8 ms",
-      "memory": 268728000,
-      "memory_display": "268.7 MB"
-    },
-    {
-      "number": 2,
-      "filename": "solution-2.java",
-      "language": "Java",
       "submission_id": "2140264267",
+      "submission_ids": [
+        "2140264267"
+      ],
       "solution_hash": "b7543268b79caa81a47532b18a64b7c372d98d160eb722c56040abfcc927ac00",
+      "approach_key": "three-step-reversal",
+      "approach_name": "Three-Step Array Reversal",
       "runtime": 5,
       "runtime_display": "5 ms",
       "memory": 268640000,
-      "memory_display": "268.6 MB"
+      "memory_display": "268.6 MB",
+      "analysis": {
+        "pattern": "Two Pointers / Array Reversal",
+        "problem_summary": "Rotate an array of n integers to the right by k steps in-place.",
+        "intuition": "Rotating right by k moves the last k elements to the front and shifts the first n - k elements to the back. Reversing the entire array swaps the relative positions of these two blocks, but leaves each block internally inverted. Reversing the first k elements and the remaining n - k elements restores internal order, completing the rotation.",
+        "approach": [
+          "Normalize k using modular arithmetic (k = k % n) to handle k greater than or equal to array length n.",
+          "If k % n == 0, return early as the array remains unchanged.",
+          "Reverse the entire array from index 0 to n - 1.",
+          "Reverse the first k elements from index 0 to k - 1.",
+          "Reverse the remaining n - k elements from index k to n - 1."
+        ],
+        "why_it_works": "Reversing the entire array moves the tail section (length k) to the head and the head section (length n - k) to the tail. Since reversing flips element order within each section, applying two subsequent localized reversals corrects the order of elements within both sections.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Block-based cyclic shifts on contiguous memory can often be performed in-place by combining global and sub-array reversal operations.",
+        "time_explanation": "Reversing the array requires n / 2 swaps total across all three reversal steps (n/2 + k/2 + (n-k)/2 = n swaps), yielding linear O(n) time complexity.",
+        "space_explanation": "The reversals are done in-place using two pointers and a scalar temporary swap variable, using O(1) extra memory."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2140291269",
+      "submission_ids": [
+        "2140291269"
+      ],
+      "solution_hash": "cd0e66c2e971be8c8c5699afd93eeeed8cf594c54f2f160363d33583d9fe0de0",
+      "approach_key": "cyclic-replacements",
+      "approach_name": "Cyclic Replacements",
+      "runtime": 8,
+      "runtime_display": "8 ms",
+      "memory": 268728000,
+      "memory_display": "268.7 MB",
+      "analysis": {
+        "pattern": "Cycle Decomposition / Modular Arithmetic",
+        "problem_summary": "Rotate an array of n integers right by k positions in-place.",
+        "intuition": "Every element at index idx belongs to a cyclic chain defined by target position next = (idx + k) % n. Following this chain lets us place each element directly into its target index while carrying the displaced value to the next target. Repeating this for all disjoint cycles places every element into place without extra array allocation.",
+        "approach": [
+          "Maintain a count variable tracking the total number of elements successfully placed.",
+          "Iterate starting cycle heads from index i = 0 up until count equals n.",
+          "Store the starting element value in a variable curr and traverse the cycle using idx = (idx + k) % n.",
+          "Swap curr with the value at the new target index, update idx, and increment count.",
+          "Continue until returning to the cycle start index i, then increment i to begin the next disjoint cycle."
+        ],
+        "why_it_works": "The permutation formed by rotating right by k decomposes into exactly gcd(n, k) disjoint cycles. Traversing every cycle until all n elements are moved guarantees each element reaches its correct rotated destination.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "In-place array permutations can be executed in optimal time and space by tracing disjoint cycle paths.",
+        "time_explanation": "Every element is visited and placed in its correct destination exactly once across all cycle loops, performing n total placement operations for O(n) time.",
+        "space_explanation": "Cycle traversal only requires scalar temporary variables (curr, next, count, idx), running in O(1) auxiliary space."
+      }
     }
   ],
-  "solution_count": 2
+  "historical_backfill_version": 4
 }

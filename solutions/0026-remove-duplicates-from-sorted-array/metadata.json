@@ -9,5 +9,44 @@
   "runtime": 1,
   "runtime_display": "1 ms",
   "memory": 46800000,
-  "memory_display": "46.8 MB"
+  "memory_display": "46.8 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2139893149",
+      "submission_ids": [
+        "2139893149",
+        "2151146279"
+      ],
+      "solution_hash": "7d0156afa394f86676adc4928d9c2e5ec96753779194777c56a27dc457e4da72",
+      "approach_key": "two-pointers-in-place",
+      "approach_name": "Two Pointers In-Place Deduplication",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 46800000,
+      "memory_display": "46.8 MB",
+      "analysis": {
+        "pattern": "Two Pointers",
+        "problem_summary": "Remove duplicate values from a sorted array in-place, keeping unique elements at the start and returning the count of unique elements.",
+        "intuition": "Because the array is already sorted in non-decreasing order, any duplicate values are guaranteed to be adjacent. By using a fast reader pointer to scan adjacent pairs and a slow writer pointer to place unique elements, we can compress the array in a single pass.",
+        "approach": [
+          "Initialize a writer pointer `k = 1`, assuming the first element at index 0 is always unique.",
+          "Iterate a reader pointer `j` from index 1 to the end of the array.",
+          "Compare `nums[j]` with `nums[j - 1]` to check if a new unique value is encountered.",
+          "If `nums[j] != nums[j - 1]`, write `nums[j]` to `nums[k]` and increment `k`.",
+          "Return `k`, which represents the number of unique elements in the array."
+        ],
+        "why_it_works": "Contiguous duplicates are skipped by the equality check. Only the first occurrence of each unique number triggers a write to `nums[k]`, effectively overwriting older duplicate values without disturbing the relative order.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "When modifying sorted arrays in-place to remove duplicates or filter elements, maintaining separate read and write pointers provides an efficient O(n) time and O(1) space solution.",
+        "time_explanation": "The algorithm inspects each element of the array of size `n` exactly once in a single linear loop, leading to O(n) time complexity.",
+        "space_explanation": "The deduplication is done strictly in-place using only a few primitive integer pointer variables, requiring O(1) auxiliary space."
+      }
+    }
+  ],
+  "historical_backfill_version": 4
 }

@@ -9,5 +9,43 @@
   "runtime": 1,
   "runtime_display": "1 ms",
   "memory": 94312000,
-  "memory_display": "94.3 MB"
+  "memory_display": "94.3 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2139943751",
+      "submission_ids": [
+        "2139943751"
+      ],
+      "solution_hash": "62bb1203ad14e71d9118b537edcc45c2ab45d5d17f0de1d6138a8e9a9c9e3e49",
+      "approach_key": "single-pass-min-price-tracking",
+      "approach_name": "Single Pass Minimum Tracking",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 94312000,
+      "memory_display": "94.3 MB",
+      "analysis": {
+        "pattern": "Dynamic Programming / Greedy Single Pass",
+        "problem_summary": "Find the maximum profit from buying and selling a stock on a single day in the future.",
+        "intuition": "To maximize profit on any given day, you should sell at the current price after having bought at the lowest price seen up to that point.",
+        "approach": [
+          "Initialize `minPrice` to infinity and `maxProfit` to 0.",
+          "Iterate through each price in the array.",
+          "Update `minPrice` if the current day's price is lower than the recorded minimum.",
+          "Calculate potential profit (`price - minPrice`) and update `maxProfit` if it exceeds the current maximum profit.",
+          "Return `maxProfit` after completing the loop."
+        ],
+        "why_it_works": "Tracking the minimum price seen so far guarantees that for every selling day, the maximum possible profit for that day is evaluated. Scanning all days ensures the global maximum profit is captured.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Maintaining a running minimum during a single traversal solves the dynamic profit tracking problem efficiently without needing dynamic programming arrays or nested loops.",
+        "time_explanation": "The algorithm visits each price in the array of size $n$ exactly once, performing constant $O(1)$ comparisons and assignments per element.",
+        "space_explanation": "The algorithm uses only a few primitive integer variables (`minPrice`, `maxProfit`), consuming constant $O(1)$ auxiliary space."
+      }
+    }
+  ],
+  "historical_backfill_version": 4
 }

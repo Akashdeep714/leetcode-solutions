@@ -10,36 +10,35 @@
 
 ## 📝 Problem
 
-Find the maximum profit achievable by buying a stock on one day and selling it on a future day given an array of daily prices. Return 0 if no profit can be made.
+Find the maximum profit from buying and selling a stock on a single day in the future.
 
 ---
 
 ## 💡 Intuition
 
-To maximize profit, we want to buy at the lowest possible price prior to selling. As we iterate through the price list, every day represents a potential selling day. To achieve the highest profit on a given selling day, we should have bought at the lowest price seen up to that point. By maintaining the running minimum price and comparing the profit from selling on the current day against our overall maximum profit, we can determine the optimal transaction in a single pass.
+To maximize profit on any given day, you should sell at the current price after having bought at the lowest price seen up to that point.
 
 ---
 
 ## 🧠 Algorithmic Pattern
 
-> **Greedy / One-Pass Dynamic Programming**
+> **Dynamic Programming / Greedy Single Pass**
 
 ---
 
 ## 🚀 Approach
 
-1. Initialize `minPrice` to `Integer.MAX_VALUE` to keep track of the lowest stock price encountered so far.
-2. Initialize `maxProfit` to `0` to store the maximum profit found.
-3. Iterate through each `price` in the `prices` array.
-4. If the current `price` is less than `minPrice`, update `minPrice` to `price`.
-5. If `price - minPrice` is greater than `maxProfit`, update `maxProfit` to this new profit value.
-6. Return `maxProfit` after iterating through all daily prices.
+1. Initialize `minPrice` to infinity and `maxProfit` to 0.
+2. Iterate through each price in the array.
+3. Update `minPrice` if the current day's price is lower than the recorded minimum.
+4. Calculate potential profit (`price - minPrice`) and update `maxProfit` if it exceeds the current maximum profit.
+5. Return `maxProfit` after completing the loop.
 
 ---
 
 ## ✅ Why This Works
 
-At any index `i`, `minPrice` correctly holds $\min(\text{prices}[0 \dots i])$. Selling on day `i` yields maximum profit when the buying price is as small as possible, which is exactly `minPrice`. By calculating `price - minPrice` for every day `i` and taking the maximum across all days, the code checks the optimal buy price for every possible sell day, guaranteeing the global maximum profit without breaking the requirement that buying must happen before selling.
+Tracking the minimum price seen so far guarantees that for every selling day, the maximum possible profit for that day is evaluated. Scanning all days ensures the global maximum profit is captured.
 
 ---
 
@@ -47,8 +46,8 @@ At any index `i`, `minPrice` correctly holds $\min(\text{prices}[0 \dots i])$. S
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(n)** |
-| Space | **O(1)** |
+| Time | **O(n) — The algorithm visits each price in the array of size $n$ exactly once, performing constant $O(1)$ comparisons and assignments per element.** |
+| Space | **O(1) — The algorithm uses only a few primitive integer variables (`minPrice`, `maxProfit`), consuming constant $O(1)$ auxiliary space.** |
 
 ### 📊 LeetCode Performance
 
@@ -67,7 +66,7 @@ At any index `i`, `minPrice` correctly holds $\min(\text{prices}[0 \dots i])$. S
 
 ## 🎯 Key Takeaway
 
-When maximizing the difference between two elements subject to a sequential order constraint (e.g., buying before selling), track the running minimum in a single pass to solve the problem in $O(n)$ time and $O(1)$ space.
+Maintaining a running minimum during a single traversal solves the dynamic profit tracking problem efficiently without needing dynamic programming arrays or nested loops.
 
 ---
 
