@@ -213,6 +213,13 @@
         "frontendId": "1299",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-09-25T17:51:58+00:00"
+      },
+      {
+        "titleSlug": "sort-array-by-parity",
+        "title": "Sort Array By Parity",
+        "frontendId": "905",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-27T16:42:08+00:00"
       }
     ],
     "problem_index": 12,
