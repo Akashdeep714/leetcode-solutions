@@ -10,29 +10,42 @@
   "runtime_display": "3 ms",
   "memory": 45248000,
   "memory_display": "45.2 MB",
+  "solution_count": 1,
   "solutions": [
     {
       "number": 1,
       "filename": "solution-2.java",
       "language": "Java",
-      "submission_id": "2142970678",
-      "solution_hash": "cb0b1ff1d14bb66d9bde9c62c432f06e9292ef733e51bc6a3e19272873f7724e",
-      "runtime": 2,
-      "runtime_display": "2 ms",
-      "memory": 44328000,
-      "memory_display": "44.3 MB"
-    },
-    {
-      "number": 2,
-      "filename": "solution-2.java",
-      "language": "Java",
       "submission_id": "2142890597",
+      "submission_ids": [
+        "2142890597",
+        "2142970678"
+      ],
       "solution_hash": "cb0b1ff1d14bb66d9bde9c62c432f06e9292ef733e51bc6a3e19272873f7724e",
+      "approach_key": "hash-set-intersection",
+      "approach_name": "Hash Set Lookup",
       "runtime": 3,
       "runtime_display": "3 ms",
       "memory": 45248000,
-      "memory_display": "45.2 MB"
+      "memory_display": "45.2 MB",
+      "analysis": {
+        "pattern": "Hash Table / Hash Set",
+        "problem_summary": "Find the unique common elements present in both integer arrays nums1 and nums2.",
+        "intuition": "Set data structures automatically handle duplicate removal and enable average O(1) time complexity for element lookups. Storing elements in hash sets allows us to easily check if an element from one array exists in the other without checking duplicates multiple times.",
+        "approach": [
+          "Insert all elements from nums1 into a hash set s1 to deduplicate them.",
+          "Insert all elements from nums2 into a hash set s2 to deduplicate them.",
+          "Iterate over each unique element in s1 and check if it exists in s2.",
+          "Collect all intersecting elements into an output array and return it."
+        ],
+        "why_it_works": "Iterating over deduplicated elements guarantees that every common value is added to the result array exactly once, while hash set membership tests confirm existence in constant average time.",
+        "time_complexity": "O(N + M)",
+        "space_complexity": "O(N + M)",
+        "key_takeaway": "Hash Sets convert array intersection into fast set-membership checks, handling both uniqueness and constant-time search simultaneously.",
+        "time_explanation": "Populating the sets takes O(N) for nums1 and O(M) for nums2. Checking membership for each element of the set takes average O(1) time per element, leading to an overall runtime of O(N + M).",
+        "space_explanation": "In the worst case, hash sets store up to N unique elements from nums1 and up to M unique elements from nums2, requiring O(N + M) auxiliary space."
+      }
     }
   ],
-  "solution_count": 2
+  "historical_backfill_version": 4
 }

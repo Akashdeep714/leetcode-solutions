@@ -2,7 +2,8 @@
 
 > **Difficulty:** 🟢 Easy  
 > **Topics:** Array · Hash Table · Two Pointers · Binary Search · Sorting  
-> **Language:** Java
+> **Solutions:** 2 unique approach(es)  
+> **Languages:** Java
 
 [🔗 View Problem on LeetCode](https://leetcode.com/problems/intersection-of-two-arrays-ii/)
 
@@ -10,69 +11,15 @@
 
 ## 📝 Problem
 
-Given two integer arrays, return an array representing their intersection where each element appears as many times as it shows in both arrays.
+Find the intersection of two arrays where each element appears as many times as it shows in both arrays.
 
 ---
 
-## 💡 Intuition
+## 🛠️ Solutions
 
-When both arrays are sorted, duplicate values are grouped together and elements appear in non-decreasing order. By placing a pointer at the beginning of each array, we can compare elements side-by-side: equal elements belong in the intersection and allow both pointers to advance, while unequal elements allow us to advance the pointer corresponding to the smaller element to search for a larger, matching value. This ensures we collect every matching instance while maintaining the exact duplicate counts required.
+This folder contains **2 unique accepted implementation(s)** for the same problem. Repeated submissions of identical code are ignored automatically.
 
----
-
-## 🧠 Algorithmic Pattern
-
-> **Two Pointers / Sorting**
-
----
-
-## 🚀 Approach
-
-1. Sort both input arrays `nums1` and `nums2` in non-decreasing order using `Arrays.sort()`.
-2. Initialize a result array `res` of size `nums1.length`, a write pointer `k = 0`, and two read pointers `i = 0` for `nums1` and `j = 0` for `nums2`.
-3. Loop while `i < nums1.length` and `j < nums2.length`.
-4. If `nums1[i] == nums2[j]`, write `nums1[i]` into `res[k]`, then increment `k`, `i`, and `j`.
-5. If `nums1[i] > nums2[j]`, increment `j` to search for a larger value in `nums2`; otherwise, increment `i`.
-6. Return the truncated result array from index `0` to `k` using `Arrays.copyOfRange(res, 0, k)`.
-
----
-
-## ✅ Why This Works
-
-Sorting guarantees that elements in both arrays are monotonically non-decreasing. If `nums1[i] < nums2[j]`, then `nums1[i]` cannot match `nums2[j]` or any subsequent element in `nums2`, so advancing `i` is guaranteed not to skip any valid matches. When `nums1[i] == nums2[j]`, the pair represents one shared instance of that number, so consuming both elements by incrementing `i` and `j` accurately counts duplicates without double-counting.
-
----
-
-## ⏱️ Complexity
-
-| Metric | Complexity |
-|---|---|
-| Time | **O(n log n + m log m)** |
-| Space | **O(log n + log m)** |
-
-### 📊 LeetCode Performance
-
-| Metric | Result |
-|---|---|
-| Runtime | `6 ms` |
-| Memory | `45.3 MB` |
-
----
-
-## 💻 Solution
-
-[View the complete Java solution →](./solution.java)
-
----
-
-## 🎯 Key Takeaway
-
-Sorting enables a two-pointer linear scan that finds the intersection of two arrays while automatically respecting element frequencies without requiring extra hash table storage.
-
----
-
----
-### 🔀 Solution 2 — Hash Table / Frequency Counting
+### 🧠 Solution 1 — Hash Table
 
 > **Language:** Java  
 > **Runtime:** `3 ms`  
@@ -80,41 +27,97 @@ Sorting enables a two-pointer linear scan that finds the intersection of two arr
 
 #### 💡 Intuition
 
-To handle duplicate elements correctly, we need to track how many times each number appears in the first array and decrement that available count whenever a match is found in the second array. A hash map allows us to store the frequency of each element in `nums1` in linear time. As we traverse `nums2`, any element present in the map with a non-zero count is added to our result set, ensuring each common number appears in the intersection exactly $\min(\text{count}_1, \text{count}_2)$ times.
+By storing element occurrences from the first array in a frequency map, we can check if elements from the second array exist with a positive count. Each matched element is added to the result and its frequency count is decremented.
 
 #### 🧠 Algorithmic Pattern
 
-> **Hash Table / Frequency Counting**
+> **Hash Table**
 
 #### 🚀 Approach
 
-1. Initialize a hash map `map` to store the frequency of each integer in `nums1`.
-2. Iterate through `nums1` and increment the count for each number in `map` using `map.put(num, map.getOrDefault(num, 0) + 1)`.
-3. Allocate an integer array `res` of size `nums1.length` to hold result elements, and initialize index pointer `k = 0`.
-4. Iterate through each number `num` in `nums2`.
-5. Retrieve the remaining count of `num` from `map`; if the count is greater than 0, place `num` into `res[k]`, increment `k`, and decrement the count of `num` in `map` by 1.
-6. Return the trimmed sub-array `Arrays.copyOfRange(res, 0, k)` containing only the filled intersection elements.
+1. Traverse `nums1` and populate a hash map storing the frequency of each integer.
+2. Iterate through `nums2`, checking if the current element exists in the map with a count greater than 0.
+3. If a valid count exists, add the element to the output array and decrement its stored count by 1.
+4. Trim the output array to the exact length of added intersection elements using `Arrays.copyOfRange`.
 
 #### ✅ Why This Works
 
-By recording the exact count of each element in `nums1` and decrementing the frequency in `map` every time a match is found in `nums2`, the code guarantees that no element is added to the result array more times than it appears in either `nums1` or `nums2`. This correctly computes the multiset intersection based on element frequencies.
+Decrementing element frequencies ensures each number is added to the intersection at most as many times as it appears in both input arrays.
 
 #### ⏱️ Complexity
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(m + n) — Populating the hash map takes $O(m)$ average time for `nums1` of length $m$, and scanning `nums2` of length $n$ takes $O(n)$ average time, yielding $O(m + n)$ total time.** |
-| Space | **O(m) — The hash map stores up to $m$ unique elements from `nums1`, requiring $O(m)$ auxiliary space.** |
+| Time | **O(N + M) — Building the frequency map for `nums1` takes O(N) time where N is `nums1.length`. Iterating through `nums2` takes O(M) time where M is `nums2.length`. Total time complexity is O(N + M).** |
+| Space | **O(min(N, M)) — Storing element counts in a hash map requires space proportional to the unique elements in `nums1`. Optimally building the map on the smaller array uses O(min(N, M)) auxiliary space.** |
 
 #### 💻 Solution
 
 [View the complete Java solution →](./solution-2.java)
 
-## 🔗 Useful Links
+#### 🎯 Key Takeaway
 
-- [LeetCode Problem](https://leetcode.com/problems/intersection-of-two-arrays-ii/)
-- [My Solution](./solution.java)
+Hash maps enable O(1) average lookup and update times, providing a linear-time solution for frequency-matching problems.
 
 ---
 
-⭐ Automatically synchronized from an accepted LeetCode submission.
+### 🧠 Solution 2 — Two Pointers
+
+> **Language:** Java  
+> **Runtime:** `6 ms`  
+> **Memory:** `45.3 MB`
+
+#### 💡 Intuition
+
+If both arrays are sorted, we can traverse them concurrently using two pointers. Comparing elements at both pointers indicates whether to record a match or advance the pointer pointing to the smaller element.
+
+#### 🧠 Algorithmic Pattern
+
+> **Two Pointers**
+
+#### 🚀 Approach
+
+1. Sort `nums1` and `nums2` in non-decreasing order.
+2. Initialize pointer `i = 0` for `nums1` and `j = 0` for `nums2`.
+3. Loop while `i < nums1.length` and `j < nums2.length`:
+4. If `nums1[i] == nums2[j]`, store the element, then increment both `i` and `j`.
+5. If `nums1[i] < nums2[j]`, increment `i` to search for a larger value in `nums1`.
+6. If `nums1[i] > nums2[j]`, increment `j` to search for a larger value in `nums2`.
+7. Copy and return the slice of the populated result array.
+
+#### ✅ Why This Works
+
+Sorting aligns matching values sequentially in both arrays. Advancing the pointer associated with the smaller element guarantees no candidate matching values are skipped.
+
+#### ⏱️ Complexity
+
+| Metric | Complexity |
+|---|---|
+| Time | **O(N log N + M log M) — Sorting `nums1` takes O(N log N) time and sorting `nums2` takes O(M log M) time. The two-pointer traversal takes O(N + M) time. The overall runtime is dominated by sorting: O(N log N + M log M).** |
+| Space | **O(1) — Ignoring the space used by primitive quicksort implementations (O(log N + log M) stack space), the approach operates in O(1) auxiliary space beyond the output container.** |
+
+#### 💻 Solution
+
+[View the complete Java solution →](./solution.java)
+
+#### 🎯 Key Takeaway
+
+Sorting simplifies multi-array comparison into a single linear scan, which is ideal if inputs are already sorted or memory is constrained.
+
+
+---
+
+## 🎯 Key Takeaway
+
+This repository currently contains 2 unique approaches for this problem. Comparing them makes the trade-off between their time, space, and implementation ideas easier to see.
+
+---
+
+## 🔗 Useful Links
+
+- [LeetCode Problem](https://leetcode.com/problems/intersection-of-two-arrays-ii/)
+- [Solutions in this folder](.)
+
+---
+
+⭐ Automatically synchronized from accepted LeetCode submissions.

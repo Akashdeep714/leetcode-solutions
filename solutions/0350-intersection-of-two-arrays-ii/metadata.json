@@ -10,29 +10,77 @@
   "runtime_display": "3 ms",
   "memory": 44884000,
   "memory_display": "44.9 MB",
+  "solution_count": 2,
   "solutions": [
     {
       "number": 1,
       "filename": "solution-2.java",
       "language": "Java",
-      "submission_id": "2143037579",
-      "solution_hash": "3b5dc54ad4d3c6f72711a4f249e8da6747411143659e3d7323586174a3bab0cd",
-      "runtime": 6,
-      "runtime_display": "6 ms",
-      "memory": 45344000,
-      "memory_display": "45.3 MB"
-    },
-    {
-      "number": 2,
-      "filename": "solution-2.java",
-      "language": "Java",
       "submission_id": "2143004110",
+      "submission_ids": [
+        "2143004110"
+      ],
       "solution_hash": "3b5dc54ad4d3c6f72711a4f249e8da6747411143659e3d7323586174a3bab0cd",
+      "approach_key": "hash-map-frequency-counter",
+      "approach_name": "Hash Map Frequency Counting",
       "runtime": 3,
       "runtime_display": "3 ms",
       "memory": 44884000,
-      "memory_display": "44.9 MB"
+      "memory_display": "44.9 MB",
+      "analysis": {
+        "pattern": "Hash Table",
+        "problem_summary": "Find the intersection of two arrays where each element appears as many times as it shows in both arrays.",
+        "intuition": "By storing element occurrences from the first array in a frequency map, we can check if elements from the second array exist with a positive count. Each matched element is added to the result and its frequency count is decremented.",
+        "approach": [
+          "Traverse `nums1` and populate a hash map storing the frequency of each integer.",
+          "Iterate through `nums2`, checking if the current element exists in the map with a count greater than 0.",
+          "If a valid count exists, add the element to the output array and decrement its stored count by 1.",
+          "Trim the output array to the exact length of added intersection elements using `Arrays.copyOfRange`."
+        ],
+        "why_it_works": "Decrementing element frequencies ensures each number is added to the intersection at most as many times as it appears in both input arrays.",
+        "time_complexity": "O(N + M)",
+        "space_complexity": "O(min(N, M))",
+        "key_takeaway": "Hash maps enable O(1) average lookup and update times, providing a linear-time solution for frequency-matching problems.",
+        "time_explanation": "Building the frequency map for `nums1` takes O(N) time where N is `nums1.length`. Iterating through `nums2` takes O(M) time where M is `nums2.length`. Total time complexity is O(N + M).",
+        "space_explanation": "Storing element counts in a hash map requires space proportional to the unique elements in `nums1`. Optimally building the map on the smaller array uses O(min(N, M)) auxiliary space."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2143037579",
+      "submission_ids": [
+        "2143037579"
+      ],
+      "solution_hash": "52b5e8b629e5e6d9e40b3a0dcaec4c44b3cc3481998468c83959ab96e8091bc3",
+      "approach_key": "sort-and-two-pointers",
+      "approach_name": "Sorting and Two Pointers",
+      "runtime": 6,
+      "runtime_display": "6 ms",
+      "memory": 45344000,
+      "memory_display": "45.3 MB",
+      "analysis": {
+        "pattern": "Two Pointers",
+        "problem_summary": "Find the intersection of two arrays including duplicates, returning elements with their minimum shared frequency.",
+        "intuition": "If both arrays are sorted, we can traverse them concurrently using two pointers. Comparing elements at both pointers indicates whether to record a match or advance the pointer pointing to the smaller element.",
+        "approach": [
+          "Sort `nums1` and `nums2` in non-decreasing order.",
+          "Initialize pointer `i = 0` for `nums1` and `j = 0` for `nums2`.",
+          "Loop while `i < nums1.length` and `j < nums2.length`:",
+          "If `nums1[i] == nums2[j]`, store the element, then increment both `i` and `j`.",
+          "If `nums1[i] < nums2[j]`, increment `i` to search for a larger value in `nums1`.",
+          "If `nums1[i] > nums2[j]`, increment `j` to search for a larger value in `nums2`.",
+          "Copy and return the slice of the populated result array."
+        ],
+        "why_it_works": "Sorting aligns matching values sequentially in both arrays. Advancing the pointer associated with the smaller element guarantees no candidate matching values are skipped.",
+        "time_complexity": "O(N log N + M log M)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Sorting simplifies multi-array comparison into a single linear scan, which is ideal if inputs are already sorted or memory is constrained.",
+        "time_explanation": "Sorting `nums1` takes O(N log N) time and sorting `nums2` takes O(M log M) time. The two-pointer traversal takes O(N + M) time. The overall runtime is dominated by sorting: O(N log N + M log M).",
+        "space_explanation": "Ignoring the space used by primitive quicksort implementations (O(log N + log M) stack space), the approach operates in O(1) auxiliary space beyond the output container."
+      }
     }
   ],
-  "solution_count": 2
+  "historical_backfill_version": 4
 }

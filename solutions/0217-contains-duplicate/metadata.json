@@ -10,29 +10,76 @@
   "runtime_display": "18 ms",
   "memory": 108180000,
   "memory_display": "108.2 MB",
+  "solution_count": 2,
   "solutions": [
     {
       "number": 1,
       "filename": "solution-2.java",
       "language": "Java",
-      "submission_id": "2141807052",
-      "solution_hash": "6ce917140966aac4bb7f93077388b12ee4262625d41fe947a8594b8c9243ca96",
-      "runtime": 26,
-      "runtime_display": "26 ms",
-      "memory": 81620000,
-      "memory_display": "81.6 MB"
-    },
-    {
-      "number": 2,
-      "filename": "solution-2.java",
-      "language": "Java",
       "submission_id": "2141801267",
+      "submission_ids": [
+        "2141801267"
+      ],
       "solution_hash": "6ce917140966aac4bb7f93077388b12ee4262625d41fe947a8594b8c9243ca96",
+      "approach_key": "hash-set-lookup",
+      "approach_name": "Hash Set Lookup",
       "runtime": 18,
       "runtime_display": "18 ms",
       "memory": 108180000,
-      "memory_display": "108.2 MB"
+      "memory_display": "108.2 MB",
+      "analysis": {
+        "pattern": "Hash Set / Frequency Tracking",
+        "problem_summary": "Determine if any element appears at least twice in an integer array.",
+        "intuition": "By keeping track of elements encountered so far in a hash set, we can check whether the current element was seen before in linear time.",
+        "approach": [
+          "Initialize an empty HashSet of integers.",
+          "Iterate through each number in the array.",
+          "Check if the HashSet already contains the current number; if it does, return true immediately.",
+          "Otherwise, add the number to the set and continue.",
+          "If the loop finishes without finding any duplicate, return false."
+        ],
+        "why_it_works": "A HashSet stores unique elements and provides O(1) average lookup time. Finding an element already present in the set guarantees the existence of a duplicate.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(n)",
+        "key_takeaway": "Using a hash set trades extra O(n) memory to achieve optimal linear O(n) execution time.",
+        "time_explanation": "We iterate through the array of n elements once. Adding and searching in a HashSet takes O(1) average time per operation, giving an overall O(n) time complexity.",
+        "space_explanation": "In the worst-case scenario where all elements are unique, the HashSet stores all n elements, consuming O(n) space."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2141807052",
+      "submission_ids": [
+        "2141807052"
+      ],
+      "solution_hash": "1c79817bac4982ab4443d7646b301b571dc17b4f999ea44b0336d789e2251887",
+      "approach_key": "sorting-adjacent-comparison",
+      "approach_name": "Sorting and Adjacent Comparison",
+      "runtime": 26,
+      "runtime_display": "26 ms",
+      "memory": 81620000,
+      "memory_display": "81.6 MB",
+      "analysis": {
+        "pattern": "Sorting / Adjacent Pair Check",
+        "problem_summary": "Determine if any element appears at least twice in an integer array.",
+        "intuition": "If the array is sorted, any duplicate values must land adjacent to one another. Sorting simplifies the duplicate check to scanning neighboring elements.",
+        "approach": [
+          "Sort the array in ascending order using Arrays.sort().",
+          "Iterate through the array from index 0 up to n - 2.",
+          "Compare each element with its immediate neighbor (nums[i] == nums[i + 1]).",
+          "If any pair of adjacent elements are equal, return true.",
+          "If no matching adjacent pair is found after scanning the entire array, return false."
+        ],
+        "why_it_works": "Sorting reorders the elements monotonically, bringing all instances of equal values adjacent to each other. Comparing neighboring elements is therefore sufficient to detect duplicates.",
+        "time_complexity": "O(n log n)",
+        "space_complexity": "O(log n)",
+        "key_takeaway": "Sorting avoids using extra heap space for hash structures at the expense of increasing time complexity to O(n log n).",
+        "time_explanation": "Sorting the array dominates the runtime at O(n log n) time. The subsequent linear scan takes O(n) time, resulting in total time complexity of O(n log n).",
+        "space_explanation": "Java's Arrays.sort() for primitive arrays uses Dual-Pivot Quicksort, requiring O(log n) auxiliary stack space."
+      }
     }
   ],
-  "solution_count": 2
+  "historical_backfill_version": 4
 }

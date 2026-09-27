@@ -2,7 +2,8 @@
 
 > **Difficulty:** 🟢 Easy  
 > **Topics:** Array · Hash Table · Sorting  
-> **Language:** Java
+> **Solutions:** 2 unique approach(es)  
+> **Languages:** Java
 
 [🔗 View Problem on LeetCode](https://leetcode.com/problems/contains-duplicate/)
 
@@ -10,68 +11,15 @@
 
 ## 📝 Problem
 
-Determine if an integer array contains any duplicate values, returning true if any element appears at least twice and false if all elements are unique.
+Determine if any element appears at least twice in an integer array.
 
 ---
 
-## 💡 Intuition
+## 🛠️ Solutions
 
-In an unsorted array, duplicate elements can appear at any arbitrary distance from each other. By sorting the array first, identical values are forced into adjacent positions. This observation simplifies the duplicate check: instead of comparing every element against all others or using additional memory to store seen values, we only need to check if any element matches its immediate neighbor in a single pass.
+This folder contains **2 unique accepted implementation(s)** for the same problem. Repeated submissions of identical code are ignored automatically.
 
----
-
-## 🧠 Algorithmic Pattern
-
-> **Sorting**
-
----
-
-## 🚀 Approach
-
-1. Sort the input array `nums` in ascending order using `Arrays.sort(nums)`.
-2. Iterate through the array from index `i = 0` up to `nums.length - 2`.
-3. In each iteration, check if the current element `nums[i]` is equal to the adjacent element `nums[i + 1]`.
-4. If `nums[i] == nums[i + 1]`, immediately return `true` as a duplicate is found.
-5. If the loop finishes without finding any matching adjacent pairs, return `false`.
-
----
-
-## ✅ Why This Works
-
-Sorting establishes a non-decreasing order across the array, guaranteeing that equal values occupy contiguous memory locations. If any number appears two or more times in `nums`, at least one pair of duplicate values will end up at adjacent indices `i` and `i + 1`. Consequently, a linear comparison of consecutive elements after sorting is mathematically guaranteed to detect duplicates if they exist.
-
----
-
-## ⏱️ Complexity
-
-| Metric | Complexity |
-|---|---|
-| Time | **O(n log n)** |
-| Space | **O(log n)** |
-
-### 📊 LeetCode Performance
-
-| Metric | Result |
-|---|---|
-| Runtime | `26 ms` |
-| Memory | `81.6 MB` |
-
----
-
-## 💻 Solution
-
-[View the complete Java solution →](./solution.java)
-
----
-
-## 🎯 Key Takeaway
-
-Sorting reorganizes data so that identical elements are adjacent, simplifying pair comparisons. While a Hash Set can solve this problem in O(n) time, sorting offers an in-place alternative with minimal extra memory overhead.
-
----
-
----
-### 🔀 Solution 2 — Hash Set
+### 🧠 Solution 1 — Hash Set / Frequency Tracking
 
 > **Language:** Java  
 > **Runtime:** `18 ms`  
@@ -79,41 +27,96 @@ Sorting reorganizes data so that identical elements are adjacent, simplifying pa
 
 #### 💡 Intuition
 
-To check for duplicates efficiently, we need a fast way to remember which numbers we have already encountered. Instead of comparing each number against all previous numbers using nested loops, we can store visited elements in a hash set. As we iterate through the array, the hash set allows us to check whether the current number has been seen before in $O(1)$ average time, enabling an immediate return of `true` upon finding the first duplicate.
+By keeping track of elements encountered so far in a hash set, we can check whether the current element was seen before in linear time.
 
 #### 🧠 Algorithmic Pattern
 
-> **Hash Set**
+> **Hash Set / Frequency Tracking**
 
 #### 🚀 Approach
 
-1. Initialize an empty hash set `set` to keep track of elements seen so far.
-2. Iterate through each integer `i` in the input array `nums`.
-3. Check if `set` already contains the current integer `i` using `set.contains(i)`.
-4. If `i` is already in `set`, immediately return `true` as a duplicate exists.
-5. If `i` is not in `set`, add it using `set.add(i)` so it can be recognized if encountered again.
-6. If the loop finishes without finding any duplicates, return `false`.
+1. Initialize an empty HashSet of integers.
+2. Iterate through each number in the array.
+3. Check if the HashSet already contains the current number; if it does, return true immediately.
+4. Otherwise, add the number to the set and continue.
+5. If the loop finishes without finding any duplicate, return false.
 
 #### ✅ Why This Works
 
-The algorithm maintains the invariant that `set` holds all distinct elements visited up to the current index. Because a hash set enforces uniqueness and provides average $O(1)$ lookup and insertion time, checking membership before adding an element guarantees that the very first repeated element will be caught, accurately returning `true` without needing further iterations.
+A HashSet stores unique elements and provides O(1) average lookup time. Finding an element already present in the set guarantees the existence of a duplicate.
 
 #### ⏱️ Complexity
 
 | Metric | Complexity |
 |---|---|
-| Time | **O(n) — Iterating through the $n$ elements takes $O(n)$ time because hash set lookup and insertion operations take $O(1)$ time on average.** |
-| Space | **O(n) — In the worst case where all elements are distinct, the hash set stores all $n$ integers from the array, using $O(n)$ auxiliary memory.** |
+| Time | **O(n) — We iterate through the array of n elements once. Adding and searching in a HashSet takes O(1) average time per operation, giving an overall O(n) time complexity.** |
+| Space | **O(n) — In the worst-case scenario where all elements are unique, the HashSet stores all n elements, consuming O(n) space.** |
 
 #### 💻 Solution
 
 [View the complete Java solution →](./solution-2.java)
 
-## 🔗 Useful Links
+#### 🎯 Key Takeaway
 
-- [LeetCode Problem](https://leetcode.com/problems/contains-duplicate/)
-- [My Solution](./solution.java)
+Using a hash set trades extra O(n) memory to achieve optimal linear O(n) execution time.
 
 ---
 
-⭐ Automatically synchronized from an accepted LeetCode submission.
+### 🧠 Solution 2 — Sorting / Adjacent Pair Check
+
+> **Language:** Java  
+> **Runtime:** `26 ms`  
+> **Memory:** `81.6 MB`
+
+#### 💡 Intuition
+
+If the array is sorted, any duplicate values must land adjacent to one another. Sorting simplifies the duplicate check to scanning neighboring elements.
+
+#### 🧠 Algorithmic Pattern
+
+> **Sorting / Adjacent Pair Check**
+
+#### 🚀 Approach
+
+1. Sort the array in ascending order using Arrays.sort().
+2. Iterate through the array from index 0 up to n - 2.
+3. Compare each element with its immediate neighbor (nums[i] == nums[i + 1]).
+4. If any pair of adjacent elements are equal, return true.
+5. If no matching adjacent pair is found after scanning the entire array, return false.
+
+#### ✅ Why This Works
+
+Sorting reorders the elements monotonically, bringing all instances of equal values adjacent to each other. Comparing neighboring elements is therefore sufficient to detect duplicates.
+
+#### ⏱️ Complexity
+
+| Metric | Complexity |
+|---|---|
+| Time | **O(n log n) — Sorting the array dominates the runtime at O(n log n) time. The subsequent linear scan takes O(n) time, resulting in total time complexity of O(n log n).** |
+| Space | **O(log n) — Java's Arrays.sort() for primitive arrays uses Dual-Pivot Quicksort, requiring O(log n) auxiliary stack space.** |
+
+#### 💻 Solution
+
+[View the complete Java solution →](./solution.java)
+
+#### 🎯 Key Takeaway
+
+Sorting avoids using extra heap space for hash structures at the expense of increasing time complexity to O(n log n).
+
+
+---
+
+## 🎯 Key Takeaway
+
+This repository currently contains 2 unique approaches for this problem. Comparing them makes the trade-off between their time, space, and implementation ideas easier to see.
+
+---
+
+## 🔗 Useful Links
+
+- [LeetCode Problem](https://leetcode.com/problems/contains-duplicate/)
+- [Solutions in this folder](.)
+
+---
+
+⭐ Automatically synchronized from accepted LeetCode submissions.

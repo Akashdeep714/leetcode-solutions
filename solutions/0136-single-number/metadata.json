@@ -10,29 +10,74 @@
   "runtime_display": "16 ms",
   "memory": 47504000,
   "memory_display": "47.5 MB",
+  "solution_count": 2,
   "solutions": [
     {
       "number": 1,
       "filename": "solution-2.java",
       "language": "Java",
-      "submission_id": "2141850506",
-      "solution_hash": "9c0aa187015b56277832315a79f36ba985b025e20b834173724a53b6f949a42f",
-      "runtime": 1,
-      "runtime_display": "1 ms",
-      "memory": 47000000,
-      "memory_display": "47 MB"
-    },
-    {
-      "number": 2,
-      "filename": "solution-2.java",
-      "language": "Java",
       "submission_id": "2141840135",
+      "submission_ids": [
+        "2141840135"
+      ],
       "solution_hash": "9c0aa187015b56277832315a79f36ba985b025e20b834173724a53b6f949a42f",
+      "approach_key": "hash-map-frequency-count",
+      "approach_name": "Frequency Counting via Hash Map",
       "runtime": 16,
       "runtime_display": "16 ms",
       "memory": 47504000,
-      "memory_display": "47.5 MB"
+      "memory_display": "47.5 MB",
+      "analysis": {
+        "pattern": "Hash Table",
+        "problem_summary": "Find the unique element in an array where all other elements appear exactly twice.",
+        "intuition": "By storing the frequency of each element in a hash map during a first pass, we can easily identify the single number by inspecting the frequency counts in a second pass.",
+        "approach": [
+          "Initialize a hash map to store each integer alongside its occurrence count.",
+          "Iterate through the array and increment the frequency count for each element in the hash map.",
+          "Iterate through the array again (or map keys) to find the key whose associated frequency value is 1.",
+          "Return the integer that has a frequency count of 1."
+        ],
+        "why_it_works": "A hash map provides average O(1) insertion and lookup operations. Counting frequencies guarantees that duplicate numbers reach a count of 2, while the single number remains at a count of 1.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(n)",
+        "key_takeaway": "Using a hash map is an intuitive way to keep track of frequencies, though it uses O(n) extra auxiliary space.",
+        "time_explanation": "We perform two linear passes over the array of size n, and each hash table insertion/lookup operates in average O(1) time, resulting in O(n) overall time complexity.",
+        "space_explanation": "In the worst case, the hash map stores around (n/2) + 1 distinct elements, requiring O(n) extra space."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2141850506",
+      "submission_ids": [
+        "2141850506"
+      ],
+      "solution_hash": "6172065d83db59ccb1d97e573b7b45a85bc0916101f53873d87367b9060d14c6",
+      "approach_key": "bitwise-xor",
+      "approach_name": "Bitwise XOR Accumulation",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 47000000,
+      "memory_display": "47 MB",
+      "analysis": {
+        "pattern": "Bit Manipulation",
+        "problem_summary": "Find the unique single element in an array where every other element appears twice, using O(1) auxiliary space.",
+        "intuition": "Bitwise XOR has two key properties: a ^ a = 0 and a ^ 0 = a. Because XOR is commutative and associative, XORing all elements together causes all duplicate pairs to cancel each other out, leaving only the single unique number.",
+        "approach": [
+          "Initialize an accumulator variable `res` to 0.",
+          "Iterate through each integer in the input array.",
+          "Update `res` by taking the bitwise XOR (`^`) with the current integer.",
+          "After processing all elements, return `res` as the single unique number."
+        ],
+        "why_it_works": "If the array is [a, b, a, c, b], taking the cumulative XOR yields: a ^ b ^ a ^ c ^ b = (a ^ a) ^ (b ^ b) ^ c = 0 ^ 0 ^ c = c. The duplicates cancel out regardless of their order in the array.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Bitwise XOR allows canceling identical pairs in a single pass without needing any additional data structure, satisfying both linear time and constant space requirements.",
+        "time_explanation": "The algorithm visits each of the n elements in the array exactly once, performing a constant-time bitwise operation at each step.",
+        "space_explanation": "Only a single integer variable (`res`) is maintained, requiring O(1) auxiliary space."
+      }
     }
   ],
-  "solution_count": 2
+  "historical_backfill_version": 4
 }
