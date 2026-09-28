@@ -222,6 +222,13 @@
         "frontendId": "905",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-09-27T16:42:08+00:00"
+      },
+      {
+        "titleSlug": "height-checker",
+        "title": "Height Checker",
+        "frontendId": "1051",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-28T17:33:46+00:00"
       }
     ],
     "problem_index": 15,
@@ -229,6 +236,6 @@
     "day": "2026-09-28",
     "problems_completed_today": 3,
     "gemini_requests_used_today": 3,
-    "gemini_blocked_today": false
+    "gemini_blocked_today": true
   }
 }
