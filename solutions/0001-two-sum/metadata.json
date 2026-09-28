@@ -5,67 +5,84 @@
   "language": "Java",
   "folder": "0001-two-sum",
   "slug": "two-sum",
-  "submission_id": "2145073823",
-  "runtime": 2,
-  "runtime_display": "2 ms",
-  "memory": 47248000,
-  "memory_display": "47.2 MB",
+  "submission_id": "1935966863",
+  "runtime": 98,
+  "runtime_display": "98 ms",
+  "memory": 46768000,
+  "memory_display": "46.8 MB",
+  "solution_count": 2,
   "solutions": [
     {
       "number": 1,
       "filename": "solution-2.java",
       "language": "Java",
-      "submission_id": "2145075315",
-      "solution_hash": "8957bc06da26698ff3352d46136c561752eda0006954f3ca6181c4b683244739",
-      "runtime": 2,
-      "runtime_display": "2 ms",
-      "memory": 47304000,
-      "memory_display": "47.3 MB"
-    },
-    {
-      "number": 2,
-      "filename": "solution-2.java",
-      "language": "Java",
       "submission_id": "1935966863",
+      "submission_ids": [
+        "1935966863",
+        "1935975802"
+      ],
       "solution_hash": "8957bc06da26698ff3352d46136c561752eda0006954f3ca6181c4b683244739",
+      "approach_key": "brute-force-nested-loops",
+      "approach_name": "Brute Force (Nested Loops)",
       "runtime": 98,
       "runtime_display": "98 ms",
       "memory": 46768000,
-      "memory_display": "46.8 MB"
+      "memory_display": "46.8 MB",
+      "analysis": {
+        "pattern": "Brute Force / Array Iteration",
+        "problem_summary": "Find indices of two numbers in an array that add up to a target sum.",
+        "intuition": "Exhaustively check all pairs of distinct elements in the array until a pair summing to the target is found.",
+        "approach": [
+          "Initialize an array of size 2 to store the resulting indices.",
+          "Iterate through each index i from 0 to nums.length - 1.",
+          "Iterate through each index j from 0 to nums.length - 1.",
+          "Check if i and j are distinct and if nums[i] + nums[j] equals target.",
+          "If a matching pair is found, record the indices and return the result."
+        ],
+        "why_it_works": "Because the problem guarantees exactly one valid solution, checking every possible pair guarantees that the correct pair will eventually be evaluated.",
+        "time_complexity": "O(n^2)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Brute force requires no additional data structures, but evaluating every pair leads to quadratic time complexity.",
+        "time_explanation": "With two nested loops iterating over the array of size n, the total number of pair comparisons is proportional to n^2.",
+        "space_explanation": "The algorithm only uses a fixed array of size 2 for the result, requiring O(1) auxiliary space."
+      }
     },
     {
-      "number": 3,
-      "filename": "solution-3.java",
-      "language": "Java",
-      "submission_id": "1935975802",
-      "solution_hash": "aa969b3803bc99301e8ee3f1fb36323e960f32f901a548a63940c210096daa3b",
-      "runtime": 52,
-      "runtime_display": "52 ms",
-      "memory": 47024000,
-      "memory_display": "47 MB"
-    },
-    {
-      "number": 4,
+      "number": 2,
       "filename": "solution-4.java",
       "language": "Java",
       "submission_id": "2145070757",
+      "submission_ids": [
+        "2145070757",
+        "2145073823",
+        "2145075315"
+      ],
       "solution_hash": "4b4786b8ea77314aecd3842b8530d2a85b98e82e3c9daa8262fa6f3e85b9fa19",
+      "approach_key": "hash-map-lookup",
+      "approach_name": "Hash Map Complement Lookup",
       "runtime": 5,
       "runtime_display": "5 ms",
       "memory": 46696000,
-      "memory_display": "46.7 MB"
-    },
-    {
-      "number": 5,
-      "filename": "solution-5.java",
-      "language": "Java",
-      "submission_id": "2145073823",
-      "solution_hash": "affa5d79cb574601ccf06be82538eeb51b51bcbfed52d0747d55d510fec00ec3",
-      "runtime": 2,
-      "runtime_display": "2 ms",
-      "memory": 47248000,
-      "memory_display": "47.2 MB"
+      "memory_display": "46.7 MB",
+      "analysis": {
+        "pattern": "Hash Table / Complement Search",
+        "problem_summary": "Find indices of two numbers in an array that add up to a target sum.",
+        "intuition": "For each number x, the required matching value is target - x. Storing array elements in a hash map allows us to check for the existence of this complement in O(1) average time.",
+        "approach": [
+          "Initialize a hash map to map each element's value to its corresponding array index.",
+          "Populate the map by iterating through the array and inserting each element.",
+          "Iterate through the array again and compute the target complement (lookupNumber = target - nums[i]).",
+          "Check if the hash map contains the complement at an index different from i.",
+          "If found, return the complement's index along with the current index i."
+        ],
+        "why_it_works": "The equation nums[i] + nums[j] = target is equivalent to nums[j] = target - nums[i]. Storing values in a hash map turns an O(n) search into an O(1) average lookup.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(n)",
+        "key_takeaway": "Trading linear auxiliary space for a hash map drastically optimizes search time from quadratic O(n^2) to linear O(n).",
+        "time_explanation": "Populating and querying the hash map takes O(1) average time per element, leading to an overall O(n) runtime across n elements.",
+        "space_explanation": "In the worst case, the hash map stores up to n elements, requiring O(n) auxiliary space."
+      }
     }
   ],
-  "solution_count": 5
+  "historical_backfill_version": 4
 }

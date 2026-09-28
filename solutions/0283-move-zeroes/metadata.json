@@ -10,29 +10,75 @@
   "runtime_display": "2 ms",
   "memory": 47352000,
   "memory_display": "47.4 MB",
+  "solution_count": 2,
   "solutions": [
     {
       "number": 1,
       "filename": "solution-2.java",
       "language": "Java",
-      "submission_id": "2144048643",
-      "solution_hash": "0a506ebb245fc919a9c736bce323f7301823981ed5233224368f9544b1e87673",
-      "runtime": 2,
-      "runtime_display": "2 ms",
-      "memory": 47764000,
-      "memory_display": "47.8 MB"
-    },
-    {
-      "number": 2,
-      "filename": "solution-2.java",
-      "language": "Java",
       "submission_id": "2144021190",
+      "submission_ids": [
+        "2144021190",
+        "2154233044"
+      ],
       "solution_hash": "0a506ebb245fc919a9c736bce323f7301823981ed5233224368f9544b1e87673",
+      "approach_key": "two-pass-overwrite-and-fill",
+      "approach_name": "Two-Pass Overwrite and Zero-Fill",
       "runtime": 2,
       "runtime_display": "2 ms",
       "memory": 47352000,
-      "memory_display": "47.4 MB"
+      "memory_display": "47.4 MB",
+      "analysis": {
+        "pattern": "Two Pointers / Two-Pass Array Modification",
+        "problem_summary": "Relocate all zero values to the end of an array while maintaining the relative order of non-zero elements in-place.",
+        "intuition": "Instead of shifting elements every time a zero is encountered, we can compress all non-zero elements toward the front using a write pointer. Once all non-zero elements are copied in order, every remaining array slot from the write pointer to the end must be filled with zero.",
+        "approach": [
+          "Initialize a write pointer `j` to 0.",
+          "Iterate through the array with a read pointer `i` from index 0 to `nums.length - 1`.",
+          "If `nums[i]` is non-zero, write `nums[i]` to `nums[j]` and increment `j`.",
+          "After completing the first pass, run a second loop from `j` to `nums.length - 1`, setting each position to 0."
+        ],
+        "why_it_works": "Processing non-zero elements from left to right preserves their relative ordering. Because the write pointer `j` never advances faster than the read pointer `i`, non-zero values are safely copied forward without overwriting unread values. The second loop fills the remaining `n - j` trailing slots with zeroes.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Decoupling array compaction into 'collecting non-zero elements' followed by 'filling zeroes' simplifies in-place array reordering without extra memory.",
+        "time_explanation": "The array is traversed twice: first to copy non-zero elements, and second to fill zeroes. Both passes take linear time relative to the length of the array $n$, resulting in overall $O(n)$ time complexity.",
+        "space_explanation": "The algorithm operates directly on the input array in-place using two integer pointer variables, requiring $O(1)$ auxiliary space."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2144048643",
+      "submission_ids": [
+        "2144048643"
+      ],
+      "solution_hash": "1e55ebd836322b0b13b385b1920a632251e5efab82b719d50b586b11195e09f0",
+      "approach_key": "single-pass-swap-zeroing",
+      "approach_name": "Single-Pass In-Place Swap and Zeroing",
+      "runtime": 2,
+      "runtime_display": "2 ms",
+      "memory": 47764000,
+      "memory_display": "47.8 MB",
+      "analysis": {
+        "pattern": "Two Pointers / Single-Pass In-Place Partitioning",
+        "problem_summary": "Move all zeroes to the end of the array in-place while preserving the original relative order of non-zero elements in a single pass.",
+        "intuition": "Maintain a write pointer `j` that tracks where the next non-zero element should be placed. As we scan the array, whenever we encounter a non-zero element at `i`, we move it to `j` and immediately clear position `i` to 0 (handling the case where `i == j` gracefully). This zeroes out old positions on the fly without a second loop.",
+        "approach": [
+          "Initialize a write pointer `j` to 0.",
+          "Iterate through the array with `i` from index 0 to `nums.length - 1`.",
+          "When `nums[i]` is non-zero, store its value, set `nums[i] = 0`, and assign the saved value to `nums[j]`.",
+          "Increment `j` after placing the non-zero element."
+        ],
+        "why_it_works": "When `i == j` (before any zeroes are encountered), setting `nums[i] = 0` followed by `nums[j] = temp` leaves the element unchanged. When `i > j`, `nums[i]` was a non-zero value that gets moved to index `j`, leaving `nums[i]` correctly zeroed out. This maintains the invariant that all elements before `j` are non-zero and all elements between `j` and `i` are zeroes.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Combining element placement and zeroing within a single iteration reduces total array write operations and eliminates the need for a post-processing fill loop.",
+        "time_explanation": "The algorithm processes each element of the array exactly once in a single pass, performing $O(1)$ constant-time operations per element, giving an overall time complexity of $O(n)$.",
+        "space_explanation": "The array is modified entirely in-place with a single extra index pointer `j` and a temporary scalar variable, taking $O(1)$ auxiliary space."
+      }
     }
   ],
-  "solution_count": 2
+  "historical_backfill_version": 4
 }

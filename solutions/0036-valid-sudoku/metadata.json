@@ -9,5 +9,45 @@
   "runtime": 1,
   "runtime_display": "1 ms",
   "memory": 46552000,
-  "memory_display": "46.6 MB"
+  "memory_display": "46.6 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2146860501",
+      "submission_ids": [
+        "2146860501"
+      ],
+      "solution_hash": "4494c5cc9a6f45e7168cfab1a7199a52b594bd9638006ff691e4478591de727a",
+      "approach_key": "fixed-size-array-validation",
+      "approach_name": "Single Pass Validation via Fixed-Size Frequency Arrays",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 46552000,
+      "memory_display": "46.6 MB",
+      "analysis": {
+        "pattern": "Matrix Traversal / Hash Table (Array Lookup)",
+        "problem_summary": "Validate a partially filled 9x9 Sudoku board to ensure digits 1-9 appear at most once per row, column, and 3x3 sub-box.",
+        "intuition": "To validate the board in a single pass, we can track digits seen so far in each row, column, and sub-box using fixed-size 2D arrays. Calculating the sub-box index `3 * (r / 3) + (c / 3)` maps any cell `(r, c)` to one of nine distinct sub-boxes.",
+        "approach": [
+          "Initialize three 9x9 2D integer arrays (`rows`, `cols`, `boxes`) to track presence of each digit (0 to 8) across rows, columns, and sub-boxes.",
+          "Iterate over every cell `(r, c)` in the 9x9 board.",
+          "Ignore empty cells marked with `.`.",
+          "Convert the character digit to a 0-indexed integer `val = board[r][c] - '1'` and compute the box index `boxIdx = 3 * (r / 3) + (c / 3)`.",
+          "Check if `val` has already been recorded in `rows[r][val]`, `cols[c][val]`, or `boxes[boxIdx][val]`. If so, return `false`.",
+          "Mark the digit as seen in all three tracking matrices and continue.",
+          "If the entire board is processed without finding duplicates, return `true`."
+        ],
+        "why_it_works": "Each cell belongs to exactly one row, one column, and one 3x3 sub-box. Updating and querying constant-size frequency arrays during traversal guarantees that duplicate digits are caught immediately upon first collision.",
+        "time_complexity": "O(1)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Fixed-size grids allow replacing dynamic hash sets with predictable 2D primitive arrays and coordinate arithmetic for constant-time constraint validation.",
+        "time_explanation": "The board has a fixed size of 9x9 (81 cells). Checking and updating the lookup arrays per cell takes O(1) operations, yielding a total time of O(81) = O(1).",
+        "space_explanation": "The auxiliary memory consists of three 9x9 integer arrays, which consume a fixed amount of memory independent of input values, yielding O(1) extra space."
+      }
+    }
+  ],
+  "historical_backfill_version": 4
 }
