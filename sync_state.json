@@ -229,6 +229,13 @@
         "frontendId": "1051",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-09-28T17:33:46+00:00"
+      },
+      {
+        "titleSlug": "third-maximum-number",
+        "title": "Third Maximum Number",
+        "frontendId": "414",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-29T17:20:17+00:00"
       }
     ],
     "problem_index": 15,
