@@ -236,6 +236,13 @@
         "frontendId": "414",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-09-29T17:20:17+00:00"
+      },
+      {
+        "titleSlug": "find-all-numbers-disappeared-in-an-array",
+        "title": "Find All Numbers Disappeared in an Array",
+        "frontendId": "448",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-09-30T16:48:38+00:00"
       }
     ],
     "problem_index": 15,
