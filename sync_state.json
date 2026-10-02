@@ -250,6 +250,13 @@
         "frontendId": "724",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-10-01T17:20:40+00:00"
+      },
+      {
+        "titleSlug": "largest-number-at-least-twice-of-others",
+        "title": "Largest Number At Least Twice of Others",
+        "frontendId": "747",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-10-02T18:14:13+00:00"
       }
     ],
     "problem_index": 15,
