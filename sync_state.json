@@ -264,6 +264,13 @@
         "frontendId": "118",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-10-03T17:28:22+00:00"
+      },
+      {
+        "titleSlug": "two-sum-ii-input-array-is-sorted",
+        "title": "Two Sum II - Input Array Is Sorted",
+        "frontendId": "167",
+        "difficulty": "MEDIUM",
+        "lastSubmittedAt": "2026-10-04T19:08:28+00:00"
       }
     ],
     "problem_index": 15,
