@@ -41,9 +41,15 @@ GEMINI_API_KEY = os.getenv(
 MAX_HISTORICAL_PROBLEMS_PER_DAY = 5
 MAX_GEMINI_REQUESTS_PER_DAY = 8
 
+# Gemini HTTP 429 can mean a short-term rate/token limit or a daily quota
+# exhaustion. Retry transient failures without consuming the daily budget.
+GEMINI_MAX_RETRIES = 3
+GEMINI_BACKOFF_SECONDS = (5, 15, 30)
+
+
 # Bump this whenever the historical-backfill algorithm changes in a way
 # that requires previously processed problems to be reconciled again.
-HISTORICAL_BACKFILL_VERSION = 4
+HISTORICAL_BACKFILL_VERSION = 5
 
 # Keep LeetCode requests gentle rather than hammering the GraphQL endpoint.
 LEETCODE_REQUEST_DELAY_SECONDS = 0.35
@@ -389,16 +395,26 @@ def save_state(state):
 
 def reset_daily_historical_budgets(state):
     """
-    Reset daily counters when the UTC calendar day changes.
+    Reset daily counters using Google's Gemini quota calendar day.
 
-    Because the GitHub Action may run every 15 minutes, these persisted
-    counters prevent the historical batch from being repeated every run.
+    Gemini documents Requests Per Day (RPD) resets at midnight Pacific Time,
+    not UTC. Persisting the Pacific date keeps the local safety budget aligned
+    with the API's actual daily quota window.
     """
     historical = state["historical_backfill"]
-    day_key = time.strftime(
-        "%Y-%m-%d",
-        time.gmtime(),
-    )
+
+    try:
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+
+        day_key = datetime.now(
+            ZoneInfo("America/Los_Angeles")
+        ).strftime("%Y-%m-%d")
+    except Exception:
+        day_key = time.strftime(
+            "%Y-%m-%d",
+            time.gmtime(),
+        )
 
     if historical.get("day") != day_key:
         historical["day"] = day_key
@@ -1017,36 +1033,78 @@ def language_name(
 
     language = str(
         language or ""
-    ).lower()
+    ).strip().lower()
+
+    if language in {
+        "", "unknown", "none", "null", "n/a", "na", "not specified",
+    }:
+        return "Unknown"
 
     names = {
         "python": "Python",
         "python3": "Python",
+        "py": "Python",
         "java": "Java",
+        "java8": "Java",
+        "java 8": "Java",
+        "java11": "Java",
+        "java 11": "Java",
+        "java17": "Java",
+        "java 17": "Java",
+        "java21": "Java",
+        "java 21": "Java",
         "cpp": "C++",
         "c++": "C++",
+        "c-plus-plus": "C++",
         "c": "C",
         "javascript": "JavaScript",
+        "js": "JavaScript",
         "typescript": "TypeScript",
+        "ts": "TypeScript",
         "csharp": "C#",
         "c#": "C#",
+        "cs": "C#",
         "go": "Go",
         "golang": "Go",
         "rust": "Rust",
+        "rs": "Rust",
         "kotlin": "Kotlin",
+        "kt": "Kotlin",
         "swift": "Swift",
         "php": "PHP",
         "ruby": "Ruby",
+        "rb": "Ruby",
         "scala": "Scala",
         "mysql": "SQL",
         "mssql": "SQL",
         "oracle": "SQL",
+        "sql": "SQL",
     }
 
     return names.get(
         language,
         language or "Unknown",
     )
+
+
+def language_from_filename(filename):
+    """Infer a display language from a stored source filename."""
+    suffix = Path(str(filename or "")).suffix.lower().lstrip(".")
+    return language_name(suffix) if suffix else "Unknown"
+
+
+def best_known_language(value=None, filename=None, fallback=None):
+    """Resolve a language deterministically, never using Gemini as the source of truth."""
+    for candidate in (value, fallback):
+        resolved = language_name(candidate)
+        if resolved != "Unknown":
+            return resolved
+
+    inferred = language_from_filename(filename)
+    if inferred != "Unknown":
+        return inferred
+
+    return "Unknown"
 
 
 def file_extension(
@@ -1881,6 +1939,194 @@ def normalize_fallback_analysis(analysis, question):
 
 
 # ============================================================
+# Gemini request / retry helpers
+# ============================================================
+
+def classify_gemini_429(response):
+    """
+    Distinguish daily quota exhaustion from short-term rate limiting.
+    """
+    try:
+        body = response.json()
+    except Exception:
+        body = {}
+
+    error = body.get("error", {}) if isinstance(body, dict) else {}
+    status = str(error.get("status", "")).lower()
+    message = str(error.get("message", "")).lower()
+    details = error.get("details", [])
+    detail_text = json.dumps(
+        details,
+        ensure_ascii=False,
+    ).lower()
+
+    combined = " ".join(
+        [status, message, detail_text]
+    )
+
+    if any(
+        token in combined
+        for token in (
+            "quota_exceeded",
+            "generate_content_free_tier_requests",
+            "requestsperday",
+            "perday",
+            "daily quota",
+            "quota exceeded",
+        )
+    ):
+        return "daily"
+
+    if any(
+        token in combined
+        for token in (
+            "rate_limit_exceeded",
+            "too_many_requests",
+            "requestsperminute",
+            "tokensperminute",
+            "perminute",
+            "rate limit",
+        )
+    ):
+        return "rate"
+
+    return "unknown"
+
+
+def _gemini_post_with_retry(
+    *,
+    prompt,
+    timeout,
+):
+    """
+    Call Gemini with bounded retries for transient failures.
+
+    A successful call is returned. Transient 429/5xx failures are retried,
+    while a confirmed daily-quota 429 blocks the backfill until the next
+    Pacific-time quota day. Failed attempts never consume the local budget.
+    """
+    for attempt in range(
+        GEMINI_MAX_RETRIES + 1
+    ):
+        try:
+            response = requests.post(
+                "https://generativelanguage.googleapis.com/v1beta/interactions",
+                headers={
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": GEMINI_API_KEY,
+                },
+                json={
+                    "model": "gemini-3.6-flash",
+                    "input": prompt,
+                },
+                timeout=timeout,
+            )
+        except requests.RequestException as exc:
+            GEMINI_RUNTIME["last_failure"] = (
+                f"Gemini network error: {exc}"
+            )
+
+            if attempt < GEMINI_MAX_RETRIES:
+                wait_seconds = GEMINI_BACKOFF_SECONDS[
+                    min(
+                        attempt,
+                        len(GEMINI_BACKOFF_SECONDS) - 1,
+                    )
+                ]
+                print(
+                    f"⚠️ Gemini network error. "
+                    f"Retrying in {wait_seconds}s..."
+                )
+                time.sleep(wait_seconds)
+                continue
+
+            print(
+                f"⏸️ Gemini network error after retries: {exc}"
+            )
+            return None
+
+        if response.status_code == 200:
+            return response
+
+        if response.status_code == 429:
+            kind = classify_gemini_429(response)
+
+            if kind == "daily":
+                GEMINI_RUNTIME["blocked"] = True
+                GEMINI_RUNTIME["last_failure"] = (
+                    "Gemini daily quota exceeded."
+                )
+                print(
+                    "⏸️ Gemini daily quota exceeded. "
+                    "Historical backfill will resume after the quota reset."
+                )
+                print(response.text[:1000])
+                return None
+
+            if attempt < GEMINI_MAX_RETRIES:
+                wait_seconds = GEMINI_BACKOFF_SECONDS[
+                    min(
+                        attempt,
+                        len(GEMINI_BACKOFF_SECONDS) - 1,
+                    )
+                ]
+                print(
+                    f"⚠️ Gemini HTTP 429 ({kind}). "
+                    f"Retrying in {wait_seconds}s..."
+                )
+                time.sleep(wait_seconds)
+                continue
+
+            GEMINI_RUNTIME["last_failure"] = (
+                f"Gemini HTTP 429 ({kind}) persisted after retries."
+            )
+            print(
+                "⏸️ Gemini HTTP 429 persisted after retries. "
+                "Historical backfill will retry on a later run."
+            )
+            print(response.text[:1000])
+            return None
+
+        if response.status_code in {
+            500,
+            502,
+            503,
+            504,
+        }:
+            if attempt < GEMINI_MAX_RETRIES:
+                wait_seconds = GEMINI_BACKOFF_SECONDS[
+                    min(
+                        attempt,
+                        len(GEMINI_BACKOFF_SECONDS) - 1,
+                    )
+                ]
+                print(
+                    f"⚠️ Gemini temporarily unavailable "
+                    f"(HTTP {response.status_code}). "
+                    f"Retrying in {wait_seconds}s..."
+                )
+                time.sleep(wait_seconds)
+                continue
+
+            GEMINI_RUNTIME["last_failure"] = (
+                "Temporary Gemini service error "
+                f"HTTP {response.status_code} after retries."
+            )
+            print(GEMINI_RUNTIME["last_failure"])
+            return None
+
+        GEMINI_RUNTIME["last_failure"] = (
+            f"Gemini request failed with HTTP "
+            f"{response.status_code}."
+        )
+        print(GEMINI_RUNTIME["last_failure"])
+        print(response.text[:1000])
+        return None
+
+    return None
+
+
+# ============================================================
 # AI explanation
 # ============================================================
 
@@ -2035,41 +2281,12 @@ RULES:
 """
 
     try:
-        response = requests.post(
-            "https://generativelanguage.googleapis.com/v1beta/interactions",
-            headers={
-                "Content-Type": "application/json",
-                "x-goog-api-key": GEMINI_API_KEY,
-            },
-            json={
-                "model": "gemini-3.6-flash",
-                "input": prompt,
-            },
+        response = _gemini_post_with_retry(
+            prompt=prompt,
             timeout=90,
         )
 
-        if response.status_code == 429:
-            GEMINI_RUNTIME["blocked"] = True
-            GEMINI_RUNTIME["last_failure"] = (
-                "Gemini returned HTTP 429 (quota/rate limit)."
-            )
-            print(
-                "⏸️ Gemini returned HTTP 429. "
-                "Historical backfill will resume on a later run/day."
-            )
-            return None
-
-        if response.status_code != 200:
-            GEMINI_RUNTIME["last_failure"] = (
-                f"Gemini request failed with HTTP {response.status_code}."
-            )
-            print(
-                "⚠️ Gemini request failed: "
-                f"HTTP {response.status_code}"
-            )
-            print(
-                response.text[:1000]
-            )
+        if response is None:
             return None
 
         body = response.json()
@@ -2216,6 +2433,7 @@ RULES:
             "The stated space usage follows the extra variables, data structures, and recursion used by the submitted implementation.",
         )
 
+        # Count only a successful, fully validated Gemini response.
         GEMINI_RUNTIME["requests_used"] += 1
         GEMINI_RUNTIME["last_failure"] = ""
         return result
@@ -2365,6 +2583,67 @@ def _cluster_has_weak_separation(clusters, candidates):
         return True
 
     return False
+
+
+def _coerce_cluster_response(clusters, candidates):
+    """Fill harmless presentation omissions while keeping submission assignment strict."""
+    if not isinstance(clusters, list):
+        return None
+
+    candidate_map = {str(item["submission_id"]): item for item in candidates}
+    normalized = []
+
+    for raw_cluster in clusters:
+        if not isinstance(raw_cluster, dict):
+            return None
+
+        cluster = dict(raw_cluster)
+        ids = [str(x) for x in cluster.get("submission_ids", [])]
+        representative_id = str(cluster.get("representative_submission_id", ""))
+        if not ids or not representative_id or representative_id not in candidate_map:
+            return None
+
+        cluster["submission_ids"] = ids
+        cluster["representative_submission_id"] = representative_id
+
+        representative = candidate_map[representative_id]
+        cluster["language"] = best_known_language(
+            cluster.get("language"),
+            None,
+            representative.get("language"),
+        )
+
+        analysis = cluster.get("analysis")
+        if isinstance(analysis, dict):
+            analysis = dict(analysis)
+            if not analysis.get("pattern"):
+                analysis["pattern"] = cluster.get("approach_name") or "Algorithmic Approach"
+            if not analysis.get("key_takeaway"):
+                analysis["key_takeaway"] = (
+                    "The reusable idea is captured by the algorithmic pattern used in the submitted implementation."
+                )
+            cluster["analysis"] = analysis
+
+        approach_name = str(cluster.get("approach_name", "")).strip()
+        if not approach_name:
+            approach_name = str((analysis or {}).get("pattern", "Algorithmic Approach")).strip()
+        cluster["approach_name"] = approach_name or "Algorithmic Approach"
+
+        approach_key = str(cluster.get("approach_key", "")).strip()
+        cluster["approach_key"] = (
+            approach_key
+            or _normalize_semantic_label(cluster["approach_name"])
+            or "algorithmic-approach"
+        )
+
+        reason = str(cluster.get("cluster_reason", "")).strip()
+        cluster["cluster_reason"] = reason or (
+            f"These submissions use the same {cluster['approach_name']} strategy."
+        )
+
+        normalized.append(cluster)
+
+    return normalized
 
 
 def _validate_clusters(clusters, candidates):
@@ -2557,49 +2836,19 @@ match the representative candidate exactly.
 """
 
     try:
-        response = requests.post(
-            "https://generativelanguage.googleapis.com/v1beta/interactions",
-            headers={
-                "Content-Type": "application/json",
-                "x-goog-api-key": GEMINI_API_KEY,
-            },
-            json={
-                "model": "gemini-3.6-flash",
-                "input": prompt,
-            },
+        response = _gemini_post_with_retry(
+            prompt=prompt,
             timeout=120,
         )
 
-        if response.status_code == 429:
-            GEMINI_RUNTIME["blocked"] = True
-            GEMINI_RUNTIME["last_failure"] = (
-                "Gemini returned HTTP 429 (quota/rate limit) during clustering audit."
-            )
-            print(
-                "⏸️ Gemini returned HTTP 429 during clustering audit."
-            )
-            return None
-
-        if response.status_code in {500, 502, 503, 504}:
-            GEMINI_RUNTIME["last_failure"] = (
-                f"Temporary Gemini service error HTTP {response.status_code} during clustering audit."
-            )
-            print(
-                f"⚠️ Gemini clustering audit temporarily unavailable (HTTP {response.status_code})."
-            )
-            return None
-
-        if response.status_code != 200:
-            GEMINI_RUNTIME["last_failure"] = (
-                f"Gemini clustering audit failed with HTTP {response.status_code}."
-            )
-            print(
-                f"⚠️ Gemini clustering audit failed: HTTP {response.status_code}"
-            )
+        if response is None:
             return None
 
         result = json.loads(_parse_gemini_text(response.json()))
-        reviewed = result.get("solutions")
+        reviewed = _coerce_cluster_response(
+            result.get("solutions"),
+            candidates,
+        )
 
         if not _validate_clusters(reviewed, candidates):
             GEMINI_RUNTIME["last_failure"] = (
@@ -2803,42 +3052,12 @@ VALIDATION RULES:
 """
 
     try:
-        response = requests.post(
-            "https://generativelanguage.googleapis.com/v1beta/interactions",
-            headers={
-                "Content-Type": "application/json",
-                "x-goog-api-key": GEMINI_API_KEY,
-            },
-            json={
-                "model": "gemini-3.6-flash",
-                "input": prompt,
-            },
+        response = _gemini_post_with_retry(
+            prompt=prompt,
             timeout=120,
         )
 
-        if response.status_code == 429:
-            GEMINI_RUNTIME["blocked"] = True
-            GEMINI_RUNTIME["last_failure"] = "Gemini returned HTTP 429 (quota/rate limit)."
-            print("⏸️ Gemini returned HTTP 429. Historical backfill will resume later.")
-            return None
-
-        if response.status_code in {500, 502, 503, 504}:
-            GEMINI_RUNTIME["last_failure"] = (
-                f"Temporary Gemini service error HTTP {response.status_code}."
-            )
-            print(
-                f"⚠️ Gemini temporarily unavailable (HTTP {response.status_code})."
-            )
-            return None
-
-        if response.status_code != 200:
-            GEMINI_RUNTIME["last_failure"] = (
-                f"Gemini clustering failed with HTTP {response.status_code}."
-            )
-            print(
-                f"⚠️ Gemini clustering failed: HTTP {response.status_code}"
-            )
-            print(response.text[:1000])
+        if response is None:
             return None
 
         body = response.json()
@@ -2848,7 +3067,10 @@ VALIDATION RULES:
             return None
 
         result = json.loads(output_text)
-        clusters = result.get("solutions")
+        clusters = _coerce_cluster_response(
+            result.get("solutions"),
+            candidates,
+        )
 
         if not _validate_clusters(clusters, candidates):
             GEMINI_RUNTIME["last_failure"] = (
@@ -2905,7 +3127,7 @@ VALIDATION RULES:
 
 
 def load_existing_solution_catalog(folder):
-    """Load existing solution files + metadata for semantic reconciliation."""
+    """Load stored solution files, language, and any prior analysis."""
     catalog = []
     if not folder.exists():
         return catalog
@@ -2923,23 +3145,26 @@ def load_existing_solution_catalog(folder):
             code = path.read_text(encoding="utf-8")
         except Exception:
             continue
+
         item = by_filename.get(path.name, {})
-        language = item.get("language") or metadata.get("language") or path.suffix.lstrip(".")
+        language = best_known_language(
+            item.get("language"),
+            path.name,
+            metadata.get("language"),
+        )
         catalog.append({
             "filename": path.name,
-            "language": language_name(language),
+            "language": language,
             "fingerprint": solution_fingerprint(code, language),
             "code": code,
+            "analysis": item.get("analysis") if isinstance(item, dict) else None,
         })
 
     return catalog
 
 
 def rebuild_problem_from_clusters(question, candidates, clusters):
-    """
-    Reconcile one problem folder so it represents the semantic clusters, not
-    every syntactically different accepted submission.
-    """
+    """Reconcile one problem while preserving existing code and explanations whenever possible."""
     number = int(question["questionFrontendId"])
     folder_name = f"{number:04d}-{safe_slug(question['title'])}"
     folder = SOLUTIONS_DIR / folder_name
@@ -2949,55 +3174,104 @@ def rebuild_problem_from_clusters(question, candidates, clusters):
 
     candidate_map = {str(item["submission_id"]): item for item in candidates}
     existing_catalog = load_existing_solution_catalog(folder)
+    old_metadata = read_metadata(folder)
+
+    try:
+        old_readme_text = readme_path.read_text(encoding="utf-8") if readme_path.exists() else ""
+    except Exception:
+        old_readme_text = ""
+
+    existing_blocks = extract_existing_solution_blocks(old_readme_text)
+    old_analysis_by_filename = {}
+    for item in old_metadata.get("solutions", []) if isinstance(old_metadata.get("solutions"), list) else []:
+        if isinstance(item, dict) and item.get("filename") and item.get("analysis"):
+            old_analysis_by_filename[item["filename"]] = item["analysis"]
 
     selected = []
     used_existing_files = set()
 
     for index, cluster in enumerate(clusters, start=1):
+        cluster_ids = [str(x) for x in cluster.get("submission_ids", [])]
         representative_id = str(cluster["representative_submission_id"])
-        representative = candidate_map[representative_id]
-        fingerprint = representative["exact_fingerprint"]
+        cluster_candidates = [
+            candidate_map[item_id]
+            for item_id in cluster_ids
+            if item_id in candidate_map
+        ]
 
-        reuse = next(
-            (
-                item
-                for item in existing_catalog
-                if item["fingerprint"] == fingerprint
-                and item["filename"] not in used_existing_files
-            ),
-            None,
-        )
+        # Reuse any old implementation that belongs to this semantic cluster,
+        # even if Gemini chose a different representative.
+        reuse = None
+        for existing in existing_catalog:
+            if existing["filename"] in used_existing_files:
+                continue
+            if any(
+                existing["fingerprint"] == candidate["exact_fingerprint"]
+                for candidate in cluster_candidates
+            ):
+                reuse = existing
+                break
 
         if reuse:
             code_filename = reuse["filename"]
             used_existing_files.add(code_filename)
+            matched_candidate = next(
+                candidate
+                for candidate in cluster_candidates
+                if candidate["exact_fingerprint"] == reuse["fingerprint"]
+            )
+            stored_code = reuse["code"]
+            analysis = (
+                reuse.get("analysis")
+                or old_analysis_by_filename.get(code_filename)
+                or cluster.get("analysis")
+            )
+            preserved_block = existing_blocks.get(code_filename)
+            preserve_whole_readme = (
+                len(clusters) == 1
+                and bool(old_readme_text)
+                and not existing_blocks
+                and not any(
+                    marker in old_readme_text
+                    for marker in (
+                        "Solve the problem using the submitted implementation.",
+                        "Recognize the algorithmic pattern and maintain the state required by the implementation.",
+                        "> **🔎 Algorithmic Approach**",
+                    )
+                )
+            )
         else:
+            representative = candidate_map[representative_id]
             extension = file_extension(representative["language"])
             code_filename = f"solution.{extension}" if index == 1 else f"solution-{index}.{extension}"
+            stored_code = representative["code"]
+            matched_candidate = representative
+            analysis = cluster.get("analysis")
+            preserved_block = None
+            preserve_whole_readme = False
 
-        code_path = folder / code_filename
-        code_path.write_text(representative["code"], encoding="utf-8")
+        language = best_known_language(matched_candidate.get("language"), code_filename)
+        (folder / code_filename).write_text(stored_code, encoding="utf-8")
 
         selected.append({
-            "analysis": cluster["analysis"],
+            "analysis": analysis,
             "submission": {
-                "lang": representative["language"],
-                "runtime": representative.get("runtime"),
-                "runtimeDisplay": representative.get("runtimeDisplay"),
-                "memory": representative.get("memory"),
-                "memoryDisplay": representative.get("memoryDisplay"),
+                "lang": language,
+                "runtime": matched_candidate.get("runtime"),
+                "runtimeDisplay": matched_candidate.get("runtimeDisplay"),
+                "memory": matched_candidate.get("memory"),
+                "memoryDisplay": matched_candidate.get("memoryDisplay"),
             },
             "code_filename": code_filename,
             "approach_key": cluster.get("approach_key", ""),
             "approach_name": cluster.get("approach_name", ""),
-            "submission_ids": [str(x) for x in cluster.get("submission_ids", [])],
+            "submission_ids": cluster_ids,
             "representative_submission_id": representative_id,
-            "solution_hash": fingerprint,
+            "solution_hash": matched_candidate["exact_fingerprint"],
+            "preserved_readme_block": preserved_block,
+            "preserve_whole_readme": preserve_whole_readme,
         })
 
-    # Remove stale solution files created by an earlier, purely textual
-    # deduplication run. Do this only for files matching the automated naming
-    # convention.
     keep_names = {item["code_filename"] for item in selected}
     for path in solution_files_in_folder(folder):
         if path.name not in keep_names:
@@ -3006,10 +3280,11 @@ def rebuild_problem_from_clusters(question, candidates, clusters):
     metadata_solutions = []
     for index, item in enumerate(selected, start=1):
         submission = item["submission"]
+        language = best_known_language(submission.get("lang"), item["code_filename"])
         metadata_solutions.append({
             "number": index,
             "filename": item["code_filename"],
-            "language": language_name(submission.get("lang")),
+            "language": language,
             "submission_id": item["representative_submission_id"],
             "submission_ids": item["submission_ids"],
             "solution_hash": item["solution_hash"],
@@ -3022,11 +3297,19 @@ def rebuild_problem_from_clusters(question, candidates, clusters):
             "analysis": item["analysis"],
         })
 
+    languages = list(dict.fromkeys(
+        item["language"]
+        for item in metadata_solutions
+        if item.get("language") and item["language"] != "Unknown"
+    ))
+    language_display = " · ".join(languages) or "Unknown"
+
     metadata = {
         "number": number,
         "title": question["title"],
         "difficulty": question["difficulty"],
-        "language": language_name(selected[0]["submission"].get("lang")) if selected else "Unknown",
+        "language": language_display,
+        "languages": languages,
         "folder": folder_name,
         "slug": question["titleSlug"],
         "submission_id": selected[0]["representative_submission_id"] if selected else None,
@@ -3039,9 +3322,21 @@ def rebuild_problem_from_clusters(question, candidates, clusters):
         "historical_backfill_version": HISTORICAL_BACKFILL_VERSION,
     }
 
-    readme = create_problem_readme(question, solutions=selected)
-    readme_path.write_text(readme, encoding="utf-8")
-    metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    if len(selected) == 1 and selected[0].get("preserve_whole_readme"):
+        # Preserve an existing good single-solution README instead of replacing
+        # a strong explanation with a new generation on every reconciliation.
+        readme_path.write_text(old_readme_text, encoding="utf-8")
+    else:
+        readme_path.write_text(
+            create_problem_readme(question, solutions=selected),
+            encoding="utf-8",
+        )
+
+    patch_readme_language_fields(readme_path, metadata)
+    metadata_path.write_text(
+        json.dumps(metadata, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
 
     return {
         "folder": folder,
@@ -3090,12 +3385,149 @@ def format_runtime_memory(submission):
     return runtime, memory
 
 
+def _patch_solution_block_language(block, language, code_filename=None):
+    """Preserve an existing solution explanation while repairing language/link metadata."""
+    if not block:
+        return ""
+
+    block = block.rstrip()
+    language = language or "Unknown"
+
+    language_re = re.compile(r"^> \*\*Language:\*\*.*$", re.MULTILINE)
+    languages_re = re.compile(r"^> \*\*Languages:\*\*.*$", re.MULTILINE)
+
+    if language_re.search(block):
+        block = language_re.sub(f"> **Language:** {language}", block, count=1)
+    elif languages_re.search(block):
+        block = languages_re.sub(f"> **Languages:** {language}", block, count=1)
+    else:
+        lines = block.splitlines()
+        insert_at = 1 if lines and lines[0].startswith("### ") else 0
+        lines[insert_at:insert_at] = [f"> **Language:** {language}", ""]
+        block = "\n".join(lines)
+
+    if code_filename:
+        block = re.sub(
+            r"(\]\(\./)[^)]+(\))",
+            lambda match: match.group(1) + code_filename + match.group(2),
+            block,
+        )
+
+    return block.rstrip()
+
+
+def extract_existing_solution_blocks(readme_text):
+    """Extract multi-solution README sections keyed by their linked source filename."""
+    blocks = {}
+    if not readme_text:
+        return blocks
+
+    headings = list(re.finditer(r"(?m)^### .*?Solution \d+.*$", readme_text))
+    for index, heading in enumerate(headings):
+        start = heading.start()
+        end = headings[index + 1].start() if index + 1 < len(headings) else len(readme_text)
+        block = readme_text[start:end].strip()
+        block = re.split(r"(?m)^## ", block, maxsplit=1)[0].rstrip()
+        for filename in re.findall(r"\]\(\./([^)]+)\)", block):
+            if filename.startswith("solution"):
+                blocks[filename] = block
+                break
+
+    return blocks
+
+
+def patch_readme_language_fields(readme_path, metadata):
+    """Repair problem/solution language labels without rewriting explanation text."""
+    if not readme_path.exists():
+        return False
+
+    try:
+        text = readme_path.read_text(encoding="utf-8")
+    except Exception:
+        return False
+
+    solutions = metadata.get("solutions", [])
+    languages = []
+
+    if isinstance(solutions, list) and solutions:
+        for item in solutions:
+            if not isinstance(item, dict):
+                continue
+            lang = best_known_language(
+                item.get("language"),
+                item.get("filename"),
+                metadata.get("language"),
+            )
+            if lang != "Unknown":
+                languages.append(lang)
+    else:
+        for path in solution_files_in_folder(readme_path.parent):
+            lang = language_from_filename(path.name)
+            if lang != "Unknown":
+                languages.append(lang)
+
+    languages = list(dict.fromkeys(languages))
+    if not languages:
+        return False
+
+    display = " · ".join(languages)
+    label = "Language" if len(languages) == 1 else "Languages"
+    changed = False
+
+    problem_lang_re = re.compile(r"^> \*\*(?:Language|Languages):\*\*.*$", re.MULTILINE)
+    if problem_lang_re.search(text):
+        updated = problem_lang_re.sub(f"> **{label}:** {display}", text, count=1)
+        changed = updated != text
+        text = updated
+    else:
+        lines = text.splitlines()
+        heading_index = next((i for i, line in enumerate(lines) if line.startswith("# ")), None)
+        if heading_index is not None:
+            lines[heading_index + 1:heading_index + 1] = ["", f"> **{label}:** {display}", ""]
+            text = "\n".join(lines)
+            changed = True
+
+    blocks = extract_existing_solution_blocks(text)
+    if isinstance(solutions, list):
+        for item in solutions:
+            if not isinstance(item, dict) or not item.get("filename"):
+                continue
+            filename = item["filename"]
+            lang = best_known_language(
+                item.get("language"),
+                filename,
+                metadata.get("language"),
+            )
+            block = blocks.get(filename)
+            if block and lang != "Unknown":
+                patched = _patch_solution_block_language(block, lang, filename)
+                if patched != block:
+                    text = text.replace(block, patched, 1)
+                    changed = True
+
+    if changed:
+        readme_path.write_text(text.rstrip() + "\n", encoding="utf-8")
+
+    return changed
+
+
 def _solution_block(question, solution, index):
+    preserved = solution.get("preserved_readme_block")
+    if preserved:
+        return _patch_solution_block_language(
+            preserved,
+            best_known_language(
+                solution.get("submission", {}).get("lang"),
+                solution.get("code_filename"),
+            ),
+            solution.get("code_filename"),
+        )
+
     analysis = solution["analysis"]
     submission = solution["submission"]
     code_filename = solution["code_filename"]
     runtime, memory = format_runtime_memory(submission)
-    language = language_name(submission.get("lang"))
+    language = best_known_language(submission.get("lang"), code_filename)
 
     approach_steps = "\n".join(
         f"{step_index}. {step}"
@@ -3582,6 +4014,42 @@ def historical_backfill(
             if not candidates:
                 problem_result = rebuild_problem_from_clusters(problem, [], [])
                 clusters = []
+            elif len(candidates) == 1:
+                print("   🧠 One candidate only; generating the normal Gemini explanation directly...")
+                analysis = ai_analysis(
+                    full_question,
+                    candidates[0]["code"],
+                    [
+                        tag.get("name", "")
+                        for tag in full_question.get("topicTags", [])
+                        if tag.get("name")
+                    ],
+                )
+                if analysis is None:
+                    raise GeminiBackfillPaused(
+                        GEMINI_RUNTIME.get("last_failure")
+                        or "Gemini did not return a valid explanation."
+                    )
+
+                clusters = [{
+                    "approach_key": _normalize_semantic_label(
+                        analysis.get("pattern", "single-approach")
+                    ) or "single-approach",
+                    "approach_name": analysis.get("pattern", "Single Approach"),
+                    "language": candidates[0]["language"],
+                    "submission_ids": [candidates[0]["submission_id"]],
+                    "representative_submission_id": candidates[0]["submission_id"],
+                    "cluster_reason": (
+                        "Only one exact-code-unique accepted implementation was found for this problem."
+                    ),
+                    "analysis": analysis,
+                }]
+                imported += 1
+                problem_result = rebuild_problem_from_clusters(
+                    full_question,
+                    candidates,
+                    clusters,
+                )
             else:
                 print(
                     f"   🧠 Asking Gemini to cluster {len(candidates)} candidate implementation(s) "
@@ -3875,7 +4343,7 @@ def update_main_readme():
             f"[{item.get('title', 'Unknown')}]"
             f"(solutions/{item.get('folder', '')}/) | "
             f"{difficulty_badge(item.get('difficulty'))} | "
-            f"{item.get('language', 'Unknown')} | "
+            f"{best_known_language(item.get('language'), None, ' · '.join(item.get('languages', [])))} | "
             f"{item.get('solution_count', 1)} |"
         )
 
@@ -3906,7 +4374,7 @@ def update_main_readme():
 
 ## 📚 Problem Archive
 
-| # | Problem | Difficulty | Language | Approaches |
+| # | Problem | Difficulty | Languages | Approaches |
 |---:|---|---|---|---:|
 {table}
 
@@ -4349,7 +4817,7 @@ def import_submission(
             "number": number,
             "title": question["title"],
             "difficulty": question["difficulty"],
-            "language": metadata.get("language") or language_name(details.get("lang")),
+            "language": best_known_language(details.get("lang"), code_filename, metadata.get("language")),
             "folder": folder_name,
             "slug": question["titleSlug"],
             "submission_id": submission_id,
@@ -4529,6 +4997,74 @@ def repair_placeholder_readmes():
     return repaired
 
 
+def repair_existing_language_fields():
+    """Repair legacy/missing language metadata and README labels without changing explanations."""
+    if not SOLUTIONS_DIR.exists():
+        return 0
+
+    repaired = 0
+    for folder in sorted(SOLUTIONS_DIR.iterdir()):
+        if not folder.is_dir():
+            continue
+
+        metadata_path = folder / "metadata.json"
+        readme_path = folder / "README.md"
+        if not metadata_path.exists():
+            continue
+
+        try:
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if not isinstance(metadata, dict):
+            continue
+
+        changed = False
+        solutions = metadata.get("solutions")
+        languages = []
+
+        if isinstance(solutions, list) and solutions:
+            for item in solutions:
+                if not isinstance(item, dict):
+                    continue
+                resolved = best_known_language(
+                    item.get("language"),
+                    item.get("filename"),
+                    metadata.get("language"),
+                )
+                if item.get("language") != resolved:
+                    item["language"] = resolved
+                    changed = True
+                if resolved != "Unknown":
+                    languages.append(resolved)
+        else:
+            for path in solution_files_in_folder(folder):
+                lang = language_from_filename(path.name)
+                if lang != "Unknown":
+                    languages.append(lang)
+
+        languages = list(dict.fromkeys(languages))
+        display = " · ".join(languages) if languages else "Unknown"
+        if metadata.get("language") != display:
+            metadata["language"] = display
+            changed = True
+        if languages and metadata.get("languages") != languages:
+            metadata["languages"] = languages
+            changed = True
+
+        if patch_readme_language_fields(readme_path, metadata):
+            changed = True
+
+        if changed:
+            metadata_path.write_text(
+                json.dumps(metadata, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+            repaired += 1
+
+    return repaired
+
+
 # ============================================================
 # Main
 # ============================================================
@@ -4556,6 +5092,10 @@ def main():
     )
 
     repaired = repair_placeholder_readmes()
+    language_repairs = repair_existing_language_fields()
+
+    if language_repairs:
+        print(f"\n🪄 Repaired language fields in {language_repairs} existing README/metadata set(s).")
 
     if repaired:
         print(
