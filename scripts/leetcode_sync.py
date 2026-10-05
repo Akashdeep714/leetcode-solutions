@@ -49,7 +49,7 @@ GEMINI_BACKOFF_SECONDS = (5, 15, 30)
 
 # Bump this whenever the historical-backfill algorithm changes in a way
 # that requires previously processed problems to be reconciled again.
-HISTORICAL_BACKFILL_VERSION = 5
+HISTORICAL_BACKFILL_VERSION = 6
 
 # Keep LeetCode requests gentle rather than hammering the GraphQL endpoint.
 LEETCODE_REQUEST_DELAY_SECONDS = 0.35
@@ -3164,7 +3164,7 @@ def load_existing_solution_catalog(folder):
 
 
 def rebuild_problem_from_clusters(question, candidates, clusters):
-    """Reconcile one problem while preserving existing code and explanations whenever possible."""
+    """Reconcile one problem while preserving existing explanations whenever possible."""
     number = int(question["questionFrontendId"])
     folder_name = f"{number:04d}-{safe_slug(question['title'])}"
     folder = SOLUTIONS_DIR / folder_name
@@ -3175,7 +3175,6 @@ def rebuild_problem_from_clusters(question, candidates, clusters):
     candidate_map = {str(item["submission_id"]): item for item in candidates}
     existing_catalog = load_existing_solution_catalog(folder)
     old_metadata = read_metadata(folder)
-
     try:
         old_readme_text = readme_path.read_text(encoding="utf-8") if readme_path.exists() else ""
     except Exception:
@@ -3183,32 +3182,26 @@ def rebuild_problem_from_clusters(question, candidates, clusters):
 
     existing_blocks = extract_existing_solution_blocks(old_readme_text)
     old_analysis_by_filename = {}
-    for item in old_metadata.get("solutions", []) if isinstance(old_metadata.get("solutions"), list) else []:
-        if isinstance(item, dict) and item.get("filename") and item.get("analysis"):
-            old_analysis_by_filename[item["filename"]] = item["analysis"]
+    old_solutions = old_metadata.get("solutions", [])
+    if isinstance(old_solutions, list):
+        for item in old_solutions:
+            if isinstance(item, dict) and item.get("filename") and item.get("analysis"):
+                old_analysis_by_filename[item["filename"]] = item["analysis"]
 
+    existing_order = [item["filename"] for item in existing_catalog]
     selected = []
     used_existing_files = set()
 
     for index, cluster in enumerate(clusters, start=1):
         cluster_ids = [str(x) for x in cluster.get("submission_ids", [])]
         representative_id = str(cluster["representative_submission_id"])
-        cluster_candidates = [
-            candidate_map[item_id]
-            for item_id in cluster_ids
-            if item_id in candidate_map
-        ]
+        cluster_candidates = [candidate_map[item_id] for item_id in cluster_ids if item_id in candidate_map]
 
-        # Reuse any old implementation that belongs to this semantic cluster,
-        # even if Gemini chose a different representative.
         reuse = None
         for existing in existing_catalog:
             if existing["filename"] in used_existing_files:
                 continue
-            if any(
-                existing["fingerprint"] == candidate["exact_fingerprint"]
-                for candidate in cluster_candidates
-            ):
+            if any(existing["fingerprint"] == candidate["exact_fingerprint"] for candidate in cluster_candidates):
                 reuse = existing
                 break
 
@@ -3216,30 +3209,12 @@ def rebuild_problem_from_clusters(question, candidates, clusters):
             code_filename = reuse["filename"]
             used_existing_files.add(code_filename)
             matched_candidate = next(
-                candidate
-                for candidate in cluster_candidates
+                candidate for candidate in cluster_candidates
                 if candidate["exact_fingerprint"] == reuse["fingerprint"]
             )
             stored_code = reuse["code"]
-            analysis = (
-                reuse.get("analysis")
-                or old_analysis_by_filename.get(code_filename)
-                or cluster.get("analysis")
-            )
+            analysis = reuse.get("analysis") or old_analysis_by_filename.get(code_filename) or cluster.get("analysis")
             preserved_block = existing_blocks.get(code_filename)
-            preserve_whole_readme = (
-                len(clusters) == 1
-                and bool(old_readme_text)
-                and not existing_blocks
-                and not any(
-                    marker in old_readme_text
-                    for marker in (
-                        "Solve the problem using the submitted implementation.",
-                        "Recognize the algorithmic pattern and maintain the state required by the implementation.",
-                        "> **🔎 Algorithmic Approach**",
-                    )
-                )
-            )
         else:
             representative = candidate_map[representative_id]
             extension = file_extension(representative["language"])
@@ -3248,7 +3223,6 @@ def rebuild_problem_from_clusters(question, candidates, clusters):
             matched_candidate = representative
             analysis = cluster.get("analysis")
             preserved_block = None
-            preserve_whole_readme = False
 
         language = best_known_language(matched_candidate.get("language"), code_filename)
         (folder / code_filename).write_text(stored_code, encoding="utf-8")
@@ -3269,8 +3243,19 @@ def rebuild_problem_from_clusters(question, candidates, clusters):
             "representative_submission_id": representative_id,
             "solution_hash": matched_candidate["exact_fingerprint"],
             "preserved_readme_block": preserved_block,
-            "preserve_whole_readme": preserve_whole_readme,
         })
+
+    all_existing_reused = (
+        bool(existing_catalog)
+        and len(existing_catalog) == len(selected)
+        and set(used_existing_files) == {item["filename"] for item in existing_catalog}
+    )
+
+    if all_existing_reused:
+        # Preserve the established solution-file order even if Gemini returns
+        # clusters in a different order on another run.
+        by_filename = {item["code_filename"]: item for item in selected}
+        selected = [by_filename[name] for name in existing_order if name in by_filename]
 
     keep_names = {item["code_filename"] for item in selected}
     for path in solution_files_in_folder(folder):
@@ -3298,8 +3283,7 @@ def rebuild_problem_from_clusters(question, candidates, clusters):
         })
 
     languages = list(dict.fromkeys(
-        item["language"]
-        for item in metadata_solutions
+        item["language"] for item in metadata_solutions
         if item.get("language") and item["language"] != "Unknown"
     ))
     language_display = " · ".join(languages) or "Unknown"
@@ -3322,27 +3306,24 @@ def rebuild_problem_from_clusters(question, candidates, clusters):
         "historical_backfill_version": HISTORICAL_BACKFILL_VERSION,
     }
 
-    if len(selected) == 1 and selected[0].get("preserve_whole_readme"):
-        # Preserve an existing good single-solution README instead of replacing
-        # a strong explanation with a new generation on every reconciliation.
-        readme_path.write_text(old_readme_text, encoding="utf-8")
+    preserve_full_readme = bool(old_readme_text) and all_existing_reused
+
+    if preserve_full_readme:
+        readme_path.write_text(old_readme_text.rstrip() + "\n", encoding="utf-8")
+        print("   🛡️ Existing README preserved; only factual metadata labels may be repaired.")
     else:
-        readme_path.write_text(
-            create_problem_readme(question, solutions=selected),
-            encoding="utf-8",
-        )
+        readme_path.write_text(create_problem_readme(question, solutions=selected), encoding="utf-8")
 
     patch_readme_language_fields(readme_path, metadata)
-    metadata_path.write_text(
-        json.dumps(metadata, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
+    metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
     return {
         "folder": folder,
         "selected": selected,
         "exact_candidates": len(candidates),
         "semantic_clusters": len(clusters),
+        "new_approaches": sum(1 for item in selected if item["code_filename"] not in existing_order),
+        "preserved_existing_readme": preserve_full_readme,
     }
 
 
@@ -3437,7 +3418,7 @@ def extract_existing_solution_blocks(readme_text):
 
 
 def patch_readme_language_fields(readme_path, metadata):
-    """Repair problem/solution language labels without rewriting explanation text."""
+    """Repair problem/solution language labels from actual stored source files."""
     if not readme_path.exists():
         return False
 
@@ -3447,26 +3428,21 @@ def patch_readme_language_fields(readme_path, metadata):
         return False
 
     solutions = metadata.get("solutions", [])
-    languages = []
+    source_files = solution_files_in_folder(readme_path.parent)
+    language_by_filename = {path.name: language_from_filename(path.name) for path in source_files}
 
-    if isinstance(solutions, list) and solutions:
+    if isinstance(solutions, list):
         for item in solutions:
             if not isinstance(item, dict):
                 continue
-            lang = best_known_language(
-                item.get("language"),
-                item.get("filename"),
-                metadata.get("language"),
+            filename = str(item.get("filename", "")).strip()
+            if not filename:
+                continue
+            language_by_filename[filename] = best_known_language(
+                item.get("language"), filename, metadata.get("language")
             )
-            if lang != "Unknown":
-                languages.append(lang)
-    else:
-        for path in solution_files_in_folder(readme_path.parent):
-            lang = language_from_filename(path.name)
-            if lang != "Unknown":
-                languages.append(lang)
 
-    languages = list(dict.fromkeys(languages))
+    languages = list(dict.fromkeys(lang for lang in language_by_filename.values() if lang != "Unknown"))
     if not languages:
         return False
 
@@ -3474,11 +3450,20 @@ def patch_readme_language_fields(readme_path, metadata):
     label = "Language" if len(languages) == 1 else "Languages"
     changed = False
 
-    problem_lang_re = re.compile(r"^> \*\*(?:Language|Languages):\*\*.*$", re.MULTILINE)
-    if problem_lang_re.search(text):
-        updated = problem_lang_re.sub(f"> **{label}:** {display}", text, count=1)
-        changed = updated != text
-        text = updated
+    root_patterns = [
+        re.compile(r"^(?:>\s*)?\*\*(?:Language|Languages):\*\*.*$", re.MULTILINE),
+        re.compile(r"^(?:>\s*)?(?:Language|Languages):\s*.*$", re.MULTILINE),
+    ]
+
+    for pattern in root_patterns:
+        match = pattern.search(text)
+        if match:
+            replacement = f"> **{label}:** {display}"
+            updated = text[:match.start()] + replacement + text[match.end():]
+            if updated != text:
+                text = updated
+                changed = True
+            break
     else:
         lines = text.splitlines()
         heading_index = next((i for i, line in enumerate(lines) if line.startswith("# ")), None)
@@ -3488,40 +3473,41 @@ def patch_readme_language_fields(readme_path, metadata):
             changed = True
 
     blocks = extract_existing_solution_blocks(text)
-    if isinstance(solutions, list):
-        for item in solutions:
-            if not isinstance(item, dict) or not item.get("filename"):
-                continue
-            filename = item["filename"]
-            lang = best_known_language(
-                item.get("language"),
-                filename,
-                metadata.get("language"),
-            )
-            block = blocks.get(filename)
-            if block and lang != "Unknown":
-                patched = _patch_solution_block_language(block, lang, filename)
-                if patched != block:
-                    text = text.replace(block, patched, 1)
-                    changed = True
+    for filename, lang in language_by_filename.items():
+        if lang == "Unknown":
+            continue
+        block = blocks.get(filename)
+        if not block:
+            continue
+        patched = _patch_solution_block_language(block, lang, filename)
+        if patched != block:
+            text = text.replace(block, patched, 1)
+            changed = True
 
     if changed:
         readme_path.write_text(text.rstrip() + "\n", encoding="utf-8")
-
     return changed
 
 
 def _solution_block(question, solution, index):
     preserved = solution.get("preserved_readme_block")
     if preserved:
-        return _patch_solution_block_language(
-            preserved,
-            best_known_language(
-                solution.get("submission", {}).get("lang"),
-                solution.get("code_filename"),
-            ),
+        language = best_known_language(
+            solution.get("submission", {}).get("lang"),
             solution.get("code_filename"),
         )
+        preserved = _patch_solution_block_language(
+            preserved,
+            language,
+            solution.get("code_filename"),
+        )
+        preserved = re.sub(
+            r"(?m)^### (.*?Solution )\d+(.*)$",
+            lambda match: f"### {match.group(1)}{index}{match.group(2)}",
+            preserved,
+            count=1,
+        )
+        return preserved
 
     analysis = solution["analysis"]
     submission = solution["submission"]
@@ -3946,6 +3932,7 @@ def historical_backfill(
         }
 
     imported = 0
+    reconciled = 0
     duplicate = 0
     semantic_merged = 0
     skipped = 0
@@ -4015,40 +4002,58 @@ def historical_backfill(
                 problem_result = rebuild_problem_from_clusters(problem, [], [])
                 clusters = []
             elif len(candidates) == 1:
-                print("   🧠 One candidate only; generating the normal Gemini explanation directly...")
-                analysis = ai_analysis(
-                    full_question,
-                    candidates[0]["code"],
-                    [
-                        tag.get("name", "")
-                        for tag in full_question.get("topicTags", [])
-                        if tag.get("name")
-                    ],
+                folder_for_candidate = SOLUTIONS_DIR / f"{int(full_question['questionFrontendId']):04d}-{safe_slug(full_question['title'])}"
+                existing_catalog = load_existing_solution_catalog(folder_for_candidate)
+                existing_match = next(
+                    (item for item in existing_catalog if item.get("fingerprint") == candidates[0]["exact_fingerprint"]),
+                    None,
                 )
-                if analysis is None:
-                    raise GeminiBackfillPaused(
-                        GEMINI_RUNTIME.get("last_failure")
-                        or "Gemini did not return a valid explanation."
+
+                if existing_match and existing_match.get("analysis"):
+                    print("   🛡️ Existing single solution found; reusing its explanation without a Gemini call.")
+                    analysis = existing_match["analysis"]
+                elif existing_match:
+                    print("   🛡️ Existing single solution found; using deterministic analysis without a Gemini call.")
+                    analysis = normalize_fallback_analysis(
+                        fallback_analysis(
+                            candidates[0]["code"],
+                            [
+                                tag.get("name", "")
+                                for tag in full_question.get("topicTags", [])
+                                if tag.get("name")
+                            ],
+                            full_question,
+                        ),
+                        full_question,
                     )
+                else:
+                    print("   🧠 One candidate only; generating the normal Gemini explanation directly...")
+                    analysis = ai_analysis(
+                        full_question,
+                        candidates[0]["code"],
+                        [
+                            tag.get("name", "")
+                            for tag in full_question.get("topicTags", [])
+                            if tag.get("name")
+                        ],
+                    )
+                    if analysis is None:
+                        raise GeminiBackfillPaused(
+                            GEMINI_RUNTIME.get("last_failure")
+                            or "Gemini did not return a valid explanation."
+                        )
 
                 clusters = [{
-                    "approach_key": _normalize_semantic_label(
-                        analysis.get("pattern", "single-approach")
-                    ) or "single-approach",
+                    "approach_key": _normalize_semantic_label(analysis.get("pattern", "single-approach")) or "single-approach",
                     "approach_name": analysis.get("pattern", "Single Approach"),
                     "language": candidates[0]["language"],
                     "submission_ids": [candidates[0]["submission_id"]],
                     "representative_submission_id": candidates[0]["submission_id"],
-                    "cluster_reason": (
-                        "Only one exact-code-unique accepted implementation was found for this problem."
-                    ),
+                    "cluster_reason": "Only one exact-code-unique accepted implementation was found for this problem.",
                     "analysis": analysis,
                 }]
-                imported += 1
                 problem_result = rebuild_problem_from_clusters(
-                    full_question,
-                    candidates,
-                    clusters,
+                    full_question, candidates, clusters
                 )
             else:
                 print(
@@ -4072,7 +4077,6 @@ def historical_backfill(
                     "minor code variations are intentionally merged."
                 )
                 semantic_merged += len(candidates) - len(clusters)
-                imported += len(clusters)
 
                 # If an earlier hash-only run created 5 variants of the same
                 # approach, this reconciliation rewrites the folder to the
@@ -4082,6 +4086,9 @@ def historical_backfill(
                     candidates,
                     clusters,
                 )
+
+            reconciled += len(clusters)
+            imported += problem_result.get("new_approaches", 0)
 
             # Mark every accepted submission for this problem as processed for
             # future incremental sync only after the whole problem is safely
@@ -4902,6 +4909,16 @@ def repair_placeholder_readmes():
             readme_text = readme_path.read_text(encoding="utf-8")
             metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
         except Exception:
+            continue
+
+        source_files = solution_files_in_folder(folder)
+        if (
+            len(source_files) > 1
+            or (
+                isinstance(metadata.get("solutions"), list)
+                and len(metadata.get("solutions", [])) > 1
+            )
+        ):
             continue
 
         placeholder_markers = (
