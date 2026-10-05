@@ -24,8 +24,8 @@
         "2027988715"
       ],
       "solution_hash": "cb388faa12e6074e7de4e26a754ab68eda15655daf2501aaed52c960a643659d",
-      "approach_key": "math digit manipulation",
-      "approach_name": "Math / Digit Manipulation",
+      "approach_key": "math modulo integer arithmetic",
+      "approach_name": "Math / Modulo & Integer Arithmetic",
       "runtime": 4,
       "runtime_display": "4 ms",
       "memory": 46080000,
@@ -49,5 +49,5 @@
       }
     }
   ],
-  "historical_backfill_version": 5
+  "historical_backfill_version": 6
 }

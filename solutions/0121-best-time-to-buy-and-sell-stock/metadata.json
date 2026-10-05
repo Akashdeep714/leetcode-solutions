@@ -24,8 +24,8 @@
         "2139943751"
       ],
       "solution_hash": "62bb1203ad14e71d9118b537edcc45c2ab45d5d17f0de1d6138a8e9a9c9e3e49",
-      "approach_key": "greedy single pass tracking",
-      "approach_name": "Greedy / Single-Pass Tracking",
+      "approach_key": "dynamic programming greedy single pass",
+      "approach_name": "Dynamic Programming / Greedy Single Pass",
       "runtime": 1,
       "runtime_display": "1 ms",
       "memory": 94312000,
@@ -50,5 +50,5 @@
       }
     }
   ],
-  "historical_backfill_version": 5
+  "historical_backfill_version": 6
 }

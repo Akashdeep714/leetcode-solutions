@@ -24,8 +24,8 @@
         "2030849021"
       ],
       "solution_hash": "17e5c7646b0d4105d3f0d4edb6dde4703b0f92f7b135f31ee2781fe82b8919a8",
-      "approach_key": "gauss-sum-formula",
-      "approach_name": "Gauss Sum Formula (Math Difference)",
+      "approach_key": "math-sum",
+      "approach_name": "Sum Formula (Gauss Summation)",
       "runtime": 0,
       "runtime_display": "0 ms",
       "memory": 47260000,
@@ -57,8 +57,8 @@
         "2030853058"
       ],
       "solution_hash": "3070d55ae6c804b17073983cd8e40d8763607c256845b1ef47189a1a524888d1",
-      "approach_key": "bitwise-xor-cancellation",
-      "approach_name": "Bitwise XOR Cancellation",
+      "approach_key": "bit-manipulation-xor",
+      "approach_name": "Bit Manipulation (XOR)",
       "runtime": 0,
       "runtime_display": "0 ms",
       "memory": 47100000,
@@ -82,5 +82,5 @@
       }
     }
   ],
-  "historical_backfill_version": 5
+  "historical_backfill_version": 6
 }

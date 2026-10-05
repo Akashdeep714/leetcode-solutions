@@ -26,7 +26,7 @@
       ],
       "solution_hash": "7d0156afa394f86676adc4928d9c2e5ec96753779194777c56a27dc457e4da72",
       "approach_key": "two-pointers-in-place-overwrite",
-      "approach_name": "Two-Pointer In-Place Overwrite",
+      "approach_name": "Two Pointers (Read and Write Pointers)",
       "runtime": 1,
       "runtime_display": "1 ms",
       "memory": 46800000,
@@ -51,5 +51,5 @@
       }
     }
   ],
-  "historical_backfill_version": 5
+  "historical_backfill_version": 6
 }
