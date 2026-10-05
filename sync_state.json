@@ -271,6 +271,13 @@
         "frontendId": "167",
         "difficulty": "MEDIUM",
         "lastSubmittedAt": "2026-10-04T19:08:28+00:00"
+      },
+      {
+        "titleSlug": "minimum-size-subarray-sum",
+        "title": "Minimum Size Subarray Sum",
+        "frontendId": "209",
+        "difficulty": "MEDIUM",
+        "lastSubmittedAt": "2026-10-05T17:24:29+00:00"
       }
     ],
     "problem_index": 5,
