@@ -3,7 +3,7 @@
 > **Difficulty:** 🟢 Easy  
 > **Topics:** Array · Bit Manipulation  
 > **Solutions:** 2 unique approach(es)  
-> **Languages:** Java
+> **Language:** Java
 
 [🔗 View Problem on LeetCode](https://leetcode.com/problems/single-number/)
 
@@ -21,7 +21,7 @@ This folder contains **2 unique accepted implementation(s)** for the same proble
 
 ### 🧠 Solution 1 — Hash Table
 
-> **Language:** Java  
+> **Language:** Java
 > **Runtime:** `16 ms`  
 > **Memory:** `47.5 MB`
 
@@ -63,7 +63,7 @@ Using a hash map is an intuitive way to keep track of frequencies, though it use
 
 ### 🧠 Solution 2 — Bit Manipulation
 
-> **Language:** Java  
+> **Language:** Java
 > **Runtime:** `1 ms`  
 > **Memory:** `47 MB`
 

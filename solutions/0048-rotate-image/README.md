@@ -74,7 +74,7 @@ In-place matrix rotations can be achieved by partitioning the matrix into concen
 ---
 ### 🔀 Solution 2 — Matrix Transposition and Reflection
 
-> **Language:** Java  
+> **Language:** Java
 > **Runtime:** `0 ms`  
 > **Memory:** `44 MB`
 

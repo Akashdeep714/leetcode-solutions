@@ -3,7 +3,7 @@
 > **Difficulty:** 🟢 Easy  
 > **Topics:** Array · Hash Table · Math · Binary Search · Bit Manipulation · Sorting  
 > **Solutions:** 2 unique approach(es)  
-> **Languages:** Java
+> **Language:** Java
 
 [🔗 View Problem on LeetCode](https://leetcode.com/problems/missing-number/)
 
@@ -21,7 +21,7 @@ This folder contains **2 unique accepted implementation(s)** for the same proble
 
 ### 🧠 Solution 1 — Math / Summation Formula
 
-> **Language:** Java  
+> **Language:** Java
 > **Runtime:** `0 ms`  
 > **Memory:** `47.3 MB`
 
@@ -60,10 +60,11 @@ Since the range [0, n] contains n + 1 elements and nums contains n elements with
 Mathematical summation formulas allow computing missing elements in O(n) time and O(1) auxiliary space without extra data structures.
 
 ---
+---
 
 ### 🧠 Solution 2 — Bit Manipulation
 
-> **Language:** Java  
+> **Language:** Java
 > **Runtime:** `0 ms`  
 > **Memory:** `47.1 MB`
 
@@ -101,6 +102,8 @@ Because XOR is commutative and associative, pairing each index i with array elem
 
 Bitwise XOR is an optimal technique for missing or unique element problems because it operates in O(1) space and avoids potential integer overflow issues inherent to addition-based approaches.
 
+
+---
 
 ---
 

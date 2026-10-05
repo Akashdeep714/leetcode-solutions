@@ -16,7 +16,7 @@
 
 ## 📚 Problem Archive
 
-| # | Problem | Difficulty | Language | Approaches |
+| # | Problem | Difficulty | Languages | Approaches |
 |---:|---|---|---|---:|
 | 1 | [Two Sum](solutions/0001-two-sum/) | 🟢 Easy | Java | 2 |
 | 9 | [Palindrome Number](solutions/0009-palindrome-number/) | 🟢 Easy | Java | 1 |
@@ -34,8 +34,8 @@
 | 283 | [Move Zeroes](solutions/0283-move-zeroes/) | 🟢 Easy | Java | 2 |
 | 349 | [Intersection of Two Arrays](solutions/0349-intersection-of-two-arrays/) | 🟢 Easy | Java | 1 |
 | 350 | [Intersection of Two Arrays II](solutions/0350-intersection-of-two-arrays-ii/) | 🟢 Easy | Java | 2 |
-| 485 | [Max Consecutive Ones](solutions/0485-max-consecutive-ones/) | 🟢 Easy | Unknown | 1 |
-| 1295 | [Find Numbers with Even Number of Digits](solutions/1295-find-numbers-with-even-number-of-digits/) | 🟢 Easy | Unknown | 3 |
+| 485 | [Max Consecutive Ones](solutions/0485-max-consecutive-ones/) | 🟢 Easy | Java | 1 |
+| 1295 | [Find Numbers with Even Number of Digits](solutions/1295-find-numbers-with-even-number-of-digits/) | 🟢 Easy | Java | 3 |
 
 ---
 

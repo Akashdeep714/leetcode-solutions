@@ -3,7 +3,7 @@
 > **Difficulty:** 🟢 Easy  
 > **Topics:** Array · Hash Table · Sorting  
 > **Solutions:** 2 unique approach(es)  
-> **Languages:** Java
+> **Language:** Java
 
 [🔗 View Problem on LeetCode](https://leetcode.com/problems/contains-duplicate/)
 
@@ -21,7 +21,7 @@ This folder contains **2 unique accepted implementation(s)** for the same proble
 
 ### 🧠 Solution 1 — Hash Set / Frequency Tracking
 
-> **Language:** Java  
+> **Language:** Java
 > **Runtime:** `18 ms`  
 > **Memory:** `108.2 MB`
 
@@ -64,7 +64,7 @@ Using a hash set trades extra O(n) memory to achieve optimal linear O(n) executi
 
 ### 🧠 Solution 2 — Sorting / Adjacent Pair Check
 
-> **Language:** Java  
+> **Language:** Java
 > **Runtime:** `26 ms`  
 > **Memory:** `81.6 MB`
 

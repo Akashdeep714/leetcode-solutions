@@ -2,7 +2,7 @@
   "number": 485,
   "title": "Max Consecutive Ones",
   "difficulty": "Easy",
-  "language": "Unknown",
+  "language": "Java",
   "folder": "0485-max-consecutive-ones",
   "slug": "max-consecutive-ones",
   "solutions": [
@@ -23,5 +23,8 @@
   "runtime_display": "2 ms",
   "memory": 52640000,
   "memory_display": "52.6 MB",
-  "solution_count": 1
+  "solution_count": 1,
+  "languages": [
+    "Java"
+  ]
 }

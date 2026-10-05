@@ -3,7 +3,7 @@
 > **Difficulty:** 🟢 Easy  
 > **Topics:** Array · Hash Table  
 > **Solutions:** 2 unique approach(es)  
-> **Languages:** Java
+> **Language:** Java
 
 [🔗 View Problem on LeetCode](https://leetcode.com/problems/two-sum/)
 
@@ -21,7 +21,7 @@ This folder contains **2 unique accepted implementation(s)** for the same proble
 
 ### 🧠 Solution 1 — Brute Force / Array Iteration
 
-> **Language:** Java  
+> **Language:** Java
 > **Runtime:** `98 ms`  
 > **Memory:** `46.8 MB`
 
@@ -64,7 +64,7 @@ Brute force requires no additional data structures, but evaluating every pair le
 
 ### 🧠 Solution 2 — Hash Table / Complement Search
 
-> **Language:** Java  
+> **Language:** Java
 > **Runtime:** `5 ms`  
 > **Memory:** `46.7 MB`
 

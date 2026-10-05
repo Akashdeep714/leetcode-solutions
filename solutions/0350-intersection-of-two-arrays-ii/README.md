@@ -3,7 +3,7 @@
 > **Difficulty:** 🟢 Easy  
 > **Topics:** Array · Hash Table · Two Pointers · Binary Search · Sorting  
 > **Solutions:** 2 unique approach(es)  
-> **Languages:** Java
+> **Language:** Java
 
 [🔗 View Problem on LeetCode](https://leetcode.com/problems/intersection-of-two-arrays-ii/)
 
@@ -21,7 +21,7 @@ This folder contains **2 unique accepted implementation(s)** for the same proble
 
 ### 🧠 Solution 1 — Hash Table
 
-> **Language:** Java  
+> **Language:** Java
 > **Runtime:** `3 ms`  
 > **Memory:** `44.9 MB`
 
@@ -63,7 +63,7 @@ Hash maps enable O(1) average lookup and update times, providing a linear-time s
 
 ### 🧠 Solution 2 — Two Pointers
 
-> **Language:** Java  
+> **Language:** Java
 > **Runtime:** `6 ms`  
 > **Memory:** `45.3 MB`
 

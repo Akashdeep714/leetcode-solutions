@@ -3,6 +3,9 @@
   "title": "Missing Number",
   "difficulty": "Easy",
   "language": "Java",
+  "languages": [
+    "Java"
+  ],
   "folder": "0268-missing-number",
   "slug": "missing-number",
   "submission_id": "2030849021",
@@ -22,7 +25,7 @@
       ],
       "solution_hash": "17e5c7646b0d4105d3f0d4edb6dde4703b0f92f7b135f31ee2781fe82b8919a8",
       "approach_key": "gauss-sum-formula",
-      "approach_name": "Arithmetic Series Sum (Gauss Formula)",
+      "approach_name": "Gauss Sum Formula (Math Difference)",
       "runtime": 0,
       "runtime_display": "0 ms",
       "memory": 47260000,
@@ -54,8 +57,8 @@
         "2030853058"
       ],
       "solution_hash": "3070d55ae6c804b17073983cd8e40d8763607c256845b1ef47189a1a524888d1",
-      "approach_key": "bit-manipulation-xor",
-      "approach_name": "Bit Manipulation (XOR)",
+      "approach_key": "bitwise-xor-cancellation",
+      "approach_name": "Bitwise XOR Cancellation",
       "runtime": 0,
       "runtime_display": "0 ms",
       "memory": 47100000,
@@ -79,5 +82,5 @@
       }
     }
   ],
-  "historical_backfill_version": 4
+  "historical_backfill_version": 5
 }

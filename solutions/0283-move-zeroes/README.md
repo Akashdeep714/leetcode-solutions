@@ -3,7 +3,7 @@
 > **Difficulty:** 🟢 Easy  
 > **Topics:** Array · Two Pointers  
 > **Solutions:** 2 unique approach(es)  
-> **Languages:** Java
+> **Language:** Java
 
 [🔗 View Problem on LeetCode](https://leetcode.com/problems/move-zeroes/)
 
@@ -21,7 +21,7 @@ This folder contains **2 unique accepted implementation(s)** for the same proble
 
 ### 🧠 Solution 1 — Two Pointers / Two-Pass Array Modification
 
-> **Language:** Java  
+> **Language:** Java
 > **Runtime:** `2 ms`  
 > **Memory:** `47.4 MB`
 
@@ -63,7 +63,7 @@ Decoupling array compaction into 'collecting non-zero elements' followed by 'fil
 
 ### 🧠 Solution 2 — Two Pointers / Single-Pass In-Place Partitioning
 
-> **Language:** Java  
+> **Language:** Java
 > **Runtime:** `2 ms`  
 > **Memory:** `47.8 MB`
 

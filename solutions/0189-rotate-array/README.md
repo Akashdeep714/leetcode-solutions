@@ -3,7 +3,7 @@
 > **Difficulty:** 🟡 Medium  
 > **Topics:** Array · Math · Two Pointers  
 > **Solutions:** 2 unique approach(es)  
-> **Languages:** Java
+> **Language:** Java
 
 [🔗 View Problem on LeetCode](https://leetcode.com/problems/rotate-array/)
 
@@ -21,7 +21,7 @@ This folder contains **2 unique accepted implementation(s)** for the same proble
 
 ### 🧠 Solution 1 — Two Pointers / Array Reversal
 
-> **Language:** Java  
+> **Language:** Java
 > **Runtime:** `5 ms`  
 > **Memory:** `268.6 MB`
 
@@ -64,7 +64,7 @@ Block-based cyclic shifts on contiguous memory can often be performed in-place b
 
 ### 🧠 Solution 2 — Cycle Decomposition / Modular Arithmetic
 
-> **Language:** Java  
+> **Language:** Java
 > **Runtime:** `8 ms`  
 > **Memory:** `268.7 MB`
 

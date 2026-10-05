@@ -34,5 +34,8 @@
       "memory_display": "44 MB"
     }
   ],
-  "solution_count": 2
+  "solution_count": 2,
+  "languages": [
+    "Java"
+  ]
 }

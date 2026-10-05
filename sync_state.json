@@ -38,7 +38,7 @@
     "2154233044"
   ],
   "historical_backfill": {
-    "version": 4,
+    "version": 5,
     "complete": false,
     "problems": [
       {
@@ -273,11 +273,11 @@
         "lastSubmittedAt": "2026-10-04T19:08:28+00:00"
       }
     ],
-    "problem_index": 15,
+    "problem_index": 5,
     "processed_submission_ids": [],
     "day": "2026-10-05",
-    "problems_completed_today": 0,
-    "gemini_requests_used_today": 0,
+    "problems_completed_today": 5,
+    "gemini_requests_used_today": 5,
     "gemini_blocked_today": false
   }
 }

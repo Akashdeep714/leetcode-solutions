@@ -74,7 +74,7 @@ Converting an integer to a string is a simple and clean way to determine its dig
 ---
 ### 🔀 Solution 2 — Math / Logarithmic Digit Counting
 
-> **Language:** Java  
+> **Language:** Java
 > **Runtime:** `1 ms`  
 > **Memory:** `44.8 MB`
 
@@ -113,7 +113,7 @@ For any positive integer $x$, the range $10^{d-1} \le x < 10^d$ corresponds to n
 ---
 ### 🔀 Solution 3 — Digit Extraction / Array Iteration
 
-> **Language:** Java  
+> **Language:** Java
 > **Runtime:** `1 ms`  
 > **Memory:** `44.7 MB`
 

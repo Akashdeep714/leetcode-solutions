@@ -3,6 +3,9 @@
   "title": "Remove Duplicates from Sorted Array",
   "difficulty": "Easy",
   "language": "Java",
+  "languages": [
+    "Java"
+  ],
   "folder": "0026-remove-duplicates-from-sorted-array",
   "slug": "remove-duplicates-from-sorted-array",
   "submission_id": "2139893149",
@@ -22,8 +25,8 @@
         "2151146279"
       ],
       "solution_hash": "7d0156afa394f86676adc4928d9c2e5ec96753779194777c56a27dc457e4da72",
-      "approach_key": "two-pointers-in-place",
-      "approach_name": "Two Pointers In-Place Deduplication",
+      "approach_key": "two-pointers-in-place-overwrite",
+      "approach_name": "Two-Pointer In-Place Overwrite",
       "runtime": 1,
       "runtime_display": "1 ms",
       "memory": 46800000,
@@ -48,5 +51,5 @@
       }
     }
   ],
-  "historical_backfill_version": 4
+  "historical_backfill_version": 5
 }

@@ -3,6 +3,9 @@
   "title": "Best Time to Buy and Sell Stock",
   "difficulty": "Easy",
   "language": "Java",
+  "languages": [
+    "Java"
+  ],
   "folder": "0121-best-time-to-buy-and-sell-stock",
   "slug": "best-time-to-buy-and-sell-stock",
   "submission_id": "2139943751",
@@ -21,8 +24,8 @@
         "2139943751"
       ],
       "solution_hash": "62bb1203ad14e71d9118b537edcc45c2ab45d5d17f0de1d6138a8e9a9c9e3e49",
-      "approach_key": "single-pass-min-price-tracking",
-      "approach_name": "Single Pass Minimum Tracking",
+      "approach_key": "greedy single pass tracking",
+      "approach_name": "Greedy / Single-Pass Tracking",
       "runtime": 1,
       "runtime_display": "1 ms",
       "memory": 94312000,
@@ -47,5 +50,5 @@
       }
     }
   ],
-  "historical_backfill_version": 4
+  "historical_backfill_version": 5
 }

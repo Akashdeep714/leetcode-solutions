@@ -46,5 +46,8 @@
       }
     }
   ],
-  "historical_backfill_version": 4
+  "historical_backfill_version": 4,
+  "languages": [
+    "Java"
+  ]
 }

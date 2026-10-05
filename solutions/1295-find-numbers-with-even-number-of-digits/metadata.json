@@ -2,7 +2,7 @@
   "number": 1295,
   "title": "Find Numbers with Even Number of Digits",
   "difficulty": "Easy",
-  "language": "Unknown",
+  "language": "Java",
   "folder": "1295-find-numbers-with-even-number-of-digits",
   "slug": "find-numbers-with-even-number-of-digits",
   "solutions": [
@@ -45,5 +45,8 @@
   "runtime_display": "1 ms",
   "memory": 44728000,
   "memory_display": "44.7 MB",
-  "solution_count": 3
+  "solution_count": 3,
+  "languages": [
+    "Java"
+  ]
 }

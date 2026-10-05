@@ -3,6 +3,9 @@
   "title": "Palindrome Number",
   "difficulty": "Easy",
   "language": "Java",
+  "languages": [
+    "Java"
+  ],
   "folder": "0009-palindrome-number",
   "slug": "palindrome-number",
   "submission_id": "2027988715",
@@ -21,8 +24,8 @@
         "2027988715"
       ],
       "solution_hash": "cb388faa12e6074e7de4e26a754ab68eda15655daf2501aaed52c960a643659d",
-      "approach_key": "mathematical-full-reversal",
-      "approach_name": "Full Integer Reversal using Modulo and Division",
+      "approach_key": "math digit manipulation",
+      "approach_name": "Math / Digit Manipulation",
       "runtime": 4,
       "runtime_display": "4 ms",
       "memory": 46080000,
@@ -46,5 +49,5 @@
       }
     }
   ],
-  "historical_backfill_version": 4
+  "historical_backfill_version": 5
 }
