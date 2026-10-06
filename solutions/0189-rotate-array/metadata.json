@@ -3,6 +3,9 @@
   "title": "Rotate Array",
   "difficulty": "Medium",
   "language": "Java",
+  "languages": [
+    "Java"
+  ],
   "folder": "0189-rotate-array",
   "slug": "rotate-array",
   "submission_id": "2140264267",
@@ -21,7 +24,7 @@
         "2140264267"
       ],
       "solution_hash": "b7543268b79caa81a47532b18a64b7c372d98d160eb722c56040abfcc927ac00",
-      "approach_key": "three-step-reversal",
+      "approach_key": "three-reversals",
       "approach_name": "Three-Step Array Reversal",
       "runtime": 5,
       "runtime_display": "5 ms",
@@ -81,8 +84,5 @@
       }
     }
   ],
-  "historical_backfill_version": 4,
-  "languages": [
-    "Java"
-  ]
+  "historical_backfill_version": 6
 }

@@ -278,13 +278,20 @@
         "frontendId": "209",
         "difficulty": "MEDIUM",
         "lastSubmittedAt": "2026-10-05T17:24:29+00:00"
+      },
+      {
+        "titleSlug": "array-partition",
+        "title": "Array Partition",
+        "frontendId": "561",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-10-06T18:41:49+00:00"
       }
     ],
-    "problem_index": 6,
+    "problem_index": 7,
     "processed_submission_ids": [],
     "day": "2026-10-06",
-    "problems_completed_today": 1,
-    "gemini_requests_used_today": 0,
+    "problems_completed_today": 2,
+    "gemini_requests_used_today": 1,
     "gemini_blocked_today": false
   }
 }
