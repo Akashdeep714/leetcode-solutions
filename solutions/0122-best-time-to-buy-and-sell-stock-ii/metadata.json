@@ -3,6 +3,9 @@
   "title": "Best Time to Buy and Sell Stock II",
   "difficulty": "Medium",
   "language": "Java",
+  "languages": [
+    "Java"
+  ],
   "folder": "0122-best-time-to-buy-and-sell-stock-ii",
   "slug": "best-time-to-buy-and-sell-stock-ii",
   "submission_id": "2140238492",
@@ -21,8 +24,8 @@
         "2140238492"
       ],
       "solution_hash": "b58d70e4e48ba124055b54fd1f5a2c76939eea22bf7ee9caf4a333c6bde75a81",
-      "approach_key": "greedy-sum-of-positive-differences",
-      "approach_name": "Greedy Sum of Positive Differences",
+      "approach_key": "greedy",
+      "approach_name": "Greedy Algorithm",
       "runtime": 0,
       "runtime_display": "0 ms",
       "memory": 46536000,
@@ -47,8 +50,5 @@
       }
     }
   ],
-  "historical_backfill_version": 4,
-  "languages": [
-    "Java"
-  ]
+  "historical_backfill_version": 6
 }
