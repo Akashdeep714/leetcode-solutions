@@ -285,13 +285,20 @@
         "frontendId": "561",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-10-06T18:41:49+00:00"
+      },
+      {
+        "titleSlug": "pascals-triangle-ii",
+        "title": "Pascal's Triangle II",
+        "frontendId": "119",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-10-07T18:48:13+00:00"
       }
     ],
-    "problem_index": 9,
+    "problem_index": 10,
     "processed_submission_ids": [],
     "day": "2026-10-07",
-    "problems_completed_today": 0,
-    "gemini_requests_used_today": 0,
+    "problems_completed_today": 1,
+    "gemini_requests_used_today": 1,
     "gemini_blocked_today": false
   }
 }

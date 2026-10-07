@@ -3,6 +3,9 @@
   "title": "Intersection of Two Arrays",
   "difficulty": "Easy",
   "language": "Java",
+  "languages": [
+    "Java"
+  ],
   "folder": "0349-intersection-of-two-arrays",
   "slug": "intersection-of-two-arrays",
   "submission_id": "2142890597",
@@ -22,7 +25,7 @@
         "2142970678"
       ],
       "solution_hash": "cb0b1ff1d14bb66d9bde9c62c432f06e9292ef733e51bc6a3e19272873f7724e",
-      "approach_key": "hash-set-intersection",
+      "approach_key": "hash-set-lookup",
       "approach_name": "Hash Set Lookup",
       "runtime": 3,
       "runtime_display": "3 ms",
@@ -47,8 +50,5 @@
       }
     }
   ],
-  "historical_backfill_version": 4,
-  "languages": [
-    "Java"
-  ]
+  "historical_backfill_version": 6
 }
