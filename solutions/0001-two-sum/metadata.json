@@ -3,6 +3,9 @@
   "title": "Two Sum",
   "difficulty": "Easy",
   "language": "Java",
+  "languages": [
+    "Java"
+  ],
   "folder": "0001-two-sum",
   "slug": "two-sum",
   "submission_id": "1935966863",
@@ -58,7 +61,7 @@
         "2145075315"
       ],
       "solution_hash": "4b4786b8ea77314aecd3842b8530d2a85b98e82e3c9daa8262fa6f3e85b9fa19",
-      "approach_key": "hash-map-lookup",
+      "approach_key": "hash-map-complement-lookup",
       "approach_name": "Hash Map Complement Lookup",
       "runtime": 5,
       "runtime_display": "5 ms",
@@ -84,8 +87,5 @@
       }
     }
   ],
-  "historical_backfill_version": 4,
-  "languages": [
-    "Java"
-  ]
+  "historical_backfill_version": 6
 }

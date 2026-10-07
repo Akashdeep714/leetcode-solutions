@@ -3,6 +3,9 @@
   "title": "Move Zeroes",
   "difficulty": "Easy",
   "language": "Java",
+  "languages": [
+    "Java"
+  ],
   "folder": "0283-move-zeroes",
   "slug": "move-zeroes",
   "submission_id": "2144021190",
@@ -22,8 +25,8 @@
         "2154233044"
       ],
       "solution_hash": "0a506ebb245fc919a9c736bce323f7301823981ed5233224368f9544b1e87673",
-      "approach_key": "two-pass-overwrite-and-fill",
-      "approach_name": "Two-Pass Overwrite and Zero-Fill",
+      "approach_key": "two-pointer-overwrite-and-fill",
+      "approach_name": "Two-Pointer Overwrite with Zero-Filling Pass",
       "runtime": 2,
       "runtime_display": "2 ms",
       "memory": 47352000,
@@ -55,8 +58,8 @@
         "2144048643"
       ],
       "solution_hash": "1e55ebd836322b0b13b385b1920a632251e5efab82b719d50b586b11195e09f0",
-      "approach_key": "single-pass-swap-zeroing",
-      "approach_name": "Single-Pass In-Place Swap and Zeroing",
+      "approach_key": "two-pointer-single-pass-swap",
+      "approach_name": "Two-Pointer Single-Pass In-Place Swap",
       "runtime": 2,
       "runtime_display": "2 ms",
       "memory": 47764000,
@@ -80,8 +83,5 @@
       }
     }
   ],
-  "historical_backfill_version": 4,
-  "languages": [
-    "Java"
-  ]
+  "historical_backfill_version": 6
 }

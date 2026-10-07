@@ -3,6 +3,9 @@
   "title": "Intersection of Two Arrays II",
   "difficulty": "Easy",
   "language": "Java",
+  "languages": [
+    "Java"
+  ],
   "folder": "0350-intersection-of-two-arrays-ii",
   "slug": "intersection-of-two-arrays-ii",
   "submission_id": "2143004110",
@@ -54,7 +57,7 @@
         "2143037579"
       ],
       "solution_hash": "52b5e8b629e5e6d9e40b3a0dcaec4c44b3cc3481998468c83959ab96e8091bc3",
-      "approach_key": "sort-and-two-pointers",
+      "approach_key": "sorting-two-pointers",
       "approach_name": "Sorting and Two Pointers",
       "runtime": 6,
       "runtime_display": "6 ms",
@@ -82,8 +85,5 @@
       }
     }
   ],
-  "historical_backfill_version": 4,
-  "languages": [
-    "Java"
-  ]
+  "historical_backfill_version": 6
 }
