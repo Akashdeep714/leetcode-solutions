@@ -3,6 +3,9 @@
   "title": "Contains Duplicate",
   "difficulty": "Easy",
   "language": "Java",
+  "languages": [
+    "Java"
+  ],
   "folder": "0217-contains-duplicate",
   "slug": "contains-duplicate",
   "submission_id": "2141801267",
@@ -81,8 +84,5 @@
       }
     }
   ],
-  "historical_backfill_version": 4,
-  "languages": [
-    "Java"
-  ]
+  "historical_backfill_version": 6
 }
