@@ -3,6 +3,9 @@
   "title": "Valid Sudoku",
   "difficulty": "Medium",
   "language": "Java",
+  "languages": [
+    "Java"
+  ],
   "folder": "0036-valid-sudoku",
   "slug": "valid-sudoku",
   "submission_id": "2146860501",
@@ -21,8 +24,8 @@
         "2146860501"
       ],
       "solution_hash": "4494c5cc9a6f45e7168cfab1a7199a52b594bd9638006ff691e4478591de727a",
-      "approach_key": "fixed-size-array-validation",
-      "approach_name": "Single Pass Validation via Fixed-Size Frequency Arrays",
+      "approach_key": "matrix traversal hash table array lookup",
+      "approach_name": "Matrix Traversal / Hash Table (Array Lookup)",
       "runtime": 1,
       "runtime_display": "1 ms",
       "memory": 46552000,
@@ -49,8 +52,5 @@
       }
     }
   ],
-  "historical_backfill_version": 4,
-  "languages": [
-    "Java"
-  ]
+  "historical_backfill_version": 6
 }
