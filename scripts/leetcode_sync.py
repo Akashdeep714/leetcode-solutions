@@ -312,6 +312,10 @@ def default_historical_state():
         "problems_completed_today": 0,
         "gemini_requests_used_today": 0,
         "gemini_blocked_today": False,
+        # Problems with accepted submissions detected after their historical
+        # pass. They are reconciled as whole problems later, not imported
+        # one submission at a time, so semantic deduplication stays correct.
+        "pending_new_problems": [],
     }
 
 
@@ -3842,6 +3846,416 @@ def merge_discovered_problems(
             existing[slug] = entry
 
 
+def monitor_new_accepted_submissions(
+    state,
+    username,
+):
+    """
+    Watch recent accepted submissions without importing them individually.
+
+    During historical backfill, only problems that have ALREADY been fully
+    scanned are eligible for the live queue. Submissions for future historical
+    problems are intentionally left for their normal full-history scan.
+
+    When the historical pass is complete, every unseen accepted submission can
+    be queued because the archive has already scanned all prior history.
+    """
+    historical = state["historical_backfill"]
+
+    try:
+        recent = get_recent_accepted(
+            username,
+            limit=RECENT_AC_FALLBACK_LIMIT,
+        )
+    except Exception as exc:
+        print(f"   ⚠️ Could not monitor recent accepted submissions: {exc}")
+        return 0
+
+    all_processed = {
+        str(x)
+        for x in state.get("processed_submission_ids", [])
+    }
+    all_processed.update(
+        str(x)
+        for x in historical.get("processed_submission_ids", [])
+    )
+
+    problems = historical.get("problems", [])
+    problem_index = int(historical.get("problem_index", 0) or 0)
+
+    if historical.get("complete", False):
+        # Once the historical archive is complete, an accepted submission can
+        # belong to a brand-new solved problem that was not present when the
+        # historical list was built. Those should also enter the safe queue.
+        eligible_slugs = None
+    else:
+        eligible_slugs = {
+            str(item.get("titleSlug", "")).strip()
+            for item in problems[:problem_index]
+            if isinstance(item, dict) and item.get("titleSlug")
+        }
+
+    pending = historical.get("pending_new_problems", [])
+    if not isinstance(pending, list):
+        pending = []
+
+    by_slug = {}
+    for item in pending:
+        if not isinstance(item, dict):
+            continue
+        slug = str(item.get("titleSlug", "")).strip()
+        if not slug:
+            continue
+        ids = item.get("submission_ids", [])
+        if not isinstance(ids, list):
+            ids = []
+        by_slug[slug] = {
+            "titleSlug": slug,
+            "title": item.get("title", slug),
+            "submission_ids": [str(x) for x in ids],
+        }
+
+    queued = 0
+    for submission in recent:
+        submission_id = str(submission.get("id", "")).strip()
+        slug = str(submission.get("titleSlug", "")).strip()
+        if not submission_id or not slug:
+            continue
+        if submission_id in all_processed:
+            continue
+        if eligible_slugs is not None and slug not in eligible_slugs:
+            continue
+
+        entry = by_slug.setdefault(
+            slug,
+            {
+                "titleSlug": slug,
+                "title": submission.get("title", slug),
+                "submission_ids": [],
+            },
+        )
+
+        if submission_id not in entry["submission_ids"]:
+            entry["submission_ids"].append(submission_id)
+            queued += 1
+
+    historical["pending_new_problems"] = list(by_slug.values())
+
+    print(
+        f"📡 Checked {len(recent)} recent accepted submission(s); "
+        f"{queued} new submission(s) queued for safe problem-level reconciliation."
+    )
+
+    return queued
+
+
+def reconcile_problem_history(question_stub):
+    """
+    Reconcile one problem from its COMPLETE accepted-submission history.
+
+    This is the single safe path used both by historical backfill and by the
+    live queue. It fetches every accepted submission, removes exact duplicates,
+    semantically clusters the remaining implementations, and rebuilds the
+    problem folder without unnecessarily replacing existing explanations.
+    """
+    slug = str(question_stub.get("titleSlug", "")).strip()
+    title = question_stub.get("title", slug)
+    if not slug:
+        raise RuntimeError("Cannot reconcile a problem without titleSlug.")
+
+    full_question = get_question(slug)
+    submissions = get_all_accepted_submissions_for_problem(slug)
+    print(f"   📥 Found {len(submissions)} accepted submission(s) for this problem.")
+
+    candidate_by_fingerprint = {}
+    submission_ids_for_problem = []
+    exact_duplicates = 0
+
+    for submission in submissions:
+        submission_id = str(submission.get("id", "")).strip()
+        if not submission_id:
+            continue
+
+        submission_ids_for_problem.append(submission_id)
+        details = get_submission_details(submission_id)
+        code = details.get("code") or ""
+        if not code:
+            raise RuntimeError(
+                f"Submission {submission_id} returned no source code."
+            )
+
+        language = language_name(details.get("lang"))
+        fingerprint = solution_fingerprint(code, language)
+
+        if fingerprint in candidate_by_fingerprint:
+            exact_duplicates += 1
+            continue
+
+        candidate_by_fingerprint[fingerprint] = {
+            "submission_id": submission_id,
+            "language": language,
+            "code": code,
+            "timestamp": submission.get("timestamp", ""),
+            "runtime": details.get("runtime"),
+            "runtimeDisplay": details.get("runtimeDisplay"),
+            "memory": details.get("memory"),
+            "memoryDisplay": details.get("memoryDisplay"),
+            "exact_fingerprint": fingerprint,
+        }
+
+    candidates = list(candidate_by_fingerprint.values())
+
+    print(f"   🧹 Exact-code unique candidates: {len(candidates)}")
+    print(f"   ♻️ Exact duplicates removed in this problem: {exact_duplicates}")
+
+    if not candidates:
+        clusters = []
+        problem_result = rebuild_problem_from_clusters(
+            full_question,
+            [],
+            [],
+        )
+    elif len(candidates) == 1:
+        folder_for_candidate = (
+            SOLUTIONS_DIR
+            / f"{int(full_question['questionFrontendId']):04d}-"
+            f"{safe_slug(full_question['title'])}"
+        )
+        existing_catalog = load_existing_solution_catalog(folder_for_candidate)
+        existing_match = next(
+            (
+                item
+                for item in existing_catalog
+                if item.get("fingerprint") == candidates[0]["exact_fingerprint"]
+            ),
+            None,
+        )
+
+        if existing_match and existing_match.get("analysis"):
+            print(
+                "   🛡️ Existing single solution found; reusing its "
+                "explanation without a Gemini call."
+            )
+            analysis = existing_match["analysis"]
+        elif existing_match:
+            print(
+                "   🛡️ Existing single solution found; using deterministic "
+                "analysis without a Gemini call."
+            )
+            analysis = normalize_fallback_analysis(
+                fallback_analysis(
+                    candidates[0]["code"],
+                    [
+                        tag.get("name", "")
+                        for tag in full_question.get("topicTags", [])
+                        if tag.get("name")
+                    ],
+                    full_question,
+                ),
+                full_question,
+            )
+        else:
+            print(
+                "   🧠 One candidate only; generating the normal Gemini "
+                "explanation directly..."
+            )
+            analysis = ai_analysis(
+                full_question,
+                candidates[0]["code"],
+                [
+                    tag.get("name", "")
+                    for tag in full_question.get("topicTags", [])
+                    if tag.get("name")
+                ],
+            )
+            if analysis is None:
+                raise GeminiBackfillPaused(
+                    GEMINI_RUNTIME.get("last_failure")
+                    or "Gemini did not return a valid explanation."
+                )
+
+        clusters = [{
+            "approach_key": (
+                _normalize_semantic_label(
+                    analysis.get("pattern", "single-approach")
+                )
+                or "single-approach"
+            ),
+            "approach_name": analysis.get("pattern", "Single Approach"),
+            "language": candidates[0]["language"],
+            "submission_ids": [candidates[0]["submission_id"]],
+            "representative_submission_id": candidates[0]["submission_id"],
+            "cluster_reason": (
+                "Only one exact-code-unique accepted implementation was "
+                "found for this problem."
+            ),
+            "analysis": analysis,
+        }]
+
+        problem_result = rebuild_problem_from_clusters(
+            full_question,
+            candidates,
+            clusters,
+        )
+    else:
+        print(
+            f"   🧠 Asking Gemini to cluster {len(candidates)} candidate "
+            "implementation(s) into genuinely different approaches..."
+        )
+        clusters = gemini_cluster_problem(
+            full_question,
+            candidates,
+        )
+
+        if clusters is None:
+            raise GeminiBackfillPaused(
+                GEMINI_RUNTIME.get("last_failure")
+                or "Gemini did not return a valid semantic clustering."
+            )
+
+        print(f"   🧠 Semantic approaches found: {len(clusters)}")
+        print(
+            "   ✅ These are algorithmically distinct approaches; minor code "
+            "variations are intentionally merged."
+        )
+
+        problem_result = rebuild_problem_from_clusters(
+            full_question,
+            candidates,
+            clusters,
+        )
+
+    return {
+        "title": title,
+        "slug": slug,
+        "question": full_question,
+        "submissions": submissions,
+        "submission_ids": submission_ids_for_problem,
+        "clusters": clusters,
+        "problem_result": problem_result,
+        "exact_duplicates": exact_duplicates,
+        "semantic_merged": max(0, len(candidates) - len(clusters)),
+        "solutions_stored": len(clusters),
+    }
+
+
+def process_pending_problem_reconciliations(
+    state,
+    username,
+):
+    """Safely reconcile queued live submissions one whole problem at a time."""
+    historical = state["historical_backfill"]
+    pending = historical.get("pending_new_problems", [])
+    if not isinstance(pending, list) or not pending:
+        return {
+            "imported": 0,
+            "duplicate": 0,
+            "semantic_merged": 0,
+            "failed": 0,
+            "paused": False,
+            "processed_problems": 0,
+        }
+
+    # One live problem per workflow run keeps Gemini usage predictable and
+    # prevents a burst of submissions from competing with the historical job.
+    item = pending[0]
+    if not isinstance(item, dict):
+        historical["pending_new_problems"] = pending[1:]
+        save_state(state)
+        return {
+            "imported": 0,
+            "duplicate": 0,
+            "semantic_merged": 0,
+            "failed": 0,
+            "paused": False,
+            "processed_problems": 0,
+        }
+
+    slug = str(item.get("titleSlug", "")).strip()
+    title = item.get("title", slug)
+    if not slug:
+        historical["pending_new_problems"] = pending[1:]
+        save_state(state)
+        return {
+            "imported": 0,
+            "duplicate": 0,
+            "semantic_merged": 0,
+            "failed": 0,
+            "paused": False,
+            "processed_problems": 0,
+        }
+
+    print("\n" + "=" * 68)
+    print(f"📡 Live reconciliation: {title}")
+    print("=" * 68)
+
+    try:
+        result = reconcile_problem_history({
+            "titleSlug": slug,
+            "title": title,
+        })
+
+        normal_processed = {
+            str(x) for x in state.get("processed_submission_ids", [])
+        }
+        normal_processed.update(result["submission_ids"])
+        state["processed_submission_ids"] = sorted(normal_processed)
+
+        historical_processed = {
+            str(x)
+            for x in historical.get("processed_submission_ids", [])
+        }
+        historical_processed.update(result["submission_ids"])
+        historical["processed_submission_ids"] = sorted(historical_processed)
+
+        historical["pending_new_problems"] = [
+            entry
+            for entry in pending
+            if str(entry.get("titleSlug", "")).strip() != slug
+        ]
+
+        save_state(state)
+
+        print(
+            f"   ✅ Live problem reconciled: {title} — "
+            f"{result['solutions_stored']} genuinely different approach(es) stored."
+        )
+
+        return {
+            "imported": result["problem_result"].get("new_approaches", 0),
+            "duplicate": result["exact_duplicates"],
+            "semantic_merged": result["semantic_merged"],
+            "failed": 0,
+            "paused": False,
+            "processed_problems": 1,
+        }
+
+    except GeminiBackfillPaused as exc:
+        print(f"   ⏸️ Live reconciliation paused: {exc}")
+        sync_runtime_to_state(state)
+        save_state(state)
+        return {
+            "imported": 0,
+            "duplicate": 0,
+            "semantic_merged": 0,
+            "failed": 0,
+            "paused": True,
+            "processed_problems": 0,
+        }
+
+    except Exception as exc:
+        print(f"   ❌ Live reconciliation failed for {title}: {exc}")
+        save_state(state)
+        return {
+            "imported": 0,
+            "duplicate": 0,
+            "semantic_merged": 0,
+            "failed": 1,
+            "paused": False,
+            "processed_problems": 0,
+        }
+
+
 def historical_backfill(
     state,
     username,
@@ -3949,165 +4363,48 @@ def historical_backfill(
         print("=" * 68)
 
         try:
-            full_question = get_question(slug)
-            submissions = get_all_accepted_submissions_for_problem(slug)
-            print(f"   📥 Found {len(submissions)} accepted submission(s) for this problem.")
-        except Exception as exc:
-            failed += 1
-            print(f"   ❌ Could not retrieve submission history: {exc}")
-            break
+            result = reconcile_problem_history(problem)
 
-        # Fetch code/details for every accepted submission first. This is
-        # required before semantic clustering can decide whether two codes
-        # are the same underlying approach.
-        candidate_by_fingerprint = {}
-        submission_ids_for_problem = []
-
-        try:
-            for submission in submissions:
-                submission_id = str(submission.get("id", "")).strip()
-                if not submission_id:
-                    continue
-
-                submission_ids_for_problem.append(submission_id)
-                details = get_submission_details(submission_id)
-                code = details.get("code") or ""
-                if not code:
-                    raise RuntimeError(f"Submission {submission_id} returned no source code.")
-
-                language = language_name(details.get("lang"))
-                fingerprint = solution_fingerprint(code, language)
-
-                if fingerprint in candidate_by_fingerprint:
-                    duplicate += 1
-                    continue
-
-                candidate_by_fingerprint[fingerprint] = {
-                    "submission_id": submission_id,
-                    "language": language,
-                    "code": code,
-                    "timestamp": submission.get("timestamp", ""),
-                    "runtime": details.get("runtime"),
-                    "runtimeDisplay": details.get("runtimeDisplay"),
-                    "memory": details.get("memory"),
-                    "memoryDisplay": details.get("memoryDisplay"),
-                    "exact_fingerprint": fingerprint,
-                }
-
-            candidates = list(candidate_by_fingerprint.values())
-            print(f"   🧹 Exact-code unique candidates: {len(candidates)}")
-            print(f"   ♻️ Exact duplicates removed in this problem: {len(submissions) - len(candidates)}")
-
-            if not candidates:
-                problem_result = rebuild_problem_from_clusters(problem, [], [])
-                clusters = []
-            elif len(candidates) == 1:
-                folder_for_candidate = SOLUTIONS_DIR / f"{int(full_question['questionFrontendId']):04d}-{safe_slug(full_question['title'])}"
-                existing_catalog = load_existing_solution_catalog(folder_for_candidate)
-                existing_match = next(
-                    (item for item in existing_catalog if item.get("fingerprint") == candidates[0]["exact_fingerprint"]),
-                    None,
-                )
-
-                if existing_match and existing_match.get("analysis"):
-                    print("   🛡️ Existing single solution found; reusing its explanation without a Gemini call.")
-                    analysis = existing_match["analysis"]
-                elif existing_match:
-                    print("   🛡️ Existing single solution found; using deterministic analysis without a Gemini call.")
-                    analysis = normalize_fallback_analysis(
-                        fallback_analysis(
-                            candidates[0]["code"],
-                            [
-                                tag.get("name", "")
-                                for tag in full_question.get("topicTags", [])
-                                if tag.get("name")
-                            ],
-                            full_question,
-                        ),
-                        full_question,
-                    )
-                else:
-                    print("   🧠 One candidate only; generating the normal Gemini explanation directly...")
-                    analysis = ai_analysis(
-                        full_question,
-                        candidates[0]["code"],
-                        [
-                            tag.get("name", "")
-                            for tag in full_question.get("topicTags", [])
-                            if tag.get("name")
-                        ],
-                    )
-                    if analysis is None:
-                        raise GeminiBackfillPaused(
-                            GEMINI_RUNTIME.get("last_failure")
-                            or "Gemini did not return a valid explanation."
-                        )
-
-                clusters = [{
-                    "approach_key": _normalize_semantic_label(analysis.get("pattern", "single-approach")) or "single-approach",
-                    "approach_name": analysis.get("pattern", "Single Approach"),
-                    "language": candidates[0]["language"],
-                    "submission_ids": [candidates[0]["submission_id"]],
-                    "representative_submission_id": candidates[0]["submission_id"],
-                    "cluster_reason": "Only one exact-code-unique accepted implementation was found for this problem.",
-                    "analysis": analysis,
-                }]
-                problem_result = rebuild_problem_from_clusters(
-                    full_question, candidates, clusters
-                )
-            else:
-                print(
-                    f"   🧠 Asking Gemini to cluster {len(candidates)} candidate implementation(s) "
-                    "into genuinely different approaches..."
-                )
-                clusters = gemini_cluster_problem(
-                    full_question,
-                    candidates,
-                )
-
-                if clusters is None:
-                    raise GeminiBackfillPaused(
-                        GEMINI_RUNTIME.get("last_failure")
-                        or "Gemini did not return a valid semantic clustering."
-                    )
-
-                print(f"   🧠 Semantic approaches found: {len(clusters)}")
-                print(
-                    "   ✅ These are algorithmically distinct approaches; "
-                    "minor code variations are intentionally merged."
-                )
-                semantic_merged += len(candidates) - len(clusters)
-
-                # If an earlier hash-only run created 5 variants of the same
-                # approach, this reconciliation rewrites the folder to the
-                # correct semantic count.
-                problem_result = rebuild_problem_from_clusters(
-                    full_question,
-                    candidates,
-                    clusters,
-                )
-
-            reconciled += len(clusters)
-            imported += problem_result.get("new_approaches", 0)
-
-            # Mark every accepted submission for this problem as processed for
-            # future incremental sync only after the whole problem is safely
-            # reconciled.
-            normal_processed = set(str(x) for x in state.get("processed_submission_ids", []))
-            normal_processed.update(submission_ids_for_problem)
+            # The complete problem reconciliation succeeded, so every accepted
+            # submission seen in its history can safely be marked processed.
+            normal_processed = set(
+                str(x)
+                for x in state.get("processed_submission_ids", [])
+            )
+            normal_processed.update(result["submission_ids"])
             state["processed_submission_ids"] = sorted(normal_processed)
+
+            historical_processed = set(
+                str(x)
+                for x in historical.get("processed_submission_ids", [])
+            )
+            historical_processed.update(result["submission_ids"])
+            historical["processed_submission_ids"] = sorted(historical_processed)
+
+            # A queued submission for this problem is no longer pending because
+            # the full accepted history has now been reconciled.
+            historical["pending_new_problems"] = [
+                entry
+                for entry in historical.get("pending_new_problems", [])
+                if str(entry.get("titleSlug", "")).strip() != slug
+            ]
+
+            imported += result["problem_result"].get("new_approaches", 0)
+            duplicate += result["exact_duplicates"]
+            semantic_merged += result["semantic_merged"]
 
             today_completed += 1
             completed_problems += 1
             historical["problems_completed_today"] = today_completed
             problem_index += 1
             historical["problem_index"] = problem_index
+
             sync_runtime_to_state(state)
             save_state(state)
 
             print(
                 f"   ✅ Historical problem reconciled: {title} — "
-                f"{len(clusters)} genuinely different approach(es) stored."
+                f"{result['solutions_stored']} genuinely different approach(es) stored."
             )
 
         except GeminiBackfillPaused as exc:
@@ -5119,6 +5416,15 @@ def main():
             f"\n🛠️ Repaired {repaired} placeholder README(s)."
         )
 
+    # Always monitor recent accepted submissions. During historical backfill
+    # we only queue submissions for problems that have already been scanned;
+    # they are reconciled later as complete problems rather than imported one
+    # by one.
+    monitor_new_accepted_submissions(
+        state,
+        username,
+    )
+
     if not state["historical_backfill"].get(
         "complete",
         False,
@@ -5140,12 +5446,23 @@ def main():
             username,
         )
 
+        # The historical job may finish on this run. Reconcile at most one
+        # queued live problem afterward, still respecting Gemini safety limits.
+        if state["historical_backfill"].get("complete", False):
+            live_result = process_pending_problem_reconciliations(
+                state,
+                username,
+            )
+            for key in ("imported", "duplicate", "semantic_merged", "failed"):
+                result[key] = result.get(key, 0) + live_result.get(key, 0)
+            result["paused"] = result.get("paused", False) or live_result.get("paused", False)
+
     else:
         print(
-            "\n🧭 Mode: INCREMENTAL SYNC"
+            "\n🧭 Mode: SAFE INCREMENTAL SYNC"
         )
 
-        result = incremental_sync(
+        result = process_pending_problem_reconciliations(
             state,
             username,
         )
@@ -5201,6 +5518,18 @@ def main():
         f"{GEMINI_RUNTIME['requests_used']}/"
         f"{MAX_GEMINI_REQUESTS_PER_DAY}"
     )
+
+    pending_count = len(
+        state["historical_backfill"].get(
+            "pending_new_problems",
+            [],
+        )
+        or []
+    )
+    if pending_count:
+        print(
+            f"   📡 Pending live problem reconciliations: {pending_count}"
+        )
 
     if result.get(
         "paused",
