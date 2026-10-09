@@ -300,6 +300,13 @@
         "frontendId": "54",
         "difficulty": "MEDIUM",
         "lastSubmittedAt": "2026-10-08T17:10:00+00:00"
+      },
+      {
+        "titleSlug": "add-binary",
+        "title": "Add Binary",
+        "frontendId": "67",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-10-09T17:06:26+00:00"
       }
     ],
     "problem_index": 15,
