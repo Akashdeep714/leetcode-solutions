@@ -307,6 +307,13 @@
         "frontendId": "67",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-10-09T17:06:26+00:00"
+      },
+      {
+        "titleSlug": "diagonal-traverse",
+        "title": "Diagonal Traverse",
+        "frontendId": "498",
+        "difficulty": "MEDIUM",
+        "lastSubmittedAt": "2026-10-10T16:58:02+00:00"
       }
     ],
     "problem_index": 15,
