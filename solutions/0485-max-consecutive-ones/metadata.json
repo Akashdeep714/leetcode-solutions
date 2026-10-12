@@ -3,28 +3,52 @@
   "title": "Max Consecutive Ones",
   "difficulty": "Easy",
   "language": "Java",
+  "languages": [
+    "Java"
+  ],
   "folder": "0485-max-consecutive-ones",
   "slug": "max-consecutive-ones",
-  "solutions": [
-    {
-      "number": 1,
-      "filename": "solution.java",
-      "language": "Java",
-      "submission_id": "2147931336",
-      "solution_hash": "e53aad729cbdd81a70066bfda2a352edaa042fcd5a3ff78f97771caac1e847b6",
-      "runtime": 2,
-      "runtime_display": "2 ms",
-      "memory": 52640000,
-      "memory_display": "52.6 MB"
-    }
-  ],
   "submission_id": "2147931336",
   "runtime": 2,
   "runtime_display": "2 ms",
   "memory": 52640000,
   "memory_display": "52.6 MB",
   "solution_count": 1,
-  "languages": [
-    "Java"
-  ]
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2147931336",
+      "submission_ids": [
+        "2147931336"
+      ],
+      "solution_hash": "e53aad729cbdd81a70066bfda2a352edaa042fcd5a3ff78f97771caac1e847b6",
+      "approach_key": "direct",
+      "approach_name": "🔎 Direct Algorithm",
+      "runtime": 2,
+      "runtime_display": "2 ms",
+      "memory": 52640000,
+      "memory_display": "52.6 MB",
+      "analysis": {
+        "pattern": "🔎 Direct Algorithm",
+        "intuition": "The submitted code follows a direct procedure tailored to the condition being checked by the problem. Each operation transforms or evaluates the current state until the return condition is reached.",
+        "approach": [
+          "Initialize the variables used by the submitted implementation.",
+          "Process the input according to the code's control flow.",
+          "Evaluate the condition that determines the next state or answer.",
+          "Update the relevant variables and continue until the stopping condition is reached.",
+          "Return the value produced by the final state."
+        ],
+        "why_it_works": "The algorithm preserves the information needed for each decision as it moves through the input. Because the final return condition is based on that maintained state, the resulting value follows directly from the operations performed by the code.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "time_explanation": "The running time follows the number of input-dependent operations performed by the submitted implementation.",
+        "space_explanation": "The solution uses only a fixed number of variables and does not allocate memory that grows with the input size.",
+        "problem_summary": "Given a binary array nums , return the maximum number of consecutive 1 's in the array .",
+        "key_takeaway": "The main idea is to recognize the 🔎 Direct Algorithm pattern and understand how the submitted implementation applies it to this problem."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
 }

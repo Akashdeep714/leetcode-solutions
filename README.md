@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **18** |
-| 🟢 Easy | **14** |
+| 🧩 Total Solved | **20** |
+| 🟢 Easy | **16** |
 | 🟡 Medium | **4** |
 | 🔴 Hard | **0** |
 
@@ -35,7 +35,9 @@
 | 349 | [Intersection of Two Arrays](solutions/0349-intersection-of-two-arrays/) | 🟢 Easy | Java | 1 |
 | 350 | [Intersection of Two Arrays II](solutions/0350-intersection-of-two-arrays-ii/) | 🟢 Easy | Java | 2 |
 | 485 | [Max Consecutive Ones](solutions/0485-max-consecutive-ones/) | 🟢 Easy | Java | 1 |
-| 1295 | [Find Numbers with Even Number of Digits](solutions/1295-find-numbers-with-even-number-of-digits/) | 🟢 Easy | Java | 3 |
+| 977 | [Squares of a Sorted Array](solutions/0977-squares-of-a-sorted-array/) | 🟢 Easy | Java | 2 |
+| 1089 | [Duplicate Zeros](solutions/1089-duplicate-zeros/) | 🟢 Easy | Java | 2 |
+| 1295 | [Find Numbers with Even Number of Digits](solutions/1295-find-numbers-with-even-number-of-digits/) | 🟢 Easy | Java | 4 |
 
 ---
 

@@ -3,6 +3,9 @@
   "title": "Rotate Image",
   "difficulty": "Medium",
   "language": "Java",
+  "languages": [
+    "Java"
+  ],
   "folder": "0048-rotate-image",
   "slug": "rotate-image",
   "submission_id": "2146956412",
@@ -10,32 +13,74 @@
   "runtime_display": "0 ms",
   "memory": 43996000,
   "memory_display": "44 MB",
+  "solution_count": 2,
   "solutions": [
     {
       "number": 1,
       "filename": "solution-2.java",
       "language": "Java",
-      "submission_id": "2146981523",
-      "solution_hash": "de2f5a7b5f97ce28eff523cb0de77f67d80f4070f96cbfd50a0d6a7051c6f0d3",
-      "runtime": 0,
-      "runtime_display": "0 ms",
-      "memory": 43688000,
-      "memory_display": "43.7 MB"
-    },
-    {
-      "number": 2,
-      "filename": "solution-2.java",
-      "language": "Java",
       "submission_id": "2146956412",
+      "submission_ids": [
+        "2146956412"
+      ],
       "solution_hash": "de2f5a7b5f97ce28eff523cb0de77f67d80f4070f96cbfd50a0d6a7051c6f0d3",
+      "approach_key": "transpose-and-reverse",
+      "approach_name": "Matrix Transposition and Row Reversal",
       "runtime": 0,
       "runtime_display": "0 ms",
       "memory": 43996000,
-      "memory_display": "44 MB"
+      "memory_display": "44 MB",
+      "analysis": {
+        "pattern": "Matrix Linear Algebra Transformation",
+        "problem_summary": "Rotate an n x n 2D matrix 90 degrees clockwise in-place without allocating extra 2D matrix memory.",
+        "intuition": "A 90-degree clockwise matrix rotation can be decomposed into two simpler linear matrix operations: transposing the matrix along its main diagonal (swapping matrix[i][j] with matrix[j][i]), followed by flipping the matrix horizontally (reversing each row).",
+        "approach": [
+          "Iterate over the upper triangle of the matrix (where j > i) and swap matrix[i][j] with matrix[j][i] to transpose the matrix.",
+          "Iterate through each row of the transposed matrix.",
+          "For each row, swap elements from the left half with elements from the right half (matrix[i][j] with matrix[i][n - 1 - j]) to reverse the row.",
+          "The matrix is now fully rotated 90 degrees clockwise in-place."
+        ],
+        "why_it_works": "Transposition converts rows to columns such that top-to-bottom elements become left-to-right elements. Reversing each row then mirrors the values horizontally, which matches the exact mapping of a 90-degree clockwise rotation: cell (i, j) moves to (j, n - 1 - i).",
+        "time_complexity": "O(n^2)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Decomposing complex matrix rotations into fundamental transformations like diagonal transposition and row reflection makes the code simple, readable, and easy to implement in-place.",
+        "time_explanation": "Transposing touches each element above the main diagonal once (n*(n-1)/2 swaps). Reversing each row touches n/2 elements per row (n*(n/2) swaps). Overall operations are proportional to the total number of cells, giving O(n^2) time complexity for an n x n matrix.",
+        "space_explanation": "The algorithm swaps elements in-place using a single primitive variable for temporary storage, requiring O(1) auxiliary space."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2146981523",
+      "submission_ids": [
+        "2146981523"
+      ],
+      "solution_hash": "5166078782eedb830e618064299499345f35da4b41d52a2f0c1c1648a7e27b46",
+      "approach_key": "four-cell-cyclic-swap",
+      "approach_name": "Layer-by-Layer Four-Cell Cyclic Swap",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 43688000,
+      "memory_display": "43.7 MB",
+      "analysis": {
+        "pattern": "Concentric Rings / Layer-by-Layer Traversal",
+        "problem_summary": "Rotate an n x n matrix 90 degrees clockwise directly in-place.",
+        "intuition": "When rotating a square matrix by 90 degrees, elements move in 4-tuples. Top-left moves to top-right, top-right to bottom-right, bottom-right to bottom-left, and bottom-left to top-left. We can process the matrix layer by layer from the outermost boundary inward.",
+        "approach": [
+          "Iterate through concentric square layers from outer ring i = 0 to inner ring i = n / 2.",
+          "For each element j along the top edge of the current layer, identify the four corresponding symmetric positions across the four edges.",
+          "Perform a cyclic shift of the 4 values in-place using temporary variables.",
+          "Repeat until all concentric layers are rotated."
+        ],
+        "why_it_works": "Every cell in an n x n matrix belongs to a group of 4 cells that rotate into each other's positions. By directly swapping these 4 elements at once ring by ring, no cell is overwritten before its value is preserved.",
+        "time_complexity": "O(n^2)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "A layer-by-layer 4-way cyclic swap rotates the matrix in a single pass without needing a secondary global matrix transformation.",
+        "time_explanation": "Each element in the matrix is part of a 4-element group, and each 4-element group is processed exactly once in O(1) time. Total operations scale directly with total matrix cells n^2, resulting in O(n^2) time.",
+        "space_explanation": "The rotation is performed directly on the input array using a constant number of temporary scalar variables, taking O(1) extra space."
+      }
     }
   ],
-  "solution_count": 2,
-  "languages": [
-    "Java"
-  ]
+  "historical_backfill_version": 6
 }

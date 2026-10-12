@@ -1,0 +1,90 @@
+{
+  "number": 1089,
+  "title": "Duplicate Zeros",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "1089-duplicate-zeros",
+  "slug": "duplicate-zeros",
+  "submission_id": "2150130175",
+  "runtime": 1,
+  "runtime_display": "1 ms",
+  "memory": 46960000,
+  "memory_display": "47 MB",
+  "solution_count": 2,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2150130175",
+      "submission_ids": [
+        "2150130175"
+      ],
+      "solution_hash": "2950e52b8582fd5c23f0e3a43a08d0279f561b0d6fc003b66942d43eea126e70",
+      "approach_key": "auxiliary-array",
+      "approach_name": "Auxiliary Array Copy",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 46960000,
+      "memory_display": "47 MB",
+      "analysis": {
+        "pattern": "Auxiliary Space Buffer",
+        "problem_summary": "Duplicate every zero in a fixed-length array while discarding elements that overflow the original array length.",
+        "intuition": "Modifying the array in place from left to right causes unread elements to be overwritten. By creating a temporary destination array, we can safely write elements forward without losing original values.",
+        "approach": [
+          "Create a destination array `dest` of the same length as the input array `arr`.",
+          "Use a source pointer `s` to read from `arr` and a destination pointer `d` to write to `dest`.",
+          "Iterate while both pointers are within valid array boundaries.",
+          "If `arr[s]` is zero, set `dest[d]` to zero, increment `d`, and if `d` is still within bounds, set `dest[d]` to zero again.",
+          "If `arr[s]` is non-zero, copy `arr[s]` directly to `dest[d]`.",
+          "Increment both pointers and repeat until the array is filled.",
+          "Copy all elements from `dest` back to `arr`."
+        ],
+        "why_it_works": "The auxiliary buffer isolates write operations from read operations, eliminating the write-conflict problem inherent in forward in-place modification.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(n)",
+        "key_takeaway": "Using extra space simplifies in-place overwriting problems into simple array construction when memory constraints are relaxed.",
+        "time_explanation": "We iterate through the array once to fill the destination array and once more to copy elements back, resulting in 2 * N steps, which is O(n).",
+        "space_explanation": "An auxiliary array `dest` of size N is allocated, using O(n) additional space."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2150137953",
+      "submission_ids": [
+        "2150137953"
+      ],
+      "solution_hash": "db051da7d0b11383f361bbf6f5a6fac9d78d035218d05cd1df449b40bfa620c6",
+      "approach_key": "two-pass-in-place-backwards",
+      "approach_name": "Two-Pass In-Place Backwards Shift",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 47172000,
+      "memory_display": "47.2 MB",
+      "analysis": {
+        "pattern": "Two Pointers / Two-Pass In-Place Modification",
+        "problem_summary": "Duplicate zeros in an integer array in place without using additional array space.",
+        "intuition": "Writing elements forward in-place overwrites data before it can be read. However, if we know where the final elements will end up, we can write from right to left (backwards) without overwriting unread elements.",
+        "approach": [
+          "Pass 1: Count how many zeros will be duplicated before reaching the logical boundary of the original length.",
+          "Handle the edge case where a zero sits exactly at the boundary and can only be written once without duplication.",
+          "Pass 2: Iterate backwards from the determined boundary index towards index 0.",
+          "If the current element is a zero, write zero twice at the shifted destination indices and decrease the shift offset.",
+          "If the current element is non-zero, place it at its new shifted position."
+        ],
+        "why_it_works": "Working backwards ensures that elements are moved to their final destination indices after those destination positions have already been processed, preventing data loss.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "When array modifications shift elements to the right, iterating backwards from right to left enables O(1) space in-place operations.",
+        "time_explanation": "The array is traversed twice: once to calculate the final boundary and once to shift elements, running in O(n) total time.",
+        "space_explanation": "Only a few scalar variables are used to track zero counts and pointer indices, requiring O(1) auxiliary space."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}

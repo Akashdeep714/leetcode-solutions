@@ -3,50 +3,151 @@
   "title": "Find Numbers with Even Number of Digits",
   "difficulty": "Easy",
   "language": "Java",
+  "languages": [
+    "Java"
+  ],
   "folder": "1295-find-numbers-with-even-number-of-digits",
   "slug": "find-numbers-with-even-number-of-digits",
-  "solutions": [
-    {
-      "number": 1,
-      "filename": "solution.java",
-      "language": "Java",
-      "submission_id": "2147984412",
-      "solution_hash": "e9e1a6241feb8b98ca04fefa2b962cd7bc7fe84e0ba06a81b6ae514c663d92a3",
-      "runtime": 2,
-      "runtime_display": "2 ms",
-      "memory": 45660000,
-      "memory_display": "45.7 MB"
-    },
-    {
-      "number": 2,
-      "filename": "solution-2.java",
-      "language": "Java",
-      "submission_id": "2147998721",
-      "solution_hash": "e8c7a6d7a3059f37416e00ac60084c7ea3fbd9e7bfc87cd112bc4c2f03d0a54b",
-      "runtime": 1,
-      "runtime_display": "1 ms",
-      "memory": 44824000,
-      "memory_display": "44.8 MB"
-    },
-    {
-      "number": 3,
-      "filename": "solution-3.java",
-      "language": "Java",
-      "submission_id": "2147961513",
-      "solution_hash": "fe5d6c5e4ef308630a11ad71a0e968e10734b723c98eb6d54f05878483aadab3",
-      "runtime": 1,
-      "runtime_display": "1 ms",
-      "memory": 44728000,
-      "memory_display": "44.7 MB"
-    }
-  ],
   "submission_id": "2147961513",
   "runtime": 1,
   "runtime_display": "1 ms",
   "memory": 44728000,
   "memory_display": "44.7 MB",
-  "solution_count": 3,
-  "languages": [
-    "Java"
-  ]
+  "solution_count": 4,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution-3.java",
+      "language": "Java",
+      "submission_id": "2147961513",
+      "submission_ids": [
+        "2147961513"
+      ],
+      "solution_hash": "fe5d6c5e4ef308630a11ad71a0e968e10734b723c98eb6d54f05878483aadab3",
+      "approach_key": "iterative-division",
+      "approach_name": "Iterative Digit Counting via Repeated Division",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 44728000,
+      "memory_display": "44.7 MB",
+      "analysis": {
+        "pattern": "Iterative Division / Digit Processing",
+        "problem_summary": "Count how many numbers in an integer array contain an even number of digits.",
+        "intuition": "Dividing a positive integer by 10 removes its last digit. By repeatedly performing integer division by 10 until the number becomes zero, we can count the total number of digits arithmetic-wise without needing extra memory.",
+        "approach": [
+          "Initialize a counter `evenCount` to 0.",
+          "Iterate through each integer in `nums`.",
+          "For each integer, count its digits by continuously dividing by 10 until it reaches 0.",
+          "If the final digit count is divisible by 2, increment `evenCount`.",
+          "Return `evenCount`."
+        ],
+        "why_it_works": "In base 10, integer division `num / 10` strips off the least significant digit. The number of steps required to reduce `num` to 0 equals the exact number of digits.",
+        "time_complexity": "O(N * K)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Repeated integer division by 10 is the standard, language-agnostic technique to count digits without allocating memory.",
+        "time_explanation": "For an array of length N where numbers have up to K digits (here K <= 6), we spend O(K) divisions per number. Thus, the total time is O(N * K), or practically O(N).",
+        "space_explanation": "The algorithm uses a constant amount of extra memory for counters and loop variables."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2147984412",
+      "submission_ids": [
+        "2147984412"
+      ],
+      "solution_hash": "e9e1a6241feb8b98ca04fefa2b962cd7bc7fe84e0ba06a81b6ae514c663d92a3",
+      "approach_key": "string-conversion",
+      "approach_name": "String Conversion",
+      "runtime": 2,
+      "runtime_display": "2 ms",
+      "memory": 45660000,
+      "memory_display": "45.7 MB",
+      "analysis": {
+        "pattern": "Type Conversion / String Inspection",
+        "problem_summary": "Count how many numbers in an array have an even number of digits.",
+        "intuition": "An integer's number of digits directly corresponds to the length of its string representation. Converting each number to a string allows us to query `.length()` directly.",
+        "approach": [
+          "Iterate through each number in `nums`.",
+          "Convert the number to a string using `String.valueOf(num)`.",
+          "Check if `string.length()` is even.",
+          "Increment the answer count if it is even, and return the total count at the end."
+        ],
+        "why_it_works": "The string representation contains one character for each digit in the base-10 number, so string length directly equals the digit count.",
+        "time_complexity": "O(N * K)",
+        "space_complexity": "O(K)",
+        "key_takeaway": "Converting numbers to strings provides concise code, but incurs small memory allocations for temporary string objects.",
+        "time_explanation": "Converting a number with K digits to a string takes O(K) time. Across N numbers, total time is O(N * K).",
+        "space_explanation": "Each integer creates a temporary string of length K (at most 6 characters), requiring O(K) temporary space per iteration."
+      }
+    },
+    {
+      "number": 3,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2147998721",
+      "submission_ids": [
+        "2147998721"
+      ],
+      "solution_hash": "e8c7a6d7a3059f37416e00ac60084c7ea3fbd9e7bfc87cd112bc4c2f03d0a54b",
+      "approach_key": "logarithmic-digit-count",
+      "approach_name": "Logarithmic Digit Counting",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 44824000,
+      "memory_display": "44.8 MB",
+      "analysis": {
+        "pattern": "Mathematical Property (Logarithms)",
+        "problem_summary": "Determine the total count of numbers with an even number of digits.",
+        "intuition": "Mathematically, the number of digits of a positive integer $n$ in base 10 is equal to $\\lfloor \\log_{10}(n) \\rfloor + 1$. Using floating-point math allows computing the digit count in $O(1)$ operations per number.",
+        "approach": [
+          "Iterate through each integer `num` in `nums`.",
+          "Compute the digit count using `(int) Math.floor(Math.log10(num)) + 1`.",
+          "Check if this digit count is even using `% 2 == 0`.",
+          "Increment the total count accordingly and return the result."
+        ],
+        "why_it_works": "Base-10 logarithms satisfy $10^{d-1} \\le n < 10^d$ for a $d$-digit number. Taking $\\log_{10}$ yields $d-1 \\le \\log_{10}(n) < d$, so taking the floor and adding 1 gives the exact number of digits $d$.",
+        "time_complexity": "O(N)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Base-10 logarithms calculate the number of digits in constant time without explicit loops or allocations.",
+        "time_explanation": "`Math.log10` runs in O(1) hardware mathematical operations. Executing this for N elements takes overall O(N) time.",
+        "space_explanation": "Only primitive scalar variables are used, taking O(1) space."
+      }
+    },
+    {
+      "number": 4,
+      "filename": "solution-4.java",
+      "language": "Java",
+      "submission_id": "2148890832",
+      "submission_ids": [
+        "2148890832"
+      ],
+      "solution_hash": "7814a9d447721b52b51ec7ae29888837b9974359fdd3870b03f1c0567bdebe7a",
+      "approach_key": "constraint-range-check",
+      "approach_name": "Constraint-Based Range Checking",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 44624000,
+      "memory_display": "44.6 MB",
+      "analysis": {
+        "pattern": "Direct Range Checking / Boundary Comparison",
+        "problem_summary": "Count numbers in the input array that have an even number of digits.",
+        "intuition": "Given the problem constraint $1 \\le nums[i] \\le 10^5$, the only possible ranges with even numbers of digits are 2-digit numbers [10, 99], 4-digit numbers [1000, 9999], and the 6-digit number 100000. Checking range boundaries directly avoids string operations, loops, or floating-point calculations.",
+        "approach": [
+          "Iterate through each element in `nums`.",
+          "Check if the element lies within `[10, 99]`, `[1000, 9999]`, or equals `100000`.",
+          "If any condition is satisfied, increment the count.",
+          "Return the total count after processing all elements."
+        ],
+        "why_it_works": "Every integer within the bounded ranges specified explicitly contains an even count of decimal digits (2, 4, or 6 digits), covering all possible even-digit numbers under the given constraints.",
+        "time_complexity": "O(N)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Leveraging problem constraints allows converting digit-counting logic into direct, low-overhead range comparisons.",
+        "time_explanation": "For each of the N numbers, a few simple integer comparisons are performed in O(1) time.",
+        "space_explanation": "No extra storage is used beyond a few integer loop counters."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
 }

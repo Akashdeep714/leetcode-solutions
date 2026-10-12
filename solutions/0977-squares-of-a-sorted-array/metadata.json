@@ -1,0 +1,89 @@
+{
+  "number": 977,
+  "title": "Squares of a Sorted Array",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0977-squares-of-a-sorted-array",
+  "slug": "squares-of-a-sorted-array",
+  "submission_id": "2148951973",
+  "runtime": 10,
+  "runtime_display": "10 ms",
+  "memory": 48920000,
+  "memory_display": "48.9 MB",
+  "solution_count": 2,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2148951973",
+      "submission_ids": [
+        "2148951973"
+      ],
+      "solution_hash": "9d8d34cdc68f3cf310a25837552c461b6c84d12b6b789e64f8598f24917fa581",
+      "approach_key": "square-and-sort",
+      "approach_name": "Square and Sort",
+      "runtime": 10,
+      "runtime_display": "10 ms",
+      "memory": 48920000,
+      "memory_display": "48.9 MB",
+      "analysis": {
+        "pattern": "Brute-Force Transformation + Sorting",
+        "problem_summary": "Given a sorted array of integers, return a new array containing the squares of each number sorted in non-decreasing order.",
+        "intuition": "The simplest way to solve the problem is to transform each number into its square without worrying about order, and then apply a standard sorting algorithm to arrange the squared values in non-decreasing order.",
+        "approach": [
+          "Create a new array `result` of size `n` to store the squared elements.",
+          "Iterate through the input array `nums` from index 0 to `n - 1`, setting `result[i] = nums[i] * nums[i]`.",
+          "Sort the `result` array using `Arrays.sort(result)`.",
+          "Return the sorted `result` array."
+        ],
+        "why_it_works": "Squaring preserves non-negativity, but distorts order for negative numbers. Sorting the resulting array explicitly re-establishes non-decreasing order regardless of initial signs.",
+        "time_complexity": "O(n log n)",
+        "space_complexity": "O(log n)",
+        "key_takeaway": "Directly squaring and sorting is straightforward to implement, but it does not take advantage of the fact that the original array was already sorted.",
+        "time_explanation": "Squaring `n` elements takes O(n) time. Sorting an array of `n` primitive integers in Java using `Arrays.sort()` takes O(n log n) time. Thus, the overall time complexity is dominated by O(n log n).",
+        "space_explanation": "Excluding the output array, Java's Dual-Pivot Quicksort requires O(log n) auxiliary space for recursion stack depth."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2148961519",
+      "submission_ids": [
+        "2148961519"
+      ],
+      "solution_hash": "ae23423253b5dc8b0be82e44a81cbb7503608ad9df94308380cdbf06ef5f8032",
+      "approach_key": "two-pointers",
+      "approach_name": "Two Pointers (Outside-In)",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 47004000,
+      "memory_display": "47 MB",
+      "analysis": {
+        "pattern": "Two Pointers",
+        "problem_summary": "Given a sorted array of integers containing negative and positive values, return a new array of their squares sorted in non-decreasing order.",
+        "intuition": "Because the input array is already sorted, the largest squared values must come from either the far-left (most negative) or far-right (most positive) elements. By comparing the magnitudes at both ends, we can select the larger square and fill the output array from right to left.",
+        "approach": [
+          "Initialize two pointers: `l = 0` (left end) and `r = n - 1` (right end).",
+          "Create a `result` array of size `n`.",
+          "Iterate backwards from index `n - 1` down to `0` for the position to fill in `result`.",
+          "Compare the absolute values `|nums[l]|` and `|nums[r]|`.",
+          "If `|nums[l]| > |nums[r]|`, store `nums[l] * nums[l]` in `result[i]` and increment `l`.",
+          "Otherwise, store `nums[r] * nums[r]` in `result[i]` and decrement `r`.",
+          "Return the populated `result` array."
+        ],
+        "why_it_works": "The absolute values of a sorted array decrease towards the middle and reach maximums at the boundaries. Choosing the maximum absolute value at each step guarantees that the result array is populated with the largest remaining square at the current highest available index.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Leveraging the pre-sorted property of the input array with two pointers allows the problem to be solved in linear time without extra sorting overhead.",
+        "time_explanation": "Each element in `nums` is evaluated exactly once as either `l` increments or `r` decrements, resulting in a single O(n) pass.",
+        "space_explanation": "Only a constant number of pointer variables (`l`, `r`, `val`) are used. The `result` array is required for the output and is not considered extra space."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
