@@ -327,6 +327,13 @@
         "frontendId": "344",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-10-11T14:59:43+00:00"
+      },
+      {
+        "titleSlug": "reverse-integer",
+        "title": "Reverse Integer",
+        "frontendId": "7",
+        "difficulty": "MEDIUM",
+        "lastSubmittedAt": "2026-10-12T17:25:29+00:00"
       }
     ],
     "problem_index": 20,
