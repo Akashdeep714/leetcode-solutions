@@ -57,9 +57,15 @@ LEETCODE_REQUEST_DELAY_SECONDS = 0.35
 # Number of submission-history rows requested per page.
 SUBMISSION_PAGE_SIZE = 40
 
-# Large fallback window used only when the authenticated solved-problem
-# progress endpoint is unavailable.
+# Legacy global recent-AC query fallback. LeetCode often caps this endpoint
+# at 20 rows even when a larger limit is requested, so it is NOT used by the
+# normal live watcher anymore.
 RECENT_AC_FALLBACK_LIMIT = 2000
+
+# Poll at most this many per-problem submission-history heads per run. For
+# typical accounts this covers every historically scanned problem each run;
+# larger archives are monitored fairly using a persisted round-robin cursor.
+MAX_LIVE_PROBLEM_HISTORY_CHECKS_PER_RUN = 60
 
 
 class GeminiBackfillPaused(RuntimeError):
@@ -1977,6 +1983,9 @@ def classify_gemini_429(response):
             "perday",
             "daily quota",
             "quota exceeded",
+            "exceeded a quota",
+            "project has exceeded a quota",
+            "quota_limit_value",
         )
     ):
         return "daily"
@@ -3846,30 +3855,134 @@ def merge_discovered_problems(
             existing[slug] = entry
 
 
+def get_recent_accepted_for_problem(
+    title_slug,
+    limit=SUBMISSION_PAGE_SIZE,
+):
+    """Fetch only the newest Accepted-history page for one problem.
+
+    Unlike recentAcSubmissionList, this query is scoped to one problem, so the
+    watcher does not silently depend on LeetCode's global 20-row cap. If any
+    unseen ID is found, the queued follow-up performs a complete history scan.
+    """
+    variables = {
+        "offset": 0,
+        "limit": min(int(limit), SUBMISSION_PAGE_SIZE),
+        "lastKey": None,
+        "questionSlug": title_slug,
+        "status": 10,
+        "lang": None,
+    }
+
+    queries = [
+        (QUESTION_SUBMISSION_LIST_QUERY, "questionSubmissionList"),
+        (
+            """
+            query submissionList(
+                $offset: Int!,
+                $limit: Int!,
+                $lastKey: String,
+                $questionSlug: String!,
+                $status: Int,
+                $lang: Int
+            ) {
+                submissionList(
+                    offset: $offset,
+                    limit: $limit,
+                    lastKey: $lastKey,
+                    questionSlug: $questionSlug,
+                    status: $status,
+                    lang: $lang
+                ) {
+                    lastKey
+                    hasNext
+                    submissions {
+                        id
+                        titleSlug
+                        status
+                        statusDisplay
+                        lang
+                        runtime
+                        timestamp
+                        memory
+                        isPending
+                    }
+                }
+            }
+            """,
+            "submissionList",
+        ),
+    ]
+
+    errors = []
+    for query, operation_name in queries:
+        try:
+            result = _fetch_submission_history_page(
+                query,
+                operation_name,
+                variables,
+            )
+            if result:
+                rows = result.get("submissions") or []
+                accepted = []
+                seen = set()
+                for row in rows:
+                    sid = str(row.get("id", "")).strip()
+                    if not sid or sid in seen:
+                        continue
+                    seen.add(sid)
+
+                    status_display = str(
+                        row.get("statusDisplay", "")
+                    ).strip().lower()
+                    status_code = str(
+                        row.get("status", "")
+                    ).strip().lower()
+                    is_accepted = (
+                        status_display in {"accepted", "ac"}
+                        or status_code in {"10", "accepted", "ac"}
+                    )
+                    is_pending = row.get("isPending", False)
+                    if isinstance(is_pending, str):
+                        is_pending = is_pending.strip().lower() == "true"
+                    if is_accepted and not is_pending:
+                        accepted.append(row)
+
+                return accepted
+            errors.append(f"{operation_name} returned no usable result")
+        except Exception as exc:
+            errors.append(f"{operation_name}: {exc}")
+
+    raise RuntimeError(
+        f"Could not read recent Accepted history for {title_slug}: "
+        + "; ".join(errors)
+    )
+
+
 def monitor_new_accepted_submissions(
     state,
     username,
 ):
-    """
-    Watch recent accepted submissions without importing them individually.
+    """Monitor per-problem Accepted histories and queue whole-problem rescans.
 
-    During historical backfill, only problems that have ALREADY been fully
-    scanned are eligible for the live queue. Submissions for future historical
-    problems are intentionally left for their normal full-history scan.
-
-    When the historical pass is complete, every unseen accepted submission can
-    be queued because the archive has already scanned all prior history.
+    The global recentAcSubmissionList has an effective small-window limit on
+    LeetCode. To avoid missing submissions once more than 20 Accepted attempts
+    exist, inspect the newest page for each eligible problem instead. New code
+    is never imported individually: unseen IDs queue a full-history reconcile.
     """
     historical = state["historical_backfill"]
 
+    # Refresh the solved-problem list so new problems can enter the persistent
+    # queue after historical backfill has already completed.
     try:
-        recent = get_recent_accepted(
-            username,
-            limit=RECENT_AC_FALLBACK_LIMIT,
-        )
+        discovered = get_all_solved_problems()
+        if discovered:
+            merge_discovered_problems(historical, discovered)
     except Exception as exc:
-        print(f"   ⚠️ Could not monitor recent accepted submissions: {exc}")
-        return 0
+        print(
+            "   ⚠️ Could not refresh the solved-problem list for submission "
+            f"monitoring: {exc}"
+        )
 
     all_processed = {
         str(x)
@@ -3884,16 +3997,16 @@ def monitor_new_accepted_submissions(
     problem_index = int(historical.get("problem_index", 0) or 0)
 
     if historical.get("complete", False):
-        # Once the historical archive is complete, an accepted submission can
-        # belong to a brand-new solved problem that was not present when the
-        # historical list was built. Those should also enter the safe queue.
-        eligible_slugs = None
-    else:
-        eligible_slugs = {
-            str(item.get("titleSlug", "")).strip()
-            for item in problems[:problem_index]
+        eligible_problems = [
+            item for item in problems
             if isinstance(item, dict) and item.get("titleSlug")
-        }
+        ]
+    else:
+        # Unscanned problems will be handled by the historical pass itself.
+        eligible_problems = [
+            item for item in problems[:problem_index]
+            if isinstance(item, dict) and item.get("titleSlug")
+        ]
 
     pending = historical.get("pending_new_problems", [])
     if not isinstance(pending, list):
@@ -3915,36 +4028,89 @@ def monitor_new_accepted_submissions(
             "submission_ids": [str(x) for x in ids],
         }
 
-    queued = 0
-    for submission in recent:
-        submission_id = str(submission.get("id", "")).strip()
-        slug = str(submission.get("titleSlug", "")).strip()
-        if not submission_id or not slug:
-            continue
-        if submission_id in all_processed:
-            continue
-        if eligible_slugs is not None and slug not in eligible_slugs:
-            continue
-
-        entry = by_slug.setdefault(
-            slug,
-            {
-                "titleSlug": slug,
-                "title": submission.get("title", slug),
-                "submission_ids": [],
-            },
+    if not eligible_problems:
+        historical["pending_new_problems"] = list(by_slug.values())
+        print(
+            "📡 Live monitor: no historically scanned problem is eligible yet; "
+            "newer problems will be covered by their upcoming full-history scan."
         )
+        save_state(state)
+        return 0
 
-        if submission_id not in entry["submission_ids"]:
-            entry["submission_ids"].append(submission_id)
-            queued += 1
+    # Fair rotation for accounts with more solved problems than the per-run
+    # check budget. With 60 or fewer eligible problems, all are checked each run.
+    cursor = int(historical.get("live_monitor_cursor", 0) or 0)
+    cursor %= len(eligible_problems)
+    check_count = min(
+        len(eligible_problems),
+        MAX_LIVE_PROBLEM_HISTORY_CHECKS_PER_RUN,
+    )
+    end_cursor = cursor + check_count
+    if end_cursor <= len(eligible_problems):
+        selected = eligible_problems[cursor:end_cursor]
+    else:
+        selected = (
+            eligible_problems[cursor:]
+            + eligible_problems[:end_cursor - len(eligible_problems)]
+        )
+    historical["live_monitor_cursor"] = end_cursor % len(eligible_problems)
+
+    checked_problems = 0
+    accepted_rows_seen = 0
+    queued = 0
+    failed_problems = 0
+
+    for problem in selected:
+        slug = str(problem.get("titleSlug", "")).strip()
+        title = problem.get("title", slug)
+        if not slug:
+            continue
+
+        try:
+            recent = get_recent_accepted_for_problem(
+                slug,
+                limit=SUBMISSION_PAGE_SIZE,
+            )
+            checked_problems += 1
+            accepted_rows_seen += len(recent)
+        except Exception as exc:
+            failed_problems += 1
+            print(f"   ⚠️ Watcher could not read {title}: {exc}")
+            continue
+
+        for submission in recent:
+            submission_id = str(submission.get("id", "")).strip()
+            if not submission_id:
+                continue
+            if submission_id in all_processed:
+                continue
+
+            entry = by_slug.setdefault(
+                slug,
+                {
+                    "titleSlug": slug,
+                    "title": title,
+                    "submission_ids": [],
+                },
+            )
+            if submission_id not in entry["submission_ids"]:
+                entry["submission_ids"].append(submission_id)
+                queued += 1
 
     historical["pending_new_problems"] = list(by_slug.values())
+    save_state(state)
 
     print(
-        f"📡 Checked {len(recent)} recent accepted submission(s); "
-        f"{queued} new submission(s) queued for safe problem-level reconciliation."
+        f"📡 Checked {checked_problems}/{len(selected)} problem histories "
+        f"(up to {SUBMISSION_PAGE_SIZE} Accepted rows each); "
+        f"saw {accepted_rows_seen} Accepted row(s), queued {queued} new "
+        "submission(s) for safe problem-level reconciliation."
     )
+    if failed_problems:
+        print(
+            f"   ⚠️ Submission monitoring could not check "
+            f"{failed_problems} problem history/histories this run."
+        )
 
     return queued
 
