@@ -334,6 +334,13 @@
         "frontendId": "7",
         "difficulty": "MEDIUM",
         "lastSubmittedAt": "2026-10-12T17:25:29+00:00"
+      },
+      {
+        "titleSlug": "first-unique-character-in-a-string",
+        "title": "First Unique Character in a String",
+        "frontendId": "387",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-10-13T16:10:45+00:00"
       }
     ],
     "problem_index": 20,
@@ -354,7 +361,8 @@
     "day": "2026-10-13",
     "problems_completed_today": 0,
     "gemini_requests_used_today": 0,
-    "gemini_blocked_today": false,
-    "pending_new_problems": []
+    "gemini_blocked_today": true,
+    "pending_new_problems": [],
+    "live_monitor_cursor": 0
   }
 }
