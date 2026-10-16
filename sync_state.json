@@ -355,6 +355,13 @@
         "frontendId": "125",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-10-15T16:18:23+00:00"
+      },
+      {
+        "titleSlug": "string-to-integer-atoi",
+        "title": "String to Integer (atoi)",
+        "frontendId": "8",
+        "difficulty": "MEDIUM",
+        "lastSubmittedAt": "2026-10-16T17:19:59+00:00"
       }
     ],
     "problem_index": 20,
