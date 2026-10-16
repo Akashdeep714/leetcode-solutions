@@ -382,7 +382,7 @@
     "day": "2026-10-16",
     "problems_completed_today": 0,
     "gemini_requests_used_today": 0,
-    "gemini_blocked_today": false,
+    "gemini_blocked_today": true,
     "pending_new_problems": [],
     "live_monitor_cursor": 0
   }
