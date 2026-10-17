@@ -435,6 +435,37 @@ def reset_daily_historical_budgets(state):
         historical["gemini_requests_used_today"] = 0
         historical["gemini_blocked_today"] = False
 
+    # The last run persisted a quota-blocked flag in sync_state.json. Changing
+    # GEMINI_API_KEY in GitHub Secrets does not change that state file, so the
+    # old project's block would otherwise continue to stop every run before
+    # the new key is tried. Store only a one-way fingerprint, never the key.
+    current_key_fingerprint = (
+        hashlib.sha256(GEMINI_API_KEY.encode("utf-8")).hexdigest()
+        if GEMINI_API_KEY
+        else ""
+    )
+    stored_key_fingerprint = str(
+        historical.get("gemini_api_key_fingerprint", "")
+    ).strip()
+
+    if current_key_fingerprint and current_key_fingerprint != stored_key_fingerprint:
+        had_stale_block = bool(historical.get("gemini_blocked_today", False))
+        had_old_counter = int(historical.get("gemini_requests_used_today", 0) or 0) > 0
+
+        if had_stale_block or had_old_counter or stored_key_fingerprint:
+            print(
+                "🔑 Gemini API key fingerprint changed (or was not recorded yet). "
+                "Clearing the persisted local quota block/counter so the new "
+                "project can be tested. Google still enforces its own quota."
+            )
+
+        historical["gemini_requests_used_today"] = 0
+        historical["gemini_blocked_today"] = False
+        historical["gemini_api_key_fingerprint"] = current_key_fingerprint
+    elif current_key_fingerprint and not stored_key_fingerprint:
+        # Initial fingerprint migration when there was no old block/counter.
+        historical["gemini_api_key_fingerprint"] = current_key_fingerprint
+
     GEMINI_RUNTIME["requests_used"] = int(
         historical.get(
             "gemini_requests_used_today",
