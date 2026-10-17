@@ -322,6 +322,9 @@ def default_historical_state():
         # pass. They are reconciled as whole problems later, not imported
         # one submission at a time, so semantic deduplication stays correct.
         "pending_new_problems": [],
+        # Problems reconciled early by the live queue are skipped when the
+        # sequential historical cursor eventually reaches them.
+        "reconciled_problem_slugs": [],
     }
 
 
@@ -3994,19 +3997,14 @@ def monitor_new_accepted_submissions(
     )
 
     problems = historical.get("problems", [])
-    problem_index = int(historical.get("problem_index", 0) or 0)
 
-    if historical.get("complete", False):
-        eligible_problems = [
-            item for item in problems
-            if isinstance(item, dict) and item.get("titleSlug")
-        ]
-    else:
-        # Unscanned problems will be handled by the historical pass itself.
-        eligible_problems = [
-            item for item in problems[:problem_index]
-            if isinstance(item, dict) and item.get("titleSlug")
-        ]
+    # Watch every discovered solved problem, including those whose historical
+    # cursor has not reached them yet. Otherwise a quota pause in backfill
+    # makes those newer submissions invisible indefinitely.
+    eligible_problems = [
+        item for item in problems
+        if isinstance(item, dict) and item.get("titleSlug")
+    ]
 
     pending = historical.get("pending_new_problems", [])
     if not isinstance(pending, list):
@@ -4026,13 +4024,14 @@ def monitor_new_accepted_submissions(
             "titleSlug": slug,
             "title": item.get("title", slug),
             "submission_ids": [str(x) for x in ids],
+            "last_seen_timestamp": int(item.get("last_seen_timestamp", 0) or 0),
         }
 
     if not eligible_problems:
         historical["pending_new_problems"] = list(by_slug.values())
         print(
-            "📡 Live monitor: no historically scanned problem is eligible yet; "
-            "newer problems will be covered by their upcoming full-history scan."
+            "📡 Live monitor: no solved-problem history is available yet; "
+            "the monitor will retry on the next run."
         )
         save_state(state)
         return 0
@@ -4091,13 +4090,28 @@ def monitor_new_accepted_submissions(
                     "titleSlug": slug,
                     "title": title,
                     "submission_ids": [],
+                    "last_seen_timestamp": 0,
                 },
+            )
+            try:
+                submitted_at = int(submission.get("timestamp", 0) or 0)
+            except (TypeError, ValueError):
+                submitted_at = 0
+            entry["last_seen_timestamp"] = max(
+                int(entry.get("last_seen_timestamp", 0) or 0),
+                submitted_at,
             )
             if submission_id not in entry["submission_ids"]:
                 entry["submission_ids"].append(submission_id)
                 queued += 1
 
-    historical["pending_new_problems"] = list(by_slug.values())
+    # Work on the problems with the newest accepted activity first, so recent
+    # user submissions do not sit behind older historical-only entries.
+    historical["pending_new_problems"] = sorted(
+        by_slug.values(),
+        key=lambda item: int(item.get("last_seen_timestamp", 0) or 0),
+        reverse=True,
+    )
     save_state(state)
 
     print(
@@ -4105,6 +4119,10 @@ def monitor_new_accepted_submissions(
         f"(up to {SUBMISSION_PAGE_SIZE} Accepted rows each); "
         f"saw {accepted_rows_seen} Accepted row(s), queued {queued} new "
         "submission(s) for safe problem-level reconciliation."
+    )
+    print(
+        f"   📋 Pending problem reconciliations saved: "
+        f"{len(historical.get('pending_new_problems', []))}"
     )
     if failed_problems:
         print(
@@ -4322,6 +4340,32 @@ def process_pending_problem_reconciliations(
             "processed_problems": 0,
         }
 
+    today_completed = int(historical.get("problems_completed_today", 0) or 0)
+    if today_completed >= MAX_HISTORICAL_PROBLEMS_PER_DAY:
+        print("⏸️ Live queue preserved: daily problem budget is already used.")
+        return {
+            "imported": 0,
+            "duplicate": 0,
+            "semantic_merged": 0,
+            "failed": 0,
+            "paused": True,
+            "processed_problems": 0,
+        }
+
+    if GEMINI_RUNTIME["blocked"] or GEMINI_RUNTIME["requests_used"] >= MAX_GEMINI_REQUESTS_PER_DAY:
+        print(
+            "⏸️ Live queue preserved until Gemini quota/budget is available; "
+            "no queued problem was removed."
+        )
+        return {
+            "imported": 0,
+            "duplicate": 0,
+            "semantic_merged": 0,
+            "failed": 0,
+            "paused": True,
+            "processed_problems": 0,
+        }
+
     # One live problem per workflow run keeps Gemini usage predictable and
     # prevents a burst of submissions from competing with the historical job.
     item = pending[0]
@@ -4379,7 +4423,13 @@ def process_pending_problem_reconciliations(
             for entry in pending
             if str(entry.get("titleSlug", "")).strip() != slug
         ]
-
+        reconciled_slugs = {
+            str(x) for x in historical.get("reconciled_problem_slugs", [])
+        }
+        reconciled_slugs.add(slug)
+        historical["reconciled_problem_slugs"] = sorted(reconciled_slugs)
+        historical["problems_completed_today"] = today_completed + 1
+        sync_runtime_to_state(state)
         save_state(state)
 
         print(
@@ -4524,6 +4574,19 @@ def historical_backfill(
         slug = str(problem.get("titleSlug", "")).strip()
         title = problem.get("title", slug)
 
+        reconciled_slugs = {
+            str(x) for x in historical.get("reconciled_problem_slugs", [])
+        }
+        if slug and slug in reconciled_slugs:
+            print(
+                f"   ⏭️ Historical cursor skipping {title}: "
+                "already reconciled safely by the live queue."
+            )
+            problem_index += 1
+            historical["problem_index"] = problem_index
+            save_state(state)
+            continue
+
         print("\n" + "=" * 68)
         print(f"📚 Historical problem {problem_index + 1}/{len(problems)}: {title}")
         print("=" * 68)
@@ -4546,6 +4609,12 @@ def historical_backfill(
             )
             historical_processed.update(result["submission_ids"])
             historical["processed_submission_ids"] = sorted(historical_processed)
+            reconciled_slugs = {
+                str(x) for x in historical.get("reconciled_problem_slugs", [])
+            }
+            if slug:
+                reconciled_slugs.add(slug)
+            historical["reconciled_problem_slugs"] = sorted(reconciled_slugs)
 
             # A queued submission for this problem is no longer pending because
             # the full accepted history has now been reconciled.
@@ -5582,11 +5651,14 @@ def main():
             f"\n🛠️ Repaired {repaired} placeholder README(s)."
         )
 
-    # Always monitor recent accepted submissions. During historical backfill
-    # we only queue submissions for problems that have already been scanned;
-    # they are reconciled later as complete problems rather than imported one
-    # by one.
+    # Watch all solved problem histories so newly accepted submissions on
+    # unscanned problems are still detected while historical backfill is paused.
     monitor_new_accepted_submissions(
+        state,
+        username,
+    )
+
+    pending_live_result = process_pending_problem_reconciliations(
         state,
         username,
     )
@@ -5611,27 +5683,14 @@ def main():
             state,
             username,
         )
-
-        # The historical job may finish on this run. Reconcile at most one
-        # queued live problem afterward, still respecting Gemini safety limits.
-        if state["historical_backfill"].get("complete", False):
-            live_result = process_pending_problem_reconciliations(
-                state,
-                username,
-            )
-            for key in ("imported", "duplicate", "semantic_merged", "failed"):
-                result[key] = result.get(key, 0) + live_result.get(key, 0)
-            result["paused"] = result.get("paused", False) or live_result.get("paused", False)
-
+        for key in ("imported", "duplicate", "semantic_merged", "failed"):
+            result[key] = result.get(key, 0) + pending_live_result.get(key, 0)
+        result["paused"] = result.get("paused", False) or pending_live_result.get("paused", False)
     else:
         print(
             "\n🧭 Mode: SAFE INCREMENTAL SYNC"
         )
-
-        result = process_pending_problem_reconciliations(
-            state,
-            username,
-        )
+        result = pending_live_result
 
     sync_runtime_to_state(
         state
