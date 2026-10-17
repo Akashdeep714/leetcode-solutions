@@ -624,6 +624,7 @@
       }
     ],
     "reconciled_problem_slugs": [],
-    "live_monitor_cursor": 0
+    "live_monitor_cursor": 0,
+    "gemini_api_key_fingerprint": "b62547aacf7d0e48c1cf0dad93162ba1eda08fd97d007a3ae0ece8ed317c2e75"
   }
 }
