@@ -362,6 +362,13 @@
         "frontendId": "8",
         "difficulty": "MEDIUM",
         "lastSubmittedAt": "2026-10-16T17:19:59+00:00"
+      },
+      {
+        "titleSlug": "find-the-index-of-the-first-occurrence-in-a-string",
+        "title": "Find the Index of the First Occurrence in a String",
+        "frontendId": "28",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-10-17T16:03:33+00:00"
       }
     ],
     "problem_index": 20,
@@ -383,7 +390,240 @@
     "problems_completed_today": 0,
     "gemini_requests_used_today": 0,
     "gemini_blocked_today": true,
-    "pending_new_problems": [],
+    "pending_new_problems": [
+      {
+        "titleSlug": "find-the-index-of-the-first-occurrence-in-a-string",
+        "title": "Find the Index of the First Occurrence in a String",
+        "submission_ids": [
+          "2174696223",
+          "2174693816"
+        ],
+        "last_seen_timestamp": 1792253013
+      },
+      {
+        "titleSlug": "string-to-integer-atoi",
+        "title": "String to Integer (atoi)",
+        "submission_ids": [
+          "2174028558",
+          "2174027517",
+          "2174011926",
+          "2174004551"
+        ],
+        "last_seen_timestamp": 1792171199
+      },
+      {
+        "titleSlug": "valid-palindrome",
+        "title": "Valid Palindrome",
+        "submission_ids": [
+          "2173178492"
+        ],
+        "last_seen_timestamp": 1792081102
+      },
+      {
+        "titleSlug": "valid-anagram",
+        "title": "Valid Anagram",
+        "submission_ids": [
+          "2172239761",
+          "2172214537"
+        ],
+        "last_seen_timestamp": 1791990529
+      },
+      {
+        "titleSlug": "first-unique-character-in-a-string",
+        "title": "First Unique Character in a String",
+        "submission_ids": [
+          "2171355527"
+        ],
+        "last_seen_timestamp": 1791907844
+      },
+      {
+        "titleSlug": "reverse-integer",
+        "title": "Reverse Integer",
+        "submission_ids": [
+          "2170442531",
+          "2170430910"
+        ],
+        "last_seen_timestamp": 1791825929
+      },
+      {
+        "titleSlug": "reverse-string",
+        "title": "Reverse String",
+        "submission_ids": [
+          "2169381895",
+          "2169381396"
+        ],
+        "last_seen_timestamp": 1791730782
+      },
+      {
+        "titleSlug": "diagonal-traverse",
+        "title": "Diagonal Traverse",
+        "submission_ids": [
+          "2168455220",
+          "2168424769"
+        ],
+        "last_seen_timestamp": 1791651481
+      },
+      {
+        "titleSlug": "add-binary",
+        "title": "Add Binary",
+        "submission_ids": [
+          "2167504319",
+          "2167483345"
+        ],
+        "last_seen_timestamp": 1791565585
+      },
+      {
+        "titleSlug": "spiral-matrix",
+        "title": "Spiral Matrix",
+        "submission_ids": [
+          "2166569638"
+        ],
+        "last_seen_timestamp": 1791479399
+      },
+      {
+        "titleSlug": "pascals-triangle-ii",
+        "title": "Pascal's Triangle II",
+        "submission_ids": [
+          "2165668031",
+          "2165653700"
+        ],
+        "last_seen_timestamp": 1791398893
+      },
+      {
+        "titleSlug": "array-partition",
+        "title": "Array Partition",
+        "submission_ids": [
+          "2164623080",
+          "2164611168"
+        ],
+        "last_seen_timestamp": 1791312109
+      },
+      {
+        "titleSlug": "minimum-size-subarray-sum",
+        "title": "Minimum Size Subarray Sum",
+        "submission_ids": [
+          "2163418165"
+        ],
+        "last_seen_timestamp": 1791221068
+      },
+      {
+        "titleSlug": "two-sum-ii-input-array-is-sorted",
+        "title": "Two Sum II - Input Array Is Sorted",
+        "submission_ids": [
+          "2162467511"
+        ],
+        "last_seen_timestamp": 1791140908
+      },
+      {
+        "titleSlug": "pascals-triangle",
+        "title": "Pascal's Triangle",
+        "submission_ids": [
+          "2162449405",
+          "2161321630"
+        ],
+        "last_seen_timestamp": 1791139468
+      },
+      {
+        "titleSlug": "largest-number-at-least-twice-of-others",
+        "title": "Largest Number At Least Twice of Others",
+        "submission_ids": [
+          "2160452570"
+        ],
+        "last_seen_timestamp": 1790964853
+      },
+      {
+        "titleSlug": "find-pivot-index",
+        "title": "Find Pivot Index",
+        "submission_ids": [
+          "2159450166",
+          "2159413338"
+        ],
+        "last_seen_timestamp": 1790875240
+      },
+      {
+        "titleSlug": "find-all-numbers-disappeared-in-an-array",
+        "title": "Find All Numbers Disappeared in an Array",
+        "submission_ids": [
+          "2158386945",
+          "2158381466"
+        ],
+        "last_seen_timestamp": 1790786918
+      },
+      {
+        "titleSlug": "third-maximum-number",
+        "title": "Third Maximum Number",
+        "submission_ids": [
+          "2158355128",
+          "2157385959",
+          "2157383203",
+          "2157356908"
+        ],
+        "last_seen_timestamp": 1790785237
+      },
+      {
+        "titleSlug": "height-checker",
+        "title": "Height Checker",
+        "submission_ids": [
+          "2156286613",
+          "2156269907"
+        ],
+        "last_seen_timestamp": 1790616825
+      },
+      {
+        "titleSlug": "sort-array-by-parity",
+        "title": "Sort Array By Parity",
+        "submission_ids": [
+          "2155164716",
+          "2155158165",
+          "2155139735",
+          "2155123804"
+        ],
+        "last_seen_timestamp": 1790527328
+      },
+      {
+        "titleSlug": "replace-elements-with-greatest-element-on-right-side",
+        "title": "Replace Elements with Greatest Element on Right Side",
+        "submission_ids": [
+          "2153245907"
+        ],
+        "last_seen_timestamp": 1790358718
+      },
+      {
+        "titleSlug": "valid-mountain-array",
+        "title": "Valid Mountain Array",
+        "submission_ids": [
+          "2152269247"
+        ],
+        "last_seen_timestamp": 1790270791
+      },
+      {
+        "titleSlug": "check-if-n-and-its-double-exist",
+        "title": "Check If N and Its Double Exist",
+        "submission_ids": [
+          "2152246445"
+        ],
+        "last_seen_timestamp": 1790269684
+      },
+      {
+        "titleSlug": "remove-element",
+        "title": "Remove Element",
+        "submission_ids": [
+          "2151126790",
+          "2151124227"
+        ],
+        "last_seen_timestamp": 1790181611
+      },
+      {
+        "titleSlug": "merge-sorted-array",
+        "title": "Merge Sorted Array",
+        "submission_ids": [
+          "2150149799",
+          "2150141905"
+        ],
+        "last_seen_timestamp": 1790103561
+      }
+    ],
+    "reconciled_problem_slugs": [],
     "live_monitor_cursor": 0
   }
 }
