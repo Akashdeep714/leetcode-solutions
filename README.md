@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **20** |
-| 🟢 Easy | **16** |
+| 🧩 Total Solved | **21** |
+| 🟢 Easy | **17** |
 | 🟡 Medium | **4** |
 | 🔴 Hard | **0** |
 
@@ -21,6 +21,7 @@
 | 1 | [Two Sum](solutions/0001-two-sum/) | 🟢 Easy | Java | 2 |
 | 9 | [Palindrome Number](solutions/0009-palindrome-number/) | 🟢 Easy | Java | 1 |
 | 26 | [Remove Duplicates from Sorted Array](solutions/0026-remove-duplicates-from-sorted-array/) | 🟢 Easy | Java | 1 |
+| 28 | [Find the Index of the First Occurrence in a String](solutions/0028-find-the-index-of-the-first-occurrence-in-a-string/) | 🟢 Easy | Java | 1 |
 | 36 | [Valid Sudoku](solutions/0036-valid-sudoku/) | 🟡 Medium | Java | 1 |
 | 48 | [Rotate Image](solutions/0048-rotate-image/) | 🟡 Medium | Java | 2 |
 | 66 | [Plus One](solutions/0066-plus-one/) | 🟢 Easy | Java | 1 |

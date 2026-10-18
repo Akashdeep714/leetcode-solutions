@@ -1,0 +1,56 @@
+{
+  "number": 28,
+  "title": "Find the Index of the First Occurrence in a String",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0028-find-the-index-of-the-first-occurrence-in-a-string",
+  "slug": "find-the-index-of-the-first-occurrence-in-a-string",
+  "submission_id": "2174693816",
+  "runtime": 191,
+  "runtime_display": "191 ms",
+  "memory": 42696000,
+  "memory_display": "42.7 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2174693816",
+      "submission_ids": [
+        "2174693816",
+        "2174696223"
+      ],
+      "solution_hash": "113a68b2189b0ae6fe3b4b98b8e3de9343ad384c2884ff197686d4d29af36562",
+      "approach_key": "brute-force-substring-search",
+      "approach_name": "Brute Force Character-by-Character Search",
+      "runtime": 191,
+      "runtime_display": "191 ms",
+      "memory": 42696000,
+      "memory_display": "42.7 MB",
+      "analysis": {
+        "pattern": "Brute Force / Sliding Window",
+        "problem_summary": "Find the index of the first occurrence of needle in haystack, or return -1 if needle is not present.",
+        "intuition": "Try every starting index in haystack and check character by character if needle matches starting at that position.",
+        "approach": [
+          "Check if haystack is shorter than needle; if so, return -1 immediately.",
+          "Iterate over possible starting indices i in haystack.",
+          "For each index i, compare characters of needle with haystack sequentially using a second pointer j.",
+          "If a character mismatch occurs, stop checking the current position and move to the next starting index i.",
+          "If all characters of needle match (j reaches needle.length()), return the starting index i.",
+          "If the loops terminate without finding a match, return -1."
+        ],
+        "why_it_works": "Checking every candidate starting index exhaustively guarantees that the first matching position will be discovered if it exists.",
+        "time_complexity": "O(N * M)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "The naive string search approach requires no additional memory, but worst-case performance is quadratic when many partial matches occur.",
+        "time_explanation": "Let N be haystack.length() and M be needle.length(). In the worst case, the outer loop runs up to N times and the inner loop checks M characters, yielding O(N * M) time complexity.",
+        "space_explanation": "Only a few primitive loop variables are used, operating directly on the input strings without allocating auxiliary memory."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}

@@ -42,7 +42,9 @@
     "2151146279",
     "2154203285",
     "2154233044",
-    "2161269484"
+    "2161269484",
+    "2174693816",
+    "2174696223"
   ],
   "historical_backfill": {
     "version": 6,
@@ -384,22 +386,15 @@
       "2148952339",
       "2148961519",
       "2150130175",
-      "2150137953"
+      "2150137953",
+      "2174693816",
+      "2174696223"
     ],
-    "day": "2026-10-17",
-    "problems_completed_today": 0,
-    "gemini_requests_used_today": 0,
-    "gemini_blocked_today": true,
+    "day": "2026-10-18",
+    "problems_completed_today": 1,
+    "gemini_requests_used_today": 1,
+    "gemini_blocked_today": false,
     "pending_new_problems": [
-      {
-        "titleSlug": "find-the-index-of-the-first-occurrence-in-a-string",
-        "title": "Find the Index of the First Occurrence in a String",
-        "submission_ids": [
-          "2174696223",
-          "2174693816"
-        ],
-        "last_seen_timestamp": 1792253013
-      },
       {
         "titleSlug": "string-to-integer-atoi",
         "title": "String to Integer (atoi)",
@@ -623,7 +618,9 @@
         "last_seen_timestamp": 1790103561
       }
     ],
-    "reconciled_problem_slugs": [],
+    "reconciled_problem_slugs": [
+      "find-the-index-of-the-first-occurrence-in-a-string"
+    ],
     "live_monitor_cursor": 0,
     "gemini_api_key_fingerprint": "b62547aacf7d0e48c1cf0dad93162ba1eda08fd97d007a3ae0ece8ed317c2e75"
   }
