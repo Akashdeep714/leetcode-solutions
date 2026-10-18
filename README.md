@@ -7,9 +7,9 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **21** |
+| 🧩 Total Solved | **22** |
 | 🟢 Easy | **17** |
-| 🟡 Medium | **4** |
+| 🟡 Medium | **5** |
 | 🔴 Hard | **0** |
 
 ---
@@ -19,6 +19,7 @@
 | # | Problem | Difficulty | Languages | Approaches |
 |---:|---|---|---|---:|
 | 1 | [Two Sum](solutions/0001-two-sum/) | 🟢 Easy | Java | 2 |
+| 8 | [String to Integer (atoi)](solutions/0008-string-to-integer-atoi/) | 🟡 Medium | Java | 1 |
 | 9 | [Palindrome Number](solutions/0009-palindrome-number/) | 🟢 Easy | Java | 1 |
 | 26 | [Remove Duplicates from Sorted Array](solutions/0026-remove-duplicates-from-sorted-array/) | 🟢 Easy | Java | 1 |
 | 28 | [Find the Index of the First Occurrence in a String](solutions/0028-find-the-index-of-the-first-occurrence-in-a-string/) | 🟢 Easy | Java | 1 |
