@@ -375,6 +375,13 @@
         "frontendId": "28",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-10-17T16:03:33+00:00"
+      },
+      {
+        "titleSlug": "longest-common-prefix",
+        "title": "Longest Common Prefix",
+        "frontendId": "14",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-10-18T16:34:31+00:00"
       }
     ],
     "problem_index": 20,
@@ -403,6 +410,15 @@
     "gemini_requests_used_today": 2,
     "gemini_blocked_today": true,
     "pending_new_problems": [
+      {
+        "titleSlug": "longest-common-prefix",
+        "title": "Longest Common Prefix",
+        "submission_ids": [
+          "2175553075",
+          "2175549869"
+        ],
+        "last_seen_timestamp": 1792341270
+      },
       {
         "titleSlug": "valid-palindrome",
         "title": "Valid Palindrome",
