@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **23** |
-| 🟢 Easy | **18** |
+| 🧩 Total Solved | **24** |
+| 🟢 Easy | **19** |
 | 🟡 Medium | **5** |
 | 🔴 Hard | **0** |
 
@@ -21,6 +21,7 @@
 | 1 | [Two Sum](solutions/0001-two-sum/) | 🟢 Easy | Java | 2 |
 | 8 | [String to Integer (atoi)](solutions/0008-string-to-integer-atoi/) | 🟡 Medium | Java | 1 |
 | 9 | [Palindrome Number](solutions/0009-palindrome-number/) | 🟢 Easy | Java | 1 |
+| 14 | [Longest Common Prefix](solutions/0014-longest-common-prefix/) | 🟢 Easy | Java | 2 |
 | 26 | [Remove Duplicates from Sorted Array](solutions/0026-remove-duplicates-from-sorted-array/) | 🟢 Easy | Java | 1 |
 | 28 | [Find the Index of the First Occurrence in a String](solutions/0028-find-the-index-of-the-first-occurrence-in-a-string/) | 🟢 Easy | Java | 1 |
 | 36 | [Valid Sudoku](solutions/0036-valid-sudoku/) | 🟡 Medium | Java | 1 |

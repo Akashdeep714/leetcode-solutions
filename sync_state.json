@@ -51,6 +51,11 @@
     "2174028558",
     "2174693816",
     "2174696223",
+    "2175549869",
+    "2175553075",
+    "2175604842",
+    "2175614562",
+    "2175618405",
     "2176493004"
   ],
   "historical_backfill": {
@@ -409,25 +414,18 @@
       "2174028558",
       "2174693816",
       "2174696223",
+      "2175549869",
+      "2175553075",
+      "2175604842",
+      "2175614562",
+      "2175618405",
       "2176493004"
     ],
     "day": "2026-10-20",
-    "problems_completed_today": 1,
-    "gemini_requests_used_today": 1,
+    "problems_completed_today": 2,
+    "gemini_requests_used_today": 2,
     "gemini_blocked_today": false,
     "pending_new_problems": [
-      {
-        "titleSlug": "longest-common-prefix",
-        "title": "Longest Common Prefix",
-        "submission_ids": [
-          "2175553075",
-          "2175549869",
-          "2175618405",
-          "2175614562",
-          "2175604842"
-        ],
-        "last_seen_timestamp": 1792345782
-      },
       {
         "titleSlug": "valid-palindrome",
         "title": "Valid Palindrome",
@@ -633,6 +631,7 @@
     ],
     "reconciled_problem_slugs": [
       "find-the-index-of-the-first-occurrence-in-a-string",
+      "longest-common-prefix",
       "reverse-string",
       "string-to-integer-atoi"
     ],

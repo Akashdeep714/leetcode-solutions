@@ -1,0 +1,91 @@
+{
+  "number": 14,
+  "title": "Longest Common Prefix",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0014-longest-common-prefix",
+  "slug": "longest-common-prefix",
+  "submission_id": "2175549869",
+  "runtime": 1,
+  "runtime_display": "1 ms",
+  "memory": 42884000,
+  "memory_display": "42.9 MB",
+  "solution_count": 2,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2175549869",
+      "submission_ids": [
+        "2175549869",
+        "2175553075",
+        "2175604842"
+      ],
+      "solution_hash": "ccf63d8b6dbe2dcc8038f53c544e61de30ce18e930530aa6ed36b1570abf835c",
+      "approach_key": "horizontal-pairwise-comparison",
+      "approach_name": "Horizontal Pairwise Comparison",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 42884000,
+      "memory_display": "42.9 MB",
+      "analysis": {
+        "pattern": "Horizontal Scanning / Pairwise Comparison",
+        "problem_summary": "Find the longest prefix shared among all strings in an array.",
+        "intuition": "The common prefix of all strings cannot be longer than the common prefix of any adjacent pair of strings. By comparing string pairs sequentially (`strs[i]` and `strs[i+1]`), we can dynamically update the maximum allowed length of the common prefix.",
+        "approach": [
+          "Initialize `minLen` with the length of the first string.",
+          "Iterate through adjacent string pairs in the array from `i = 0` to `strs.length - 2`.",
+          "For each pair, iterate character by character up to the minimum length of the two strings.",
+          "Stop matching when characters differ or `minLen` bound is reached, then update `minLen` with the matched count.",
+          "Return the substring of the first string from index `0` to `minLen`."
+        ],
+        "why_it_works": "The prefix property is associative: `LCP(S1, S2, S3) = LCP(LCP(S1, S2), S3)`. Thus, continuously bounding the prefix length across adjacent string comparisons guarantees the correct overall common prefix length.",
+        "time_complexity": "O(S)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Sequential pairwise comparison reduces the problem to repeated two-string prefix checks, updating a single boundary variable.",
+        "time_explanation": "In the worst case where all strings are identical, every character in all strings is inspected once, yielding O(S) time where S is the total number of characters across all strings.",
+        "space_explanation": "Only primitive integer variables are used for index bounds, requiring O(1) auxiliary space."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2175614562",
+      "submission_ids": [
+        "2175614562",
+        "2175618405"
+      ],
+      "solution_hash": "c26b493456d1287eae86dfc3969652d99cc309ac936e3c22f1d092b085a15cc0",
+      "approach_key": "vertical-scanning",
+      "approach_name": "Vertical Character-by-Character Scanning",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 42844000,
+      "memory_display": "42.8 MB",
+      "analysis": {
+        "pattern": "Vertical Scanning",
+        "problem_summary": "Determine the longest prefix common to all strings in an array.",
+        "intuition": "Instead of comparing entire string pairs horizontally, compare characters at column index `i` across all strings. The moment any string differs at index `i`, the prefix ends immediately.",
+        "approach": [
+          "Find the minimum length among all strings to bound the search.",
+          "Iterate index `i` from `0` to `minLen - 1` (column by column).",
+          "For each index `i`, iterate through all strings `j` in the array (row by row).",
+          "If `strs[j].charAt(i)` does not match `strs[0].charAt(i)`, return the substring `strs[0][0...i]` immediately.",
+          "If the outer loop finishes without mismatch, return `strs[0][0...minLen]`."
+        ],
+        "why_it_works": "Vertical scanning checks candidate prefix positions in ascending order. Since a common prefix requires identical characters at every column index for all strings, the first mismatch directly defines the end of the common prefix.",
+        "time_complexity": "O(S)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Vertical scanning allows early exit as soon as a character mismatch occurs at any column index, making it optimal when common prefixes are short.",
+        "time_explanation": "In the worst case, every character in every string is checked, resulting in O(S) total comparisons. In practice, early exit happens as soon as a mismatch is found.",
+        "space_explanation": "Only constant space is used for pointer variables and loop counters."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
