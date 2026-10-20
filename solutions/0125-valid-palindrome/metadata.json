@@ -1,0 +1,57 @@
+{
+  "number": 125,
+  "title": "Valid Palindrome",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0125-valid-palindrome",
+  "slug": "valid-palindrome",
+  "submission_id": "2173178492",
+  "runtime": 2,
+  "runtime_display": "2 ms",
+  "memory": 43760000,
+  "memory_display": "43.8 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2173178492",
+      "submission_ids": [
+        "2173178492"
+      ],
+      "solution_hash": "855897ccbf3ffceca178f2125f2b516cf0e00c05915c7b68ba822e6d0f40e5a5",
+      "approach_key": "two pointers",
+      "approach_name": "Two Pointers",
+      "runtime": 2,
+      "runtime_display": "2 ms",
+      "memory": 43760000,
+      "memory_display": "43.8 MB",
+      "analysis": {
+        "pattern": "Two Pointers",
+        "problem_summary": "Determine if a given string is a palindrome after removing all non-alphanumeric characters and ignoring letter case.",
+        "intuition": "A string is a palindrome if its valid characters match symmetrically from the outside in. Rather than spending extra space creating a cleaned, reversed copy of the string, we can process the string in place using two pointers starting at opposite ends. By skipping non-alphanumeric characters on the fly and comparing lowercase representations of valid characters, we can verify whether the string reads the same forward and backward in a single pass.",
+        "approach": [
+          "Define a helper function `isAlphaNumericCharacter(char c)` that checks whether a character `c` is a lowercase letter ('a'-'z'), uppercase letter ('A'-'Z'), or digit ('0'-'9').",
+          "Initialize two pointers: `i = 0` at the start of the string and `j = s.length() - 1` at the end.",
+          "Enter a `while` loop that runs as long as `i < j`.",
+          "Retrieve `c1 = s.charAt(i)` and `c2 = s.charAt(j)`. If `c1` is not alphanumeric, increment `i` and continue to the next iteration.",
+          "If `c2` is not alphanumeric, decrement `j` and continue to the next iteration.",
+          "When both pointers point to alphanumeric characters, convert `c1` and `c2` to lowercase using `Character.toLowerCase()`. If they are not equal, return `false` immediately.",
+          "If the characters match, increment `i` and decrement `j` to move toward the center.",
+          "If the loop terminates without finding any mismatch, return `true`."
+        ],
+        "why_it_works": "The algorithm maintains the invariant that all filtered alphanumeric pairs outside the window `[i, j]` have been checked and verified to match. By using `continue` statements to skip non-alphanumeric characters, the pointers always align on the next valid forward and backward characters respectively. Converting both to lowercase neutralizes case differences, guaranteeing an accurate check for symmetry without modifying the string or allocating additional memory.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Using two pointers converging from both ends allows you to filter and validate string properties in a single pass without allocating auxiliary memory.",
+        "time_explanation": "Each character in the string is visited at most once by either pointer `i` or pointer `j` as they move toward each other.",
+        "space_explanation": "The algorithm only uses two integer pointers and a few primitive character variables, requiring no extra auxiliary memory."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
