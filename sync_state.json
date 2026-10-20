@@ -43,12 +43,15 @@
     "2154203285",
     "2154233044",
     "2161269484",
+    "2169381396",
+    "2169381895",
     "2174004551",
     "2174011926",
     "2174027517",
     "2174028558",
     "2174693816",
-    "2174696223"
+    "2174696223",
+    "2176493004"
   ],
   "historical_backfill": {
     "version": 6,
@@ -398,28 +401,21 @@
       "2148961519",
       "2150130175",
       "2150137953",
+      "2169381396",
+      "2169381895",
       "2174004551",
       "2174011926",
       "2174027517",
       "2174028558",
       "2174693816",
-      "2174696223"
+      "2174696223",
+      "2176493004"
     ],
-    "day": "2026-10-19",
-    "problems_completed_today": 0,
-    "gemini_requests_used_today": 0,
-    "gemini_blocked_today": true,
+    "day": "2026-10-20",
+    "problems_completed_today": 1,
+    "gemini_requests_used_today": 1,
+    "gemini_blocked_today": false,
     "pending_new_problems": [
-      {
-        "titleSlug": "reverse-string",
-        "title": "Reverse String",
-        "submission_ids": [
-          "2169381895",
-          "2169381396",
-          "2176493004"
-        ],
-        "last_seen_timestamp": 1792433570
-      },
       {
         "titleSlug": "longest-common-prefix",
         "title": "Longest Common Prefix",
@@ -637,6 +633,7 @@
     ],
     "reconciled_problem_slugs": [
       "find-the-index-of-the-first-occurrence-in-a-string",
+      "reverse-string",
       "string-to-integer-atoi"
     ],
     "live_monitor_cursor": 0,

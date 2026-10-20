@@ -1,0 +1,55 @@
+{
+  "number": 344,
+  "title": "Reverse String",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0344-reverse-string",
+  "slug": "reverse-string",
+  "submission_id": "2169381396",
+  "runtime": 0,
+  "runtime_display": "0 ms",
+  "memory": 48324000,
+  "memory_display": "48.3 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2169381396",
+      "submission_ids": [
+        "2169381396",
+        "2169381895",
+        "2176493004"
+      ],
+      "solution_hash": "f60a2f209271f88f96079c99818fcb3cc1f04277025f54fed5c5fc1ff389bd04",
+      "approach_key": "two-pointers-in-place-swap",
+      "approach_name": "Two Pointers Opposite Direction Swap",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 48324000,
+      "memory_display": "48.3 MB",
+      "analysis": {
+        "pattern": "Two Pointers",
+        "problem_summary": "Reverse an array of characters in-place using O(1) extra memory.",
+        "intuition": "To reverse a sequence in-place, the outermost elements must swap positions, followed by the second outermost elements, moving progressively toward the middle.",
+        "approach": [
+          "Initialize two pointers: `i` at index 0 (start) and `j` at index `s.length - 1` (end).",
+          "Iterate while the left pointer `i` has not passed the right pointer `j`.",
+          "Swap the characters at `s[i]` and `s[j]` using a temporary variable `temp`.",
+          "Increment `i` and decrement `j` to move both pointers toward the middle."
+        ],
+        "why_it_works": "Swapping the elements at index `i` and `j` exchanges the $i$-th element from the front with the $i$-th element from the back. Repeating this until the pointers meet effectively mirrors the entire array.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Using two converging pointers is the optimal strategy for in-place array reversal, achieving O(n) time and O(1) auxiliary space.",
+        "time_explanation": "The loop performs $n/2$ iterations, where $n$ is the length of the string array `s`. Each iteration performs constant-time swap operations, resulting in an overall time complexity of $O(n)$.",
+        "space_explanation": "All operations modify the input array directly in-place, using only a constant amount of extra memory for two pointer indices and one temporary character variable."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
