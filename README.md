@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **26** |
-| 🟢 Easy | **21** |
+| 🧩 Total Solved | **27** |
+| 🟢 Easy | **22** |
 | 🟡 Medium | **5** |
 | 🔴 Hard | **0** |
 
@@ -40,6 +40,7 @@
 | 344 | [Reverse String](solutions/0344-reverse-string/) | 🟢 Easy | Java | 1 |
 | 349 | [Intersection of Two Arrays](solutions/0349-intersection-of-two-arrays/) | 🟢 Easy | Java | 1 |
 | 350 | [Intersection of Two Arrays II](solutions/0350-intersection-of-two-arrays-ii/) | 🟢 Easy | Java | 2 |
+| 387 | [First Unique Character in a String](solutions/0387-first-unique-character-in-a-string/) | 🟢 Easy | Java | 1 |
 | 485 | [Max Consecutive Ones](solutions/0485-max-consecutive-ones/) | 🟢 Easy | Java | 1 |
 | 977 | [Squares of a Sorted Array](solutions/0977-squares-of-a-sorted-array/) | 🟢 Easy | Java | 2 |
 | 1089 | [Duplicate Zeros](solutions/1089-duplicate-zeros/) | 🟢 Easy | Java | 2 |

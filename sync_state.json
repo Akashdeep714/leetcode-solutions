@@ -45,6 +45,7 @@
     "2161269484",
     "2169381396",
     "2169381895",
+    "2171355527",
     "2172214537",
     "2172239761",
     "2173178492",
@@ -411,6 +412,7 @@
       "2150137953",
       "2169381396",
       "2169381895",
+      "2171355527",
       "2172214537",
       "2172239761",
       "2173178492",
@@ -428,18 +430,10 @@
       "2176493004"
     ],
     "day": "2026-10-20",
-    "problems_completed_today": 4,
-    "gemini_requests_used_today": 4,
+    "problems_completed_today": 5,
+    "gemini_requests_used_today": 5,
     "gemini_blocked_today": false,
     "pending_new_problems": [
-      {
-        "titleSlug": "first-unique-character-in-a-string",
-        "title": "First Unique Character in a String",
-        "submission_ids": [
-          "2171355527"
-        ],
-        "last_seen_timestamp": 1791907844
-      },
       {
         "titleSlug": "reverse-integer",
         "title": "Reverse Integer",
@@ -620,6 +614,7 @@
     ],
     "reconciled_problem_slugs": [
       "find-the-index-of-the-first-occurrence-in-a-string",
+      "first-unique-character-in-a-string",
       "longest-common-prefix",
       "reverse-string",
       "string-to-integer-atoi",

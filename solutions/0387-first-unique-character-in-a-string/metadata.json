@@ -1,0 +1,56 @@
+{
+  "number": 387,
+  "title": "First Unique Character in a String",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0387-first-unique-character-in-a-string",
+  "slug": "first-unique-character-in-a-string",
+  "submission_id": "2171355527",
+  "runtime": 33,
+  "runtime_display": "33 ms",
+  "memory": 46772000,
+  "memory_display": "46.8 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2171355527",
+      "submission_ids": [
+        "2171355527"
+      ],
+      "solution_hash": "0f02d7a4668aaef7ad5dd87f762b5756759ec0c1c3b474aff2f222774392cf07",
+      "approach_key": "frequency counting hash table",
+      "approach_name": "Frequency Counting / Hash Table",
+      "runtime": 33,
+      "runtime_display": "33 ms",
+      "memory": 46772000,
+      "memory_display": "46.8 MB",
+      "analysis": {
+        "pattern": "Frequency Counting / Hash Table",
+        "problem_summary": "Find the index of the first character in a string that appears exactly once, or return -1 if every character repeats.",
+        "intuition": "To determine whether a character is unique, we must count its total occurrences across the entire string, which cannot be determined in a single pass without knowing future characters. By storing the frequency of every character in a hash map during a first pass, we can perform a second pass from left to right and inspect the frequency of each character in its original order, returning the index of the very first character whose stored count is 1.",
+        "approach": [
+          "Initialize an empty hash map `map` where keys are characters and values are their frequency counts.",
+          "Convert the string `s` into a character array and iterate through each character `c`.",
+          "Update `map` by incrementing the count for `c` using `map.getOrDefault(c, 0) + 1`.",
+          "Iterate through the string `s` by index `i` from `0` to `s.length() - 1`.",
+          "For each character `s.charAt(i)`, retrieve its frequency count from `map`.",
+          "If the frequency count equals `1`, immediately return the current index `i`.",
+          "If the loop completes without finding any character with a count of `1`, return `-1`."
+        ],
+        "why_it_works": "The first pass builds a complete frequency table for all characters in the string. The second pass processes the string in strict left-to-right order, ensuring that the first character evaluated with a count of 1 is mathematically guaranteed to be the first non-repeating character in the string.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Using a two-pass approach—where the first pass gathers global frequencies and the second pass preserves original sequence order—is an effective pattern for order-sensitive unique element lookups.",
+        "time_explanation": "The algorithm iterates through the string of length n twice and performs constant-time hash map insertions and lookups on average.",
+        "space_explanation": "The hash map stores at most 26 key-value pairs because the string consists solely of lowercase English letters, using O(1) auxiliary space."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
