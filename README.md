@@ -7,9 +7,9 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **27** |
+| 🧩 Total Solved | **28** |
 | 🟢 Easy | **22** |
-| 🟡 Medium | **5** |
+| 🟡 Medium | **6** |
 | 🔴 Hard | **0** |
 
 ---
@@ -19,6 +19,7 @@
 | # | Problem | Difficulty | Languages | Approaches |
 |---:|---|---|---|---:|
 | 1 | [Two Sum](solutions/0001-two-sum/) | 🟢 Easy | Java | 2 |
+| 7 | [Reverse Integer](solutions/0007-reverse-integer/) | 🟡 Medium | Java | 1 |
 | 8 | [String to Integer (atoi)](solutions/0008-string-to-integer-atoi/) | 🟡 Medium | Java | 1 |
 | 9 | [Palindrome Number](solutions/0009-palindrome-number/) | 🟢 Easy | Java | 1 |
 | 14 | [Longest Common Prefix](solutions/0014-longest-common-prefix/) | 🟢 Easy | Java | 2 |
