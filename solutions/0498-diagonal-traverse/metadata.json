@@ -1,0 +1,88 @@
+{
+  "number": 498,
+  "title": "Diagonal Traverse",
+  "difficulty": "Medium",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0498-diagonal-traverse",
+  "slug": "diagonal-traverse",
+  "submission_id": "2168424769",
+  "runtime": 6,
+  "runtime_display": "6 ms",
+  "memory": 47588000,
+  "memory_display": "47.6 MB",
+  "solution_count": 2,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2168424769",
+      "submission_ids": [
+        "2168424769"
+      ],
+      "solution_hash": "3bf13696ee1a7b90afb34696ca90c482ea1bb16c617ccc5ca1961ccdfdd0d951",
+      "approach_key": "diagonal-index-iteration-with-reversal",
+      "approach_name": "Diagonal Index Iteration with Alternating Reversal",
+      "runtime": 6,
+      "runtime_display": "6 ms",
+      "memory": 47588000,
+      "memory_display": "47.6 MB",
+      "analysis": {
+        "pattern": "Matrix Diagonal Traversal / Outer Loop by Diagonal Index",
+        "problem_summary": "Return all elements of an m x n matrix in a diagonal zigzag order.",
+        "intuition": "Every cell (r, c) on the same diagonal shares a constant sum i = r + c. There are m + n - 1 total diagonals. By iterating over diagonal indices from 0 to m + n - 2, we can determine the starting boundaries for each diagonal, collect all cells along that diagonal from top-right to bottom-left, and reverse the collected list for alternating diagonals to achieve the required upward movement.",
+        "approach": [
+          "Loop i from 0 to m + n - 2 representing each diagonal index sum.",
+          "Determine the starting row and column indices for the i-th diagonal.",
+          "Traverse down-left along the diagonal (rowIdx++, colIdx--) while remaining within matrix bounds.",
+          "If the diagonal index i is even, store elements in a temporary list and reverse it before adding to the result array to simulate upward traversal.",
+          "If the diagonal index i is odd, append elements directly to the result array."
+        ],
+        "why_it_works": "Cells in any diagonal satisfy r + c = constant. Grouping elements by this property ensures complete and orderly traversal of every diagonal, while selective list reversal correctly matches the required alternating directions.",
+        "time_complexity": "O(m * n)",
+        "space_complexity": "O(min(m, n))",
+        "key_takeaway": "Using the mathematical property (r + c = constant) simplifies boundary determination for matrix diagonals and simplifies direction handling via temporary reversal.",
+        "time_explanation": "Every element of the m x n matrix is visited once during diagonal collection and once during array copy, taking O(m * n) total operations.",
+        "space_explanation": "An auxiliary temporary list is used to store elements of a single diagonal before reversal. The maximum size of a diagonal in an m x n matrix is min(m, n), consuming O(min(m, n)) extra space."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2168455220",
+      "submission_ids": [
+        "2168455220"
+      ],
+      "solution_hash": "e24ceb56cd6b0f0b9f13e77281e3ec8c66024f5d27d5d858ea451ea321238162",
+      "approach_key": "step-by-step-state-simulation",
+      "approach_name": "Step-by-Step Simulation with Boundary Reflection",
+      "runtime": 4,
+      "runtime_display": "4 ms",
+      "memory": 47988000,
+      "memory_display": "48 MB",
+      "analysis": {
+        "pattern": "State Machine / Directional Matrix Simulation",
+        "problem_summary": "Traverse an m x n matrix diagonally in alternating upward and downward directions.",
+        "intuition": "Instead of processing whole diagonals at once, we can simulate the trajectory of a moving point. Maintain a single direction indicator (1 for moving up-right, -1 for moving down-left). Move cell by cell until a boundary is hit, then flip the direction and adjust the row/column to enter the next diagonal.",
+        "approach": [
+          "Initialize pointers rowIdx = 0, colIdx = 0, and dir = 1 (upward-right direction).",
+          "For each step up to m * n, copy mat[rowIdx][colIdx] into the result array.",
+          "Compute the tentative next position: (rowIdx - dir, colIdx + dir).",
+          "Check if the tentative position is out of matrix bounds. If within bounds, update (rowIdx, colIdx) directly.",
+          "If out of bounds, flip direction (dir = -dir) and shift coordinates according to corner/edge conditions (prefer moving right if moving up-right hits a boundary, otherwise move down; prefer moving down if moving down-left hits a boundary, otherwise move right)."
+        ],
+        "why_it_works": "The boundaries of the matrix naturally force a direction flip and a coordinate reset. Explicitly handling boundary conditions keeps coordinate updates correct without requiring auxiliary collections or intermediate lists.",
+        "time_complexity": "O(m * n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Simulating pointer movement with direct boundary reflections allows O(1) extra space matrix traversal without intermediate data structures.",
+        "time_explanation": "The algorithm visits each cell in the m x n matrix exactly once in sequence, performing O(1) coordinate updates per cell, yielding O(m * n) overall time.",
+        "space_explanation": "Only constant O(1) additional variables (pointers and direction flag) are used, excluding the output array."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
