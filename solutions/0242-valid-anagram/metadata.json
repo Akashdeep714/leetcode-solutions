@@ -1,0 +1,87 @@
+{
+  "number": 242,
+  "title": "Valid Anagram",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0242-valid-anagram",
+  "slug": "valid-anagram",
+  "submission_id": "2172214537",
+  "runtime": 3,
+  "runtime_display": "3 ms",
+  "memory": 44340000,
+  "memory_display": "44.3 MB",
+  "solution_count": 2,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2172214537",
+      "submission_ids": [
+        "2172214537"
+      ],
+      "solution_hash": "f6c9fe5af0e4638eda3bfea2c11a0dff0d5d0d3096aff3bb5ca75f89f8c5d4d3",
+      "approach_key": "fixed-frequency-array",
+      "approach_name": "Fixed-Size Frequency Array",
+      "runtime": 3,
+      "runtime_display": "3 ms",
+      "memory": 44340000,
+      "memory_display": "44.3 MB",
+      "analysis": {
+        "pattern": "Frequency Counting / Fixed Bucketing",
+        "problem_summary": "Determine whether string t is a permutation (anagram) of string s.",
+        "intuition": "Since the inputs consist solely of lowercase English letters, a fixed 26-element array can directly map each character to its offset relative to 'a'. Incrementing counts for s and decrementing for t leaves all elements at 0 if and only if the strings are anagrams.",
+        "approach": [
+          "Initialize a fixed-size integer array of length 26 to store character frequencies.",
+          "Traverse string s and increment the array count at index c - 'a' for each character.",
+          "Traverse string t and decrement the array count at index c - 'a' for each character.",
+          "Check the frequency array; if any entry is non-zero, return false. If all entries are zero, return true."
+        ],
+        "why_it_works": "An anagram requires identical character frequencies. By incrementing counts for s and decrementing for t, any mismatch results in a non-zero entry in the frequency array.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "When the alphabet size is small and fixed (such as lowercase English letters), an array-based lookup table avoids hash map overhead and yields O(1) auxiliary space.",
+        "time_explanation": "Iterating over both strings of length n takes O(n) time. Inspecting the 26-element array takes constant O(1) time, resulting in overall O(n) time complexity.",
+        "space_explanation": "The frequency array size is strictly fixed to 26 elements regardless of input string length, using O(1) auxiliary space."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2172239761",
+      "submission_ids": [
+        "2172239761"
+      ],
+      "solution_hash": "6de2d8e914bc47e432b172810ab2e3003e072c6e66d6cd43568a82dfd71241cd",
+      "approach_key": "hash-map-frequency-counter",
+      "approach_name": "Hash Map Frequency Counter",
+      "runtime": 14,
+      "runtime_display": "14 ms",
+      "memory": 46144000,
+      "memory_display": "46.1 MB",
+      "analysis": {
+        "pattern": "Hash Table Frequency Counting",
+        "problem_summary": "Determine whether string t is an anagram of s using dynamic character frequency mapping.",
+        "intuition": "Using a Hash Map dynamically links characters to their net frequencies. This approach requires no assumptions about alphabet boundaries and gracefully handles arbitrary character sets like Unicode.",
+        "approach": [
+          "First compare string lengths; if s.length() != t.length(), return false immediately.",
+          "Initialize a HashMap<Character, Integer> to record net frequencies.",
+          "Iterate through s, incrementing the map entry for each character.",
+          "Iterate through t, decrementing the map entry for each character.",
+          "Iterate over the map keys; if any frequency is non-zero, return false. Otherwise, return true."
+        ],
+        "why_it_works": "By tracking net frequency in a map, matching characters cancel out. If any net count remains non-zero, the two strings do not share identical character counts.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(k)",
+        "key_takeaway": "Using a Hash Map provides flexibility for unbounded character sets (such as Unicode), trading slight memory overhead for generality.",
+        "time_explanation": "Iterating through strings of length n takes O(n) time. Each hash map operation runs in average O(1) time. Checking the distinct keys takes O(k) where k <= n, making the total time complexity O(n).",
+        "space_explanation": "The map stores up to k unique characters from the input strings, requiring O(k) auxiliary space, where k is bounded by the alphabet size."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}

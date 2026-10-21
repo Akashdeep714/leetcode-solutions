@@ -45,6 +45,8 @@
     "2161269484",
     "2169381396",
     "2169381895",
+    "2172214537",
+    "2172239761",
     "2173178492",
     "2174004551",
     "2174011926",
@@ -409,6 +411,8 @@
       "2150137953",
       "2169381396",
       "2169381895",
+      "2172214537",
+      "2172239761",
       "2173178492",
       "2174004551",
       "2174011926",
@@ -424,19 +428,10 @@
       "2176493004"
     ],
     "day": "2026-10-20",
-    "problems_completed_today": 3,
-    "gemini_requests_used_today": 3,
+    "problems_completed_today": 4,
+    "gemini_requests_used_today": 4,
     "gemini_blocked_today": false,
     "pending_new_problems": [
-      {
-        "titleSlug": "valid-anagram",
-        "title": "Valid Anagram",
-        "submission_ids": [
-          "2172239761",
-          "2172214537"
-        ],
-        "last_seen_timestamp": 1791990529
-      },
       {
         "titleSlug": "first-unique-character-in-a-string",
         "title": "First Unique Character in a String",
@@ -628,6 +623,7 @@
       "longest-common-prefix",
       "reverse-string",
       "string-to-integer-atoi",
+      "valid-anagram",
       "valid-palindrome"
     ],
     "live_monitor_cursor": 0,

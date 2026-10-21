@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **25** |
-| 🟢 Easy | **20** |
+| 🧩 Total Solved | **26** |
+| 🟢 Easy | **21** |
 | 🟡 Medium | **5** |
 | 🔴 Hard | **0** |
 
@@ -34,6 +34,7 @@
 | 189 | [Rotate Array](solutions/0189-rotate-array/) | 🟡 Medium | Java | 2 |
 | 217 | [Contains Duplicate](solutions/0217-contains-duplicate/) | 🟢 Easy | Java | 2 |
 | 231 | [Power of Two](solutions/0231-power-of-two/) | 🟢 Easy | Java | 1 |
+| 242 | [Valid Anagram](solutions/0242-valid-anagram/) | 🟢 Easy | Java | 2 |
 | 268 | [Missing Number](solutions/0268-missing-number/) | 🟢 Easy | Java | 2 |
 | 283 | [Move Zeroes](solutions/0283-move-zeroes/) | 🟢 Easy | Java | 2 |
 | 344 | [Reverse String](solutions/0344-reverse-string/) | 🟢 Easy | Java | 1 |
