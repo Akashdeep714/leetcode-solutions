@@ -1,0 +1,90 @@
+{
+  "number": 67,
+  "title": "Add Binary",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0067-add-binary",
+  "slug": "add-binary",
+  "submission_id": "2167483345",
+  "runtime": 1,
+  "runtime_display": "1 ms",
+  "memory": 43340000,
+  "memory_display": "43.3 MB",
+  "solution_count": 2,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2167483345",
+      "submission_ids": [
+        "2167483345"
+      ],
+      "solution_hash": "fec93466c16917e0eb7d34a9c550e038bd3c1524c8cf3fceef9bfd4960f22529",
+      "approach_key": "digit-by-digit-simulation",
+      "approach_name": "Digit-by-Digit Addition Simulation",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 43340000,
+      "memory_display": "43.3 MB",
+      "analysis": {
+        "pattern": "Simulation / Two Pointers",
+        "problem_summary": "Add two binary strings and return their sum as a binary string.",
+        "intuition": "Binary addition can be performed column by column from right to left (least significant bit to most significant bit), carrying over overflow bits just like standard elementary school decimal addition.",
+        "approach": [
+          "Swap strings if necessary so that string 'a' is guaranteed to be at least as long as string 'b'.",
+          "Iterate backwards from the rightmost index of 'a' and 'b', maintaining a carry variable initialized to 0.",
+          "At each index, sum the carry and the current binary digits from 'a' and 'b' (if within bounds of 'b').",
+          "Append the sum modulo 2 (sum % 2) to a StringBuilder, and update carry to sum divided by 2 (sum / 2).",
+          "If a carry remains after traversing all characters, append 1 to the StringBuilder.",
+          "Reverse the StringBuilder and return the result as a string."
+        ],
+        "why_it_works": "Adding two single bits along with a carry yields a sum between 0 and 3. The least significant bit of this total (sum % 2) represents the bit at the current position, while the most significant bit (sum / 2) becomes the carry for the next position.",
+        "time_complexity": "O(max(N, M))",
+        "space_complexity": "O(max(N, M))",
+        "key_takeaway": "Digit-by-digit string traversal avoids integer overflow limits, allowing arbitrary length binary string addition in linear time.",
+        "time_explanation": "Traversing the input strings from right to left takes O(max(N, M)) time, where N and M are the lengths of strings 'a' and 'b'. Reversing the result StringBuilder also takes O(max(N, M)) time.",
+        "space_explanation": "The extra memory is used by the StringBuilder to construct the result string, requiring space proportional to the maximum input string length plus at most one extra bit for a final carry."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2167504319",
+      "submission_ids": [
+        "2167504319"
+      ],
+      "solution_hash": "301a58fa69bfc38cd5edc21a66ed60fa4fab0d268b678a7e3567ffa3d60307a1",
+      "approach_key": "biginteger-bitwise-addition",
+      "approach_name": "Bitwise Addition using BigInteger",
+      "runtime": 7,
+      "runtime_display": "7 ms",
+      "memory": 44800000,
+      "memory_display": "44.8 MB",
+      "analysis": {
+        "pattern": "Bit Manipulation / Arbitrary Precision Arithmetic",
+        "problem_summary": "Add two binary strings and return their sum as a binary string.",
+        "intuition": "Addition without arithmetic operators can be achieved using bitwise XOR to compute sums without carry, and bitwise AND shifted left by one to compute carries, repeating until no carry remains.",
+        "approach": [
+          "Parse input binary strings into Java BigInteger objects using radix 2.",
+          "Iterate in a loop while the second BigInteger (representing current carries) is non-zero.",
+          "In each step, compute bitwise XOR between the two BigIntegers to get the sum without carry.",
+          "Compute bitwise AND between the two BigIntegers and shift left by 1 to compute the propagated carry.",
+          "Update the first BigInteger to the XOR sum and the second BigInteger to the shifted carry.",
+          "Once the carry becomes zero, format the final BigInteger back to a base-2 binary string."
+        ],
+        "why_it_works": "Bitwise XOR produces 1 when exactly one input bit is 1 (half-adder sum), while bitwise AND produces 1 only when both input bits are 1 (half-adder carry). Shifting the carry left by 1 moves carry bits into their correct target column for the next addition iteration.",
+        "time_complexity": "O(max(N, M)^2)",
+        "space_complexity": "O(max(N, M))",
+        "key_takeaway": "Full adder logic can be generalized to multi-bit numbers using bitwise XOR and left-shifted bitwise AND.",
+        "time_explanation": "Parsing strings to BigInteger takes O(max(N, M)) time. The bitwise addition loop executes at most O(max(N, M)) times (bounded by the longest continuous carry sequence), and each BigInteger bitwise operation on max(N, M) bits takes linear time, leading to O(max(N, M)^2) worst-case time complexity.",
+        "space_explanation": "BigInteger instances allocate dynamic arrays proportional to the number of bits required to store numbers up to max(N, M) bits in length."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}

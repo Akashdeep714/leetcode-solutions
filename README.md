@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **29** |
-| 🟢 Easy | **22** |
+| 🧩 Total Solved | **30** |
+| 🟢 Easy | **23** |
 | 🟡 Medium | **7** |
 | 🔴 Hard | **0** |
 
@@ -28,6 +28,7 @@
 | 36 | [Valid Sudoku](solutions/0036-valid-sudoku/) | 🟡 Medium | Java | 1 |
 | 48 | [Rotate Image](solutions/0048-rotate-image/) | 🟡 Medium | Java | 2 |
 | 66 | [Plus One](solutions/0066-plus-one/) | 🟢 Easy | Java | 1 |
+| 67 | [Add Binary](solutions/0067-add-binary/) | 🟢 Easy | Java | 2 |
 | 121 | [Best Time to Buy and Sell Stock](solutions/0121-best-time-to-buy-and-sell-stock/) | 🟢 Easy | Java | 1 |
 | 122 | [Best Time to Buy and Sell Stock II](solutions/0122-best-time-to-buy-and-sell-stock-ii/) | 🟡 Medium | Java | 1 |
 | 125 | [Valid Palindrome](solutions/0125-valid-palindrome/) | 🟢 Easy | Java | 1 |
