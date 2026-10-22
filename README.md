@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **32** |
-| 🟢 Easy | **24** |
+| 🧩 Total Solved | **33** |
+| 🟢 Easy | **25** |
 | 🟡 Medium | **8** |
 | 🔴 Hard | **0** |
 
@@ -47,6 +47,7 @@
 | 387 | [First Unique Character in a String](solutions/0387-first-unique-character-in-a-string/) | 🟢 Easy | Java | 1 |
 | 485 | [Max Consecutive Ones](solutions/0485-max-consecutive-ones/) | 🟢 Easy | Java | 1 |
 | 498 | [Diagonal Traverse](solutions/0498-diagonal-traverse/) | 🟡 Medium | Java | 2 |
+| 561 | [Array Partition](solutions/0561-array-partition/) | 🟢 Easy | Java | 2 |
 | 977 | [Squares of a Sorted Array](solutions/0977-squares-of-a-sorted-array/) | 🟢 Easy | Java | 2 |
 | 1089 | [Duplicate Zeros](solutions/1089-duplicate-zeros/) | 🟢 Easy | Java | 2 |
 | 1295 | [Find Numbers with Even Number of Digits](solutions/1295-find-numbers-with-even-number-of-digits/) | 🟢 Easy | Java | 4 |

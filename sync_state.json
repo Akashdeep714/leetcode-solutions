@@ -43,6 +43,8 @@
     "2154203285",
     "2154233044",
     "2161269484",
+    "2164611168",
+    "2164623080",
     "2165653700",
     "2165668031",
     "2166569638",
@@ -419,6 +421,8 @@
       "2148961519",
       "2150130175",
       "2150137953",
+      "2164611168",
+      "2164623080",
       "2165653700",
       "2165668031",
       "2166569638",
@@ -447,20 +451,11 @@
       "2175618405",
       "2176493004"
     ],
-    "day": "2026-10-21",
-    "problems_completed_today": 5,
-    "gemini_requests_used_today": 5,
-    "gemini_blocked_today": false,
+    "day": "2026-10-22",
+    "problems_completed_today": 1,
+    "gemini_requests_used_today": 1,
+    "gemini_blocked_today": true,
     "pending_new_problems": [
-      {
-        "titleSlug": "array-partition",
-        "title": "Array Partition",
-        "submission_ids": [
-          "2164623080",
-          "2164611168"
-        ],
-        "last_seen_timestamp": 1791312109
-      },
       {
         "titleSlug": "minimum-size-subarray-sum",
         "title": "Minimum Size Subarray Sum",
@@ -588,6 +583,7 @@
     ],
     "reconciled_problem_slugs": [
       "add-binary",
+      "array-partition",
       "diagonal-traverse",
       "find-the-index-of-the-first-occurrence-in-a-string",
       "first-unique-character-in-a-string",

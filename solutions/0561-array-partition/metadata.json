@@ -1,0 +1,86 @@
+{
+  "number": 561,
+  "title": "Array Partition",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0561-array-partition",
+  "slug": "array-partition",
+  "submission_id": "2164611168",
+  "runtime": 18,
+  "runtime_display": "18 ms",
+  "memory": 49748000,
+  "memory_display": "49.7 MB",
+  "solution_count": 2,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2164611168",
+      "submission_ids": [
+        "2164611168"
+      ],
+      "solution_hash": "ca287f42671f81ff15e59ca54fa0facf7338538aade0e08b70c3bd2910261785",
+      "approach_key": "sorting-greedy",
+      "approach_name": "Sorting with Greedy Selection",
+      "runtime": 18,
+      "runtime_display": "18 ms",
+      "memory": 49748000,
+      "memory_display": "49.7 MB",
+      "analysis": {
+        "pattern": "Greedy / Sorting",
+        "problem_summary": "Pair 2n integers into n pairs such that the sum of the minimum of each pair is maximized.",
+        "intuition": "To maximize the sum of minimums in pairs, we want to minimize the loss caused by taking the smaller element of each pair. By sorting the numbers in ascending order and pairing adjacent elements (e.g., (nums[0], nums[1]), (nums[2], nums[3])), each smaller element is paired with the smallest possible element that is larger than or equal to it. Therefore, the sum of all elements at even indices yields the optimal total sum.",
+        "approach": [
+          "Sort the input array 'nums' in non-decreasing order using standard comparison sort.",
+          "Initialize a variable 'maxSum' to 0.",
+          "Iterate through the sorted array stepping by 2 (i.e., i = 0, 2, 4, ...).",
+          "Add nums[i] to 'maxSum' at each step and return the result."
+        ],
+        "why_it_works": "In any pair (a, b) with a <= b, the element 'b' is discarded and 'a' contributes to the sum. To waste as little value as possible, 'b' should be as close to 'a' as possible. Sorting guarantees adjacent elements are closest in value.",
+        "time_complexity": "O(N log N)",
+        "space_complexity": "O(log N)",
+        "key_takeaway": "When pairing elements to maximize pair minimums, sorting ensures adjacent elements minimize the 'waste' of larger numbers.",
+        "time_explanation": "Sorting the array of size N takes O(N log N) time using Java's dual-pivot Quicksort. The subsequent linear traversal stepping by 2 takes O(N) time, yielding O(N log N) overall.",
+        "space_explanation": "Java's Arrays.sort() for primitive integer arrays uses dual-pivot Quicksort, requiring O(log N) auxiliary recursion stack space."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2164623080",
+      "submission_ids": [
+        "2164623080"
+      ],
+      "solution_hash": "95d10a56b3f08e0eddc5b8163b5aae00840639ce2e5cea00e5082cd93ed85610",
+      "approach_key": "counting-sort-greedy",
+      "approach_name": "Counting Sort / Frequency Array",
+      "runtime": 6,
+      "runtime_display": "6 ms",
+      "memory": 48468000,
+      "memory_display": "48.5 MB",
+      "analysis": {
+        "pattern": "Counting Sort / Bucket Array",
+        "problem_summary": "Pair 2n integers into n pairs to maximize the sum of minimums, utilizing bounded integer values for optimization.",
+        "intuition": "Since the constraint bounds the input values (-10,000 to 10,000), we can avoid the O(N log N) sorting overhead by counting value occurrences in a frequency array. Traversing this frequency array sequentially naturally yields elements in sorted order, allowing us to accumulate every second element using a parity tracker.",
+        "approach": [
+          "Create a frequency array of size 20,001 (offsetting numbers by +10,000 to handle negative values).",
+          "Iterate through 'nums' to count the frequency of each element.",
+          "Initialize a boolean flag 'isEvenIndex' to true to track whether the current element instance falls on an even index in the conceptual sorted order.",
+          "Iterate through the frequency array. While count > 0, add the element value to 'maxSum' if 'isEvenIndex' is true, decrement the count, and flip 'isEvenIndex'."
+        ],
+        "why_it_works": "Counting sort implicitly sorts elements in O(N + K) linear time. Toggling a boolean flag for each instance of a value correctly identifies elements that would occupy even indices in a fully sorted array.",
+        "time_complexity": "O(N + K)",
+        "space_complexity": "O(K)",
+        "key_takeaway": "When input values are bounded within a small known range, counting sort replaces comparison sorting for linear-time performance.",
+        "time_explanation": "Populating the frequency array takes O(N) time for N elements. Iterating over the fixed frequency array of range K = 20,001 takes O(K) time, giving a total runtime of O(N + K).",
+        "space_explanation": "Requires a frequency array of size 2 * 10,000 + 1 = 20,001, which uses O(K) constant additional space."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
