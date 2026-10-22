@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **31** |
-| 🟢 Easy | **23** |
+| 🧩 Total Solved | **32** |
+| 🟢 Easy | **24** |
 | 🟡 Medium | **8** |
 | 🔴 Hard | **0** |
 
@@ -30,6 +30,7 @@
 | 54 | [Spiral Matrix](solutions/0054-spiral-matrix/) | 🟡 Medium | Java | 1 |
 | 66 | [Plus One](solutions/0066-plus-one/) | 🟢 Easy | Java | 1 |
 | 67 | [Add Binary](solutions/0067-add-binary/) | 🟢 Easy | Java | 2 |
+| 119 | [Pascal's Triangle II](solutions/0119-pascal-s-triangle-ii/) | 🟢 Easy | Java | 2 |
 | 121 | [Best Time to Buy and Sell Stock](solutions/0121-best-time-to-buy-and-sell-stock/) | 🟢 Easy | Java | 1 |
 | 122 | [Best Time to Buy and Sell Stock II](solutions/0122-best-time-to-buy-and-sell-stock-ii/) | 🟡 Medium | Java | 1 |
 | 125 | [Valid Palindrome](solutions/0125-valid-palindrome/) | 🟢 Easy | Java | 1 |

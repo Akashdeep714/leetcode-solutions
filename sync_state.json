@@ -43,6 +43,8 @@
     "2154203285",
     "2154233044",
     "2161269484",
+    "2165653700",
+    "2165668031",
     "2166569638",
     "2167483345",
     "2167504319",
@@ -417,6 +419,8 @@
       "2148961519",
       "2150130175",
       "2150137953",
+      "2165653700",
+      "2165668031",
       "2166569638",
       "2167483345",
       "2167504319",
@@ -444,19 +448,10 @@
       "2176493004"
     ],
     "day": "2026-10-21",
-    "problems_completed_today": 4,
-    "gemini_requests_used_today": 4,
+    "problems_completed_today": 5,
+    "gemini_requests_used_today": 5,
     "gemini_blocked_today": false,
     "pending_new_problems": [
-      {
-        "titleSlug": "pascals-triangle-ii",
-        "title": "Pascal's Triangle II",
-        "submission_ids": [
-          "2165668031",
-          "2165653700"
-        ],
-        "last_seen_timestamp": 1791398893
-      },
       {
         "titleSlug": "array-partition",
         "title": "Array Partition",
@@ -597,6 +592,7 @@
       "find-the-index-of-the-first-occurrence-in-a-string",
       "first-unique-character-in-a-string",
       "longest-common-prefix",
+      "pascals-triangle-ii",
       "reverse-integer",
       "reverse-string",
       "spiral-matrix",

@@ -1,0 +1,88 @@
+{
+  "number": 119,
+  "title": "Pascal's Triangle II",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0119-pascal-s-triangle-ii",
+  "slug": "pascals-triangle-ii",
+  "submission_id": "2165653700",
+  "runtime": 1,
+  "runtime_display": "1 ms",
+  "memory": 42804000,
+  "memory_display": "42.8 MB",
+  "solution_count": 2,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2165653700",
+      "submission_ids": [
+        "2165653700"
+      ],
+      "solution_hash": "de99fe9a890ee32c1930199c64efab34c52409fe0fc44e6ee901bf4262a5660b",
+      "approach_key": "dp-row-by-row",
+      "approach_name": "Iterative Row-by-Row Dynamic Programming",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 42804000,
+      "memory_display": "42.8 MB",
+      "analysis": {
+        "pattern": "Dynamic Programming",
+        "problem_summary": "Return the rowIndex-th (0-indexed) row of Pascal's triangle.",
+        "intuition": "Each entry in Pascal's triangle (except the boundaries) is the sum of the two adjacent entries in the row directly above it. We can start with the 0-th row containing just [1] and iteratively generate each subsequent row up to rowIndex using the previous row's values.",
+        "approach": [
+          "Initialize the 0-th row as a list with a single element: [1].",
+          "Iterate through row indices from 1 up to rowIndex.",
+          "For each new row, set the boundary element to 1, then calculate intermediate elements by summing prev.get(i) and prev.get(i - 1).",
+          "Append a final 1 to the current row and update the previous row pointer to reference the current row.",
+          "Return the last constructed row after reaching rowIndex."
+        ],
+        "why_it_works": "By definition, C(n, k) = C(n - 1, k - 1) + C(n - 1, k). Building rows sequentially guarantees that all values from row (n - 1) are computed before row n needs them.",
+        "time_complexity": "O(k^2)",
+        "space_complexity": "O(k)",
+        "key_takeaway": "Simulating the row-by-row additive construction directly mimics Pascal's definition and requires space for only the current and previous rows.",
+        "time_explanation": "Generating row i requires computing i + 1 elements. Summing across all rows from 0 to k takes 1 + 2 + ... + (k + 1) = O(k^2) total operations, where k is rowIndex.",
+        "space_explanation": "At any given point, only two rows (the previous row and the current row being built) are kept in memory, each using at most O(k) extra space."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2165668031",
+      "submission_ids": [
+        "2165668031"
+      ],
+      "solution_hash": "dc69f8b3747de273c4130c0a7b68f174beb426b46ac666553c0ebb27a2af770f",
+      "approach_key": "combinatorial-math-formula",
+      "approach_name": "Combinatorial Combination Formula",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 42404000,
+      "memory_display": "42.4 MB",
+      "analysis": {
+        "pattern": "Math / Combinatorics",
+        "problem_summary": "Return the rowIndex-th (0-indexed) row of Pascal's triangle.",
+        "intuition": "The elements of the n-th row in Pascal's triangle correspond to the binomial coefficients C(n, 0), C(n, 1), ..., C(n, n). Consecutive coefficients satisfy the mathematical recurrence C(n, i) = C(n, i - 1) * (n - i + 1) / i. This allows each element to be computed in O(1) time directly from the preceding element without computing intermediate rows.",
+        "approach": [
+          "Initialize the result row list starting with the first element C(n, 0) = 1.",
+          "Iterate i from 1 to rowIndex.",
+          "Compute C(n, i) from C(n, i - 1) using the formula: C(n, i) = C(n, i - 1) * (rowIndex - i + 1) / i.",
+          "Use 64-bit integer arithmetic (long) during multiplication to prevent integer overflow before dividing by i.",
+          "Cast the result to an integer and append it to the row."
+        ],
+        "why_it_works": "The ratio C(n, i) / C(n, i - 1) simplifies algebraically to (n - i + 1) / i. Multiplying the previous element by this factor directly yields the current element.",
+        "time_complexity": "O(k)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Binomial coefficient recurrence relations allow direct linear-time generation of any single row of Pascal's triangle.",
+        "time_explanation": "The loop executes k times (where k is rowIndex), with each iteration performing basic arithmetic operations in O(1) time, resulting in O(k) total runtime.",
+        "space_explanation": "Excluding the output list of size k + 1 required for the result, the algorithm uses O(1) auxiliary space."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
