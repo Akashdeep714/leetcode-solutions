@@ -405,6 +405,13 @@
         "frontendId": "14",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-10-18T16:34:31+00:00"
+      },
+      {
+        "titleSlug": "reverse-words-in-a-string",
+        "title": "Reverse Words in a String",
+        "frontendId": "151",
+        "difficulty": "MEDIUM",
+        "lastSubmittedAt": "2026-10-22T18:19:52+00:00"
       }
     ],
     "problem_index": 20,
@@ -456,6 +463,15 @@
     "gemini_requests_used_today": 1,
     "gemini_blocked_today": true,
     "pending_new_problems": [
+      {
+        "titleSlug": "reverse-words-in-a-string",
+        "title": "Reverse Words in a String",
+        "submission_ids": [
+          "2179097144",
+          "2179061971"
+        ],
+        "last_seen_timestamp": 1792693192
+      },
       {
         "titleSlug": "minimum-size-subarray-sum",
         "title": "Minimum Size Subarray Sum",
