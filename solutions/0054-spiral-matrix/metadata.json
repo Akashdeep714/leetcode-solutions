@@ -1,0 +1,55 @@
+{
+  "number": 54,
+  "title": "Spiral Matrix",
+  "difficulty": "Medium",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0054-spiral-matrix",
+  "slug": "spiral-matrix",
+  "submission_id": "2166569638",
+  "runtime": 0,
+  "runtime_display": "0 ms",
+  "memory": 43312000,
+  "memory_display": "43.3 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2166569638",
+      "submission_ids": [
+        "2166569638"
+      ],
+      "solution_hash": "cfeb9245653b79e9fc5c51dbec978f18f273baece9d152b6711ac6f4a862a285",
+      "approach_key": "matrix simulation",
+      "approach_name": "Matrix Simulation",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 43312000,
+      "memory_display": "43.3 MB",
+      "analysis": {
+        "pattern": "Matrix Simulation",
+        "problem_summary": "Traverse an m x n 2D matrix in clockwise spiral order and return all of its elements in a single 1D list.",
+        "intuition": "A clockwise spiral traversal decomposes into alternating horizontal and vertical movements whose segment lengths decrease over time. Starting from row 0 and column -1, moving right covers all $n$ columns, after which the top row is consumed and the remaining usable row count $m$ drops by 1. Moving down then covers the remaining $m$ rows, consuming the rightmost column and reducing the available column count $n$ by 1. Reversing the movement step with a direction multiplier `dir = -1` switches the motion to leftward and upward. By continually toggling `dir` between 1 and -1 while shrinking $m$ and $n$, the traversal perfectly spirals inward without needing a separate visited matrix or four explicit boundary pointers.",
+        "approach": [
+          "Initialize row index `i = 0`, column index `j = -1`, available row count `m = matrix.length`, available column count `n = matrix[0].length`, and direction step `dir = 1`.",
+          "Execute a loop that continues as long as there are remaining rows (`m > 0`) and remaining columns (`n > 0`).",
+          "Traverse horizontally `n` times: update column index `j += dir`, append `matrix[i][j]` to `res`, and decrement remaining rows `m` by 1.",
+          "Traverse vertically `m` times: update row index `i += dir`, append `matrix[i][j]` to `res`, and decrement remaining columns `n` by 1.",
+          "Invert the movement direction by updating `dir = dir * -1` so the next pass moves in the opposite directions (left and up).",
+          "Return the accumulated result list `res` once either `m` or `n` reaches 0."
+        ],
+        "why_it_works": "Horizontal traversals process $n$ unvisited cells in the current row before decreasing $m$, guaranteeing that the row is not revisited. Vertical traversals process $m$ unvisited cells in the current column before decreasing $n$, guaranteeing that the column is retired. Multiplying `dir` by -1 toggles step direction between forward (+1 for right/down) and backward (-1 for left/up). Because each step consumes a complete row or column boundary and exact coordinate offsets match the shrinking inner matrix dimensions, every cell is visited exactly once in clockwise order.",
+        "time_complexity": "O(m * n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Alternating horizontal and vertical segments while toggling a direction sign (+1 / -1) and decrementing active row/column counts provides an elegant way to simulate spiral matrix traversals.",
+        "time_explanation": "Each of the m * n cells in the matrix is processed and appended to the output list exactly once.",
+        "space_explanation": "Ignoring the space required for the output list, the algorithm uses only a few scalar variables for tracking indices and bounds."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
