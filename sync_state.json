@@ -71,7 +71,9 @@
     "2175604842",
     "2175614562",
     "2175618405",
-    "2176493004"
+    "2176493004",
+    "2179061971",
+    "2179097144"
   ],
   "historical_backfill": {
     "version": 6,
@@ -456,22 +458,15 @@
       "2175604842",
       "2175614562",
       "2175618405",
-      "2176493004"
+      "2176493004",
+      "2179061971",
+      "2179097144"
     ],
-    "day": "2026-10-22",
+    "day": "2026-10-23",
     "problems_completed_today": 1,
     "gemini_requests_used_today": 1,
-    "gemini_blocked_today": true,
+    "gemini_blocked_today": false,
     "pending_new_problems": [
-      {
-        "titleSlug": "reverse-words-in-a-string",
-        "title": "Reverse Words in a String",
-        "submission_ids": [
-          "2179097144",
-          "2179061971"
-        ],
-        "last_seen_timestamp": 1792693192
-      },
       {
         "titleSlug": "minimum-size-subarray-sum",
         "title": "Minimum Size Subarray Sum",
@@ -607,6 +602,7 @@
       "pascals-triangle-ii",
       "reverse-integer",
       "reverse-string",
+      "reverse-words-in-a-string",
       "spiral-matrix",
       "string-to-integer-atoi",
       "valid-anagram",
