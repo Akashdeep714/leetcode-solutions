@@ -414,6 +414,13 @@
         "frontendId": "151",
         "difficulty": "MEDIUM",
         "lastSubmittedAt": "2026-10-22T18:19:52+00:00"
+      },
+      {
+        "titleSlug": "reverse-words-in-a-string-iii",
+        "title": "Reverse Words in a String III",
+        "frontendId": "557",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-10-23T17:24:33+00:00"
       }
     ],
     "problem_index": 20,
@@ -462,11 +469,28 @@
       "2179061971",
       "2179097144"
     ],
-    "day": "2026-10-23",
-    "problems_completed_today": 1,
-    "gemini_requests_used_today": 1,
-    "gemini_blocked_today": false,
+    "day": "2026-10-25",
+    "problems_completed_today": 0,
+    "gemini_requests_used_today": 0,
+    "gemini_blocked_today": true,
     "pending_new_problems": [
+      {
+        "titleSlug": "longest-common-prefix",
+        "title": "Longest Common Prefix",
+        "submission_ids": [
+          "2181539745",
+          "2180737547"
+        ],
+        "last_seen_timestamp": 1792944936
+      },
+      {
+        "titleSlug": "reverse-words-in-a-string-iii",
+        "title": "Reverse Words in a String III",
+        "submission_ids": [
+          "2179873021"
+        ],
+        "last_seen_timestamp": 1792776273
+      },
       {
         "titleSlug": "minimum-size-subarray-sum",
         "title": "Minimum Size Subarray Sum",
