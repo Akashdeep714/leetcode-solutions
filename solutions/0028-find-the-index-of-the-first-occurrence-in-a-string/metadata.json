@@ -22,11 +22,12 @@
       "submission_id": "2174693816",
       "submission_ids": [
         "2174693816",
-        "2174696223"
+        "2174696223",
+        "2182396599"
       ],
       "solution_hash": "113a68b2189b0ae6fe3b4b98b8e3de9343ad384c2884ff197686d4d29af36562",
-      "approach_key": "brute-force-substring-search",
-      "approach_name": "Brute Force Character-by-Character Search",
+      "approach_key": "naive-string-matching",
+      "approach_name": "Brute Force Naive String Matching",
       "runtime": 191,
       "runtime_display": "191 ms",
       "memory": 42696000,
