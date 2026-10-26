@@ -1,0 +1,55 @@
+{
+  "number": 557,
+  "title": "Reverse Words in a String III",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0557-reverse-words-in-a-string-iii",
+  "slug": "reverse-words-in-a-string-iii",
+  "submission_id": "2179873021",
+  "runtime": 3,
+  "runtime_display": "3 ms",
+  "memory": 46104000,
+  "memory_display": "46.1 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2179873021",
+      "submission_ids": [
+        "2179873021"
+      ],
+      "solution_hash": "e307023e0602da64e116927d872a75df3cf6a5d3d66cd4db1f2c34e94fea5454",
+      "approach_key": "two pointers",
+      "approach_name": "Two Pointers",
+      "runtime": 3,
+      "runtime_display": "3 ms",
+      "memory": 46104000,
+      "memory_display": "46.1 MB",
+      "analysis": {
+        "pattern": "Two Pointers",
+        "problem_summary": "Reverse the characters of each word in a space-delimited sentence while preserving space characters and word order.",
+        "intuition": "Since words are separated by spaces and stay in their original relative positions, we can process each word independently. Converting the string into a mutable character array allows us to locate each word's start and end boundaries using two pointers, then reverse the characters in that specific sub-range in-place before constructing the final string.",
+        "approach": [
+          "Convert the input string `s` into a character array `charArr` and initialize both `start` and `end` pointers to index `0`.",
+          "Iterate through `charArr` with a outer `while` loop that runs as long as `start` is within array bounds.",
+          "Advance `end` using an inner `while` loop until it encounters a space character `' '` or reaches the end of the array, defining the current word boundary.",
+          "Call the `reverse` helper method to swap characters in `charArr` from index `start` to `end - 1` using a two-pointer approach that moves inward.",
+          "Advance both `start` and `end` to `end + 1` to skip the space character and position the pointers at the beginning of the next word.",
+          "Construct and return a new `String` from the modified `charArr` after all words have been reversed."
+        ],
+        "why_it_works": "By using `end` to find the delimiting space, the interval `[start, end - 1]` strictly bounds a single word. Applying a standard two-pointer character reversal on this precise sub-array guarantees that each character within the word is mirrored around its midpoint, reversing the word while leaving spaces and the order of surrounding words unchanged.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(n)",
+        "time_explanation": "Each character in the string is visited a constant number of times—once to locate word boundaries and at most once during the character reversal process.",
+        "space_explanation": "Creating the character array `charArr` and the resulting string requires auxiliary memory proportional to the length of the string `s`.",
+        "key_takeaway": "To reverse segments of a string separated by a delimiter, use dynamic pointer bounds to isolate each segment and apply localized two-pointer reversals."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
