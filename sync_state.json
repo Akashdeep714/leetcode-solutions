@@ -73,7 +73,9 @@
     "2175618405",
     "2176493004",
     "2179061971",
-    "2179097144"
+    "2179097144",
+    "2180737547",
+    "2181539745"
   ],
   "historical_backfill": {
     "version": 6,
@@ -467,22 +469,15 @@
       "2175618405",
       "2176493004",
       "2179061971",
-      "2179097144"
+      "2179097144",
+      "2180737547",
+      "2181539745"
     ],
-    "day": "2026-10-25",
-    "problems_completed_today": 0,
-    "gemini_requests_used_today": 0,
-    "gemini_blocked_today": true,
+    "day": "2026-10-26",
+    "problems_completed_today": 1,
+    "gemini_requests_used_today": 1,
+    "gemini_blocked_today": false,
     "pending_new_problems": [
-      {
-        "titleSlug": "longest-common-prefix",
-        "title": "Longest Common Prefix",
-        "submission_ids": [
-          "2181539745",
-          "2180737547"
-        ],
-        "last_seen_timestamp": 1792944936
-      },
       {
         "titleSlug": "reverse-words-in-a-string-iii",
         "title": "Reverse Words in a String III",
