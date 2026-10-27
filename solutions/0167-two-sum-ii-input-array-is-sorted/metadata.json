@@ -1,0 +1,56 @@
+{
+  "number": 167,
+  "title": "Two Sum II - Input Array Is Sorted",
+  "difficulty": "Medium",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0167-two-sum-ii-input-array-is-sorted",
+  "slug": "two-sum-ii-input-array-is-sorted",
+  "submission_id": "2162467511",
+  "runtime": 2,
+  "runtime_display": "2 ms",
+  "memory": 48596000,
+  "memory_display": "48.6 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2162467511",
+      "submission_ids": [
+        "2162467511"
+      ],
+      "solution_hash": "95a5e81350ba5766f333563882f5f31395234dcc5a31795e5952335283adf513",
+      "approach_key": "two pointers",
+      "approach_name": "Two Pointers",
+      "runtime": 2,
+      "runtime_display": "2 ms",
+      "memory": 48596000,
+      "memory_display": "48.6 MB",
+      "analysis": {
+        "pattern": "Two Pointers",
+        "problem_summary": "Given a 1-indexed sorted array of integers and a target value, find the 1-based indices of two numbers that add up to target.",
+        "intuition": "Because the array is sorted in non-decreasing order, the smallest values are on the left and the largest are on the right. By placing one pointer at the beginning and another at the end, we can evaluate the sum of the extreme values. If the sum exceeds the target, decreasing the right pointer reduces the sum; if the sum is below the target, increasing the left pointer raises the sum. This monotonic property allows us to narrow down the answer in linear time without extra space.",
+        "approach": [
+          "Initialize pointer `left` to index `0` and pointer `right` to index `numbers.length - 1`.",
+          "Loop while `left` is strictly less than `right`.",
+          "Calculate the current sum `sum = numbers[left] + numbers[right]`.",
+          "If `sum == target`, return a new array containing the 1-based indices `[left + 1, right + 1]`.",
+          "If `sum > target`, decrement `right` by 1 to test a smaller sum.",
+          "If `sum < target`, increment `left` by 1 to test a larger sum.",
+          "Return `[-1, -1]` as a fallback if no pair is found (guaranteed not to occur per problem constraints)."
+        ],
+        "why_it_works": "At any step, if `numbers[left] + numbers[right] > target`, then `numbers[right]` cannot be paired with any element at index `k >= left` because all such elements are greater than or equal to `numbers[left]`, making their sums even larger. Thus, `numbers[right]` can be safely eliminated by decrementing `right`. Symmetric logic applies when the sum is less than `target`, allowing us to increment `left`. This invariant guarantees that we never skip the unique target pair.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "time_explanation": "Each iteration of the while loop either increments `left` or decrements `right`, processing at most $n$ elements in total.",
+        "space_explanation": "The algorithm only allocates a constant number of scalar variables (`left`, `right`, `sum`) regardless of the array size.",
+        "key_takeaway": "Sorting enables a two-pointer approach that shrinks the search space from opposite ends in linear time while using $O(1)$ auxiliary space."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}

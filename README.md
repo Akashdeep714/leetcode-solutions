@@ -7,9 +7,9 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **36** |
+| 🧩 Total Solved | **37** |
 | 🟢 Easy | **26** |
-| 🟡 Medium | **10** |
+| 🟡 Medium | **11** |
 | 🔴 Hard | **0** |
 
 ---
@@ -36,6 +36,7 @@
 | 125 | [Valid Palindrome](solutions/0125-valid-palindrome/) | 🟢 Easy | Java | 1 |
 | 136 | [Single Number](solutions/0136-single-number/) | 🟢 Easy | Java | 2 |
 | 151 | [Reverse Words in a String](solutions/0151-reverse-words-in-a-string/) | 🟡 Medium | Java | 2 |
+| 167 | [Two Sum II - Input Array Is Sorted](solutions/0167-two-sum-ii-input-array-is-sorted/) | 🟡 Medium | Java | 1 |
 | 189 | [Rotate Array](solutions/0189-rotate-array/) | 🟡 Medium | Java | 2 |
 | 209 | [Minimum Size Subarray Sum](solutions/0209-minimum-size-subarray-sum/) | 🟡 Medium | Java | 1 |
 | 217 | [Contains Duplicate](solutions/0217-contains-duplicate/) | 🟢 Easy | Java | 2 |
