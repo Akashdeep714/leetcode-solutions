@@ -1,0 +1,87 @@
+{
+  "number": 118,
+  "title": "Pascal's Triangle",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0118-pascal-s-triangle",
+  "slug": "pascals-triangle",
+  "submission_id": "2161321630",
+  "runtime": 1,
+  "runtime_display": "1 ms",
+  "memory": 43300000,
+  "memory_display": "43.3 MB",
+  "solution_count": 2,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2161321630",
+      "submission_ids": [
+        "2161321630"
+      ],
+      "solution_hash": "796fb502fa0f6e39eedbe49530139a48749d1c49cf22a2322bb958ad3beb9250",
+      "approach_key": "iterative-dp",
+      "approach_name": "Iterative Row-by-Row Dynamic Programming",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 43300000,
+      "memory_display": "43.3 MB",
+      "analysis": {
+        "pattern": "Dynamic Programming / Tabulation",
+        "problem_summary": "Generate the first numRows of Pascal's Triangle.",
+        "intuition": "Every element in Pascal's Triangle (except the boundary 1s) is the sum of the two elements directly above it in the previous row.",
+        "approach": [
+          "Initialize the result list and add the base case row `[1]`.",
+          "Iterate `row` from 1 to `numRows - 1`.",
+          "For each row, initialize a new list with 1 as the first element.",
+          "Fill interior elements at index `i` by adding `prevRow[i - 1]` and `prevRow[i]`.",
+          "Append 1 at the end of the row and add the completed row to the output list."
+        ],
+        "why_it_works": "Pascal's identity guarantees that element $C(n, k) = C(n-1, k-1) + C(n-1, k)$. Fetching values directly from the stored previous row computes each element in $O(1)$ time without duplicate calculations.",
+        "time_complexity": "O(numRows^2)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Constructing each row directly from the preceding row is simple, avoids integer overflow risks, and generates the entire triangle efficiently.",
+        "time_explanation": "Row $r$ contains $r + 1$ elements. Summing $1 + 2 + \\dots + \\text{numRows}$ yields $\\frac{\\text{numRows}(\\text{numRows} + 1)}{2}$ total operations, which is $O(\\text{numRows}^2)$.",
+        "space_explanation": "Ignoring memory required for the output list, only $O(1)$ auxiliary memory is used for iteration indices and pointers."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2162449405",
+      "submission_ids": [
+        "2162449405"
+      ],
+      "solution_hash": "fb02a03d180477e3e71b75d9a19aa8f841e33dbf923e632ac3d359e2ebe79a5f",
+      "approach_key": "combinatorial-multiplicative",
+      "approach_name": "Combinatorial Row Generation via Multiplicative Formula",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 43436000,
+      "memory_display": "43.4 MB",
+      "analysis": {
+        "pattern": "Combinatorics / Math",
+        "problem_summary": "Generate the first numRows of Pascal's Triangle.",
+        "intuition": "Row $n$ (0-indexed) consists of combination values $\\binom{n}{0}, \\binom{n}{1}, \\dots, \\binom{n}{n}$. Each term can be derived directly from the preceding term using $\\binom{n}{k} = \\binom{n}{k-1} \\times \\frac{n - k + 1}{k}$.",
+        "approach": [
+          "Iterate through row index `n` from `0` to `numRows - 1`.",
+          "Initialize the first element of row `n` as `res = 1`.",
+          "Iterate `i` from `1` to `n`, updating `res = res * (n - i + 1) / i` to derive each element.",
+          "Append each computed `res` value to the row and return all generated rows."
+        ],
+        "why_it_works": "The relation $\\binom{n}{k} = \\binom{n}{k-1} \\frac{n - k + 1}{k}$ allows computing element $k$ directly from element $k-1$ within the same row without constructing preceding rows of the triangle.",
+        "time_complexity": "O(numRows^2)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Using the combination multiplication formula allows any single row of Pascal's Triangle to be generated independently in $O(n)$ time.",
+        "time_explanation": "Generating row $n$ requires $n$ iterations. Across all `numRows`, total steps equal $1 + 2 + \\dots + \\text{numRows} = O(\\text{numRows}^2)$.",
+        "space_explanation": "Only $O(1)$ extra space is used for temporary arithmetic computations beyond the space allocated for the output structure."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
