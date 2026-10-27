@@ -7,9 +7,9 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **35** |
+| 🧩 Total Solved | **36** |
 | 🟢 Easy | **26** |
-| 🟡 Medium | **9** |
+| 🟡 Medium | **10** |
 | 🔴 Hard | **0** |
 
 ---
@@ -37,6 +37,7 @@
 | 136 | [Single Number](solutions/0136-single-number/) | 🟢 Easy | Java | 2 |
 | 151 | [Reverse Words in a String](solutions/0151-reverse-words-in-a-string/) | 🟡 Medium | Java | 2 |
 | 189 | [Rotate Array](solutions/0189-rotate-array/) | 🟡 Medium | Java | 2 |
+| 209 | [Minimum Size Subarray Sum](solutions/0209-minimum-size-subarray-sum/) | 🟡 Medium | Java | 1 |
 | 217 | [Contains Duplicate](solutions/0217-contains-duplicate/) | 🟢 Easy | Java | 2 |
 | 231 | [Power of Two](solutions/0231-power-of-two/) | 🟢 Easy | Java | 1 |
 | 242 | [Valid Anagram](solutions/0242-valid-anagram/) | 🟢 Easy | Java | 2 |

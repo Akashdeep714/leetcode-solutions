@@ -1,0 +1,55 @@
+{
+  "number": 209,
+  "title": "Minimum Size Subarray Sum",
+  "difficulty": "Medium",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0209-minimum-size-subarray-sum",
+  "slug": "minimum-size-subarray-sum",
+  "submission_id": "2163418165",
+  "runtime": 2,
+  "runtime_display": "2 ms",
+  "memory": 69184000,
+  "memory_display": "69.2 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2163418165",
+      "submission_ids": [
+        "2163418165"
+      ],
+      "solution_hash": "07aae945c07b977b2158142c7ee1aa4a304e4c3663535078d18e7ba94b55cea2",
+      "approach_key": "sliding window",
+      "approach_name": "Sliding Window",
+      "runtime": 2,
+      "runtime_display": "2 ms",
+      "memory": 69184000,
+      "memory_display": "69.2 MB",
+      "analysis": {
+        "pattern": "Sliding Window",
+        "problem_summary": "Find the minimal length of a contiguous subarray in an array of positive integers whose sum is at least target, or return 0 if no such subarray exists.",
+        "intuition": "Because all elements in the array are positive integers, the window sum increases monotonically as we expand the right boundary and decreases monotonically as we shrink the left boundary. This monotonicity allows us to use a dynamic sliding window: we expand the right endpoint until the running sum reaches or exceeds target, and then immediately shrink from the left endpoint to find the shortest valid subarray ending at that right position before expanding further.",
+        "approach": [
+          "Initialize `minDis` to `Integer.MAX_VALUE` to track the shortest subarray length, `left` and `right` pointers to `0`, and `runSum` to `0` for maintaining the current window's sum.",
+          "Iterate `right` from `0` to `nums.length - 1`, adding `nums[right]` to `runSum` in each iteration to expand the window.",
+          "While `runSum` is greater than or equal to `target`, attempt to shrink the window from the left.",
+          "Inside the inner loop, update `minDis` with the minimum of its current value and the current window length, `right - left + 1`.",
+          "Subtract `nums[left]` from `runSum` and increment `left` by `1` to test if a smaller window ending at `right` can still satisfy the sum constraint.",
+          "After the outer loop finishes examining all elements, return `0` if `minDis` was never updated (`minDis == Integer.MAX_VALUE`), otherwise return `minDis`."
+        ],
+        "why_it_works": "The monotonicity guaranteed by positive integers ensures that once a window `[left, right]` reaches a sum of at least `target`, expanding `right` further with the same `left` would only produce longer valid subarrays, which cannot beat the current length for that starting position `left`. Therefore, it is safe to incrementally move `left` forward to find the minimal valid window starting at or after `left` without skipping any candidate that could yield a shorter valid length.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "When array elements are strictly positive, subarray sums are monotonic with respect to window boundaries, allowing a two-pointer sliding window to inspect all candidate minimal subarrays in linear time.",
+        "time_explanation": "Both the `left` and `right` pointers advance through the array at most `n` times, resulting in at most `2n` total pointer operations.",
+        "space_explanation": "The algorithm only tracks a few integer scalar variables (`minDis`, `left`, `right`, `runSum`), using constant extra space."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
