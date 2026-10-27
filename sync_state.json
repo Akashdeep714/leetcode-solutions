@@ -79,7 +79,8 @@
     "2179873021",
     "2180737547",
     "2181539745",
-    "2182396599"
+    "2182396599",
+    "2183376359"
   ],
   "historical_backfill": {
     "version": 6,
@@ -427,6 +428,13 @@
         "frontendId": "557",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-10-23T17:24:33+00:00"
+      },
+      {
+        "titleSlug": "delete-node-in-a-linked-list",
+        "title": "Delete Node in a Linked List",
+        "frontendId": "237",
+        "difficulty": "MEDIUM",
+        "lastSubmittedAt": "2026-10-27T18:48:28+00:00"
       }
     ],
     "problem_index": 20,
@@ -479,11 +487,12 @@
       "2179873021",
       "2180737547",
       "2181539745",
-      "2182396599"
+      "2182396599",
+      "2183376359"
     ],
     "day": "2026-10-27",
-    "problems_completed_today": 2,
-    "gemini_requests_used_today": 2,
+    "problems_completed_today": 3,
+    "gemini_requests_used_today": 3,
     "gemini_blocked_today": false,
     "pending_new_problems": [
       {
@@ -598,6 +607,7 @@
     "reconciled_problem_slugs": [
       "add-binary",
       "array-partition",
+      "delete-node-in-a-linked-list",
       "diagonal-traverse",
       "find-the-index-of-the-first-occurrence-in-a-string",
       "first-unique-character-in-a-string",

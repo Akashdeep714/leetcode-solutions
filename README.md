@@ -7,9 +7,9 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **37** |
+| 🧩 Total Solved | **38** |
 | 🟢 Easy | **26** |
-| 🟡 Medium | **11** |
+| 🟡 Medium | **12** |
 | 🔴 Hard | **0** |
 
 ---
@@ -41,6 +41,7 @@
 | 209 | [Minimum Size Subarray Sum](solutions/0209-minimum-size-subarray-sum/) | 🟡 Medium | Java | 1 |
 | 217 | [Contains Duplicate](solutions/0217-contains-duplicate/) | 🟢 Easy | Java | 2 |
 | 231 | [Power of Two](solutions/0231-power-of-two/) | 🟢 Easy | Java | 1 |
+| 237 | [Delete Node in a Linked List](solutions/0237-delete-node-in-a-linked-list/) | 🟡 Medium | Java | 1 |
 | 242 | [Valid Anagram](solutions/0242-valid-anagram/) | 🟢 Easy | Java | 2 |
 | 268 | [Missing Number](solutions/0268-missing-number/) | 🟢 Easy | Java | 2 |
 | 283 | [Move Zeroes](solutions/0283-move-zeroes/) | 🟢 Easy | Java | 2 |
