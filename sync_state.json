@@ -42,6 +42,7 @@
     "2151146279",
     "2154203285",
     "2154233044",
+    "2160452570",
     "2161269484",
     "2161321630",
     "2162449405",
@@ -453,6 +454,7 @@
       "2148961519",
       "2150130175",
       "2150137953",
+      "2160452570",
       "2161321630",
       "2162449405",
       "2162467511",
@@ -494,19 +496,11 @@
       "2182396599",
       "2183376359"
     ],
-    "day": "2026-10-27",
-    "problems_completed_today": 4,
-    "gemini_requests_used_today": 4,
+    "day": "2026-10-28",
+    "problems_completed_today": 1,
+    "gemini_requests_used_today": 1,
     "gemini_blocked_today": false,
     "pending_new_problems": [
-      {
-        "titleSlug": "largest-number-at-least-twice-of-others",
-        "title": "Largest Number At Least Twice of Others",
-        "submission_ids": [
-          "2160452570"
-        ],
-        "last_seen_timestamp": 1790964853
-      },
       {
         "titleSlug": "find-pivot-index",
         "title": "Find Pivot Index",
@@ -606,6 +600,7 @@
       "diagonal-traverse",
       "find-the-index-of-the-first-occurrence-in-a-string",
       "first-unique-character-in-a-string",
+      "largest-number-at-least-twice-of-others",
       "longest-common-prefix",
       "minimum-size-subarray-sum",
       "pascals-triangle",

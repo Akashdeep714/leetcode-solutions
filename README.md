@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **39** |
-| 🟢 Easy | **27** |
+| 🧩 Total Solved | **40** |
+| 🟢 Easy | **28** |
 | 🟡 Medium | **12** |
 | 🔴 Hard | **0** |
 
@@ -54,6 +54,7 @@
 | 498 | [Diagonal Traverse](solutions/0498-diagonal-traverse/) | 🟡 Medium | Java | 2 |
 | 557 | [Reverse Words in a String III](solutions/0557-reverse-words-in-a-string-iii/) | 🟢 Easy | Java | 1 |
 | 561 | [Array Partition](solutions/0561-array-partition/) | 🟢 Easy | Java | 2 |
+| 747 | [Largest Number At Least Twice of Others](solutions/0747-largest-number-at-least-twice-of-others/) | 🟢 Easy | Java | 1 |
 | 977 | [Squares of a Sorted Array](solutions/0977-squares-of-a-sorted-array/) | 🟢 Easy | Java | 2 |
 | 1089 | [Duplicate Zeros](solutions/1089-duplicate-zeros/) | 🟢 Easy | Java | 2 |
 | 1295 | [Find Numbers with Even Number of Digits](solutions/1295-find-numbers-with-even-number-of-digits/) | 🟢 Easy | Java | 4 |
