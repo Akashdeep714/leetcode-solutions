@@ -1,0 +1,56 @@
+{
+  "number": 19,
+  "title": "Remove Nth Node From End of List",
+  "difficulty": "Medium",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0019-remove-nth-node-from-end-of-list",
+  "slug": "remove-nth-node-from-end-of-list",
+  "submission_id": "2184123559",
+  "runtime": 0,
+  "runtime_display": "0 ms",
+  "memory": 42956000,
+  "memory_display": "43 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2184123559",
+      "submission_ids": [
+        "2184123559"
+      ],
+      "solution_hash": "41f6bb9f205f4299a41ebd032bf1dc51162e35a926ddeac462808c7113027297",
+      "approach_key": "two pass linked list traversal",
+      "approach_name": "Two-pass Linked List Traversal",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 42956000,
+      "memory_display": "43 MB",
+      "analysis": {
+        "pattern": "Two-pass Linked List Traversal",
+        "problem_summary": "Remove the n-th node from the end of a singly linked list and return the head of the modified list.",
+        "intuition": "The n-th node from the end is at a distance of len - n steps from the start of the list. Since a singly linked list can only be traversed forward, we can first make a full pass to count the total length of the list. In a second pass, we navigate to the node immediately before the target node to bypass it. Creating a dummy node pointing to the head simplifies edge cases—specifically when the node to be removed is the head itself (when len == n)—because the dummy node acts as a permanent predecessor.",
+        "approach": [
+          "Initialize a counter len = 0 and a pointer cur = head.",
+          "Traverse the linked list using cur, incrementing len until cur becomes null to compute the total node count.",
+          "Instantiate a dummy node with value 0 and set dummy.next = head to handle head deletions cleanly.",
+          "Compute jumps = len - n, which represents the number of forward steps required from dummy to reach the node preceding the target.",
+          "Initialize prev = dummy and advance prev forward jumps times using a loop.",
+          "Unlink the target node by reassigning prev.next = prev.next.next.",
+          "Return dummy.next, which holds the head of the updated list."
+        ],
+        "why_it_works": "In a list of total length `len`, the n-th node from the end is located at 0-based index `len - n` relative to the head. Starting from a dummy node positioned before the head, advancing `len - n` steps stops exactly at the predecessor node (index `len - n - 1` relative to head). Modifying `prev.next` to point to `prev.next.next` effectively unlinks the target node without altering any other links in the list.",
+        "time_complexity": "O(N)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Using a dummy node placed before the head simplifies linked list node deletions by ensuring every node, including the original head, has a valid predecessor to update.",
+        "time_explanation": "The list is traversed twice—once to measure its total length N and once to reach the removal point—taking O(N) linear time overall.",
+        "space_explanation": "The implementation only allocates a single dummy node and a few pointer variables, requiring O(1) auxiliary space."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}

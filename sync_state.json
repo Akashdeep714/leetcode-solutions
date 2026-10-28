@@ -83,7 +83,8 @@
     "2180737547",
     "2181539745",
     "2182396599",
-    "2183376359"
+    "2183376359",
+    "2184123559"
   ],
   "historical_backfill": {
     "version": 6,
@@ -438,6 +439,13 @@
         "frontendId": "237",
         "difficulty": "MEDIUM",
         "lastSubmittedAt": "2026-10-27T18:48:28+00:00"
+      },
+      {
+        "titleSlug": "remove-nth-node-from-end-of-list",
+        "title": "Remove Nth Node From End of List",
+        "frontendId": "19",
+        "difficulty": "MEDIUM",
+        "lastSubmittedAt": "2026-10-28T17:18:42+00:00"
       }
     ],
     "problem_index": 20,
@@ -494,11 +502,12 @@
       "2180737547",
       "2181539745",
       "2182396599",
-      "2183376359"
+      "2183376359",
+      "2184123559"
     ],
     "day": "2026-10-28",
-    "problems_completed_today": 1,
-    "gemini_requests_used_today": 1,
+    "problems_completed_today": 2,
+    "gemini_requests_used_today": 2,
     "gemini_blocked_today": false,
     "pending_new_problems": [
       {
@@ -605,6 +614,7 @@
       "minimum-size-subarray-sum",
       "pascals-triangle",
       "pascals-triangle-ii",
+      "remove-nth-node-from-end-of-list",
       "reverse-integer",
       "reverse-string",
       "reverse-words-in-a-string",
