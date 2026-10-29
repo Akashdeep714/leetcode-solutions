@@ -42,6 +42,8 @@
     "2151146279",
     "2154203285",
     "2154233044",
+    "2158381466",
+    "2158386945",
     "2159413338",
     "2159450166",
     "2160452570",
@@ -465,6 +467,8 @@
       "2148961519",
       "2150130175",
       "2150137953",
+      "2158381466",
+      "2158386945",
       "2159413338",
       "2159450166",
       "2160452570",
@@ -512,19 +516,10 @@
       "2184950384"
     ],
     "day": "2026-10-29",
-    "problems_completed_today": 2,
-    "gemini_requests_used_today": 2,
+    "problems_completed_today": 3,
+    "gemini_requests_used_today": 3,
     "gemini_blocked_today": false,
     "pending_new_problems": [
-      {
-        "titleSlug": "find-all-numbers-disappeared-in-an-array",
-        "title": "Find All Numbers Disappeared in an Array",
-        "submission_ids": [
-          "2158386945",
-          "2158381466"
-        ],
-        "last_seen_timestamp": 1790786918
-      },
       {
         "titleSlug": "third-maximum-number",
         "title": "Third Maximum Number",
@@ -604,6 +599,7 @@
       "array-partition",
       "delete-node-in-a-linked-list",
       "diagonal-traverse",
+      "find-all-numbers-disappeared-in-an-array",
       "find-pivot-index",
       "find-the-index-of-the-first-occurrence-in-a-string",
       "first-unique-character-in-a-string",

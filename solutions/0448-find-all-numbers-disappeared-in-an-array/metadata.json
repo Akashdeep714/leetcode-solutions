@@ -1,0 +1,86 @@
+{
+  "number": 448,
+  "title": "Find All Numbers Disappeared in an Array",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0448-find-all-numbers-disappeared-in-an-array",
+  "slug": "find-all-numbers-disappeared-in-an-array",
+  "submission_id": "2158381466",
+  "runtime": 21,
+  "runtime_display": "21 ms",
+  "memory": 78796000,
+  "memory_display": "78.8 MB",
+  "solution_count": 2,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2158381466",
+      "submission_ids": [
+        "2158381466"
+      ],
+      "solution_hash": "e19ca3e5780d7a9b8c68c4e552802b81818d893258d67a94cb701a61757de225",
+      "approach_key": "hash-set-lookup",
+      "approach_name": "HashSet Presence Tracking",
+      "runtime": 21,
+      "runtime_display": "21 ms",
+      "memory": 78796000,
+      "memory_display": "78.8 MB",
+      "analysis": {
+        "pattern": "Hash Table / Set Lookup",
+        "problem_summary": "Find all numbers from 1 to n that do not appear in the input array of size n.",
+        "intuition": "By storing all seen numbers in a Hash Set, we can check whether any number from 1 to n is present in O(1) average time.",
+        "approach": [
+          "Iterate through the array `nums` and insert every element into a `HashSet`.",
+          "Iterate through all candidate numbers from `1` to `n` (inclusive).",
+          "Check if the `HashSet` contains the current number.",
+          "If the number is missing from the set, append it to the result list."
+        ],
+        "why_it_works": "A hash set allows constant time average lookups, enabling us to easily identify which integers in the sequence 1 through n were omitted.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(n)",
+        "key_takeaway": "Using a HashSet provides a direct and easy-to-understand solution for tracking element presence, though it requires O(n) extra space.",
+        "time_explanation": "Populating the hash set takes O(n) time, and checking numbers 1 through n takes O(n) time, giving an overall linear runtime.",
+        "space_explanation": "The HashSet stores up to n distinct elements from the array, taking O(n) auxiliary space."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2158386945",
+      "submission_ids": [
+        "2158386945"
+      ],
+      "solution_hash": "17ef2f7bfb92dbb9135ea256f63c8f43b1f7ed2dc9d93db1004eebaf257bffb1",
+      "approach_key": "in-place-index-negation",
+      "approach_name": "In-Place Index Negation",
+      "runtime": 7,
+      "runtime_display": "7 ms",
+      "memory": 73828000,
+      "memory_display": "73.8 MB",
+      "analysis": {
+        "pattern": "In-Place Array Modification / Index Mapping",
+        "problem_summary": "Find all missing numbers in the range [1, n] without using extra space.",
+        "intuition": "Since all numbers are within range [1, n], each number `x` corresponds to a valid array index `x - 1`. We can mark the presence of `x` by making the element at index `x - 1` negative.",
+        "approach": [
+          "Iterate through each element `num` in `nums`.",
+          "Determine the corresponding target index as `idx = Math.abs(num) - 1`.",
+          "If the element at `nums[idx]` is positive, negate it to signify that `idx + 1` exists in the array.",
+          "Perform a second pass over `nums`: for any index `i` where `nums[i]` remains positive, `i + 1` was never encountered, so append `i + 1` to the output list."
+        ],
+        "why_it_works": "The absolute value allows us to read original values even after they have been negated, effectively utilizing the array's sign bit as a boolean visited flag without losing information.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "When input values map directly to valid array indices ([1, n] to [0, n-1]), the sign of elements can be repurposed as in-place visited flags to achieve O(1) auxiliary space.",
+        "time_explanation": "The algorithm makes two linear scans over the array of size n, resulting in O(n) runtime.",
+        "space_explanation": "All operations modify the array in-place. The output list does not count as extra space as per the problem description, so auxiliary space complexity is O(1)."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
