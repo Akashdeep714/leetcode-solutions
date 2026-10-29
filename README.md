@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **41** |
-| 🟢 Easy | **28** |
+| 🧩 Total Solved | **42** |
+| 🟢 Easy | **29** |
 | 🟡 Medium | **13** |
 | 🔴 Hard | **0** |
 
@@ -55,6 +55,7 @@
 | 498 | [Diagonal Traverse](solutions/0498-diagonal-traverse/) | 🟡 Medium | Java | 2 |
 | 557 | [Reverse Words in a String III](solutions/0557-reverse-words-in-a-string-iii/) | 🟢 Easy | Java | 1 |
 | 561 | [Array Partition](solutions/0561-array-partition/) | 🟢 Easy | Java | 2 |
+| 724 | [Find Pivot Index](solutions/0724-find-pivot-index/) | 🟢 Easy | Java | 2 |
 | 747 | [Largest Number At Least Twice of Others](solutions/0747-largest-number-at-least-twice-of-others/) | 🟢 Easy | Java | 1 |
 | 977 | [Squares of a Sorted Array](solutions/0977-squares-of-a-sorted-array/) | 🟢 Easy | Java | 2 |
 | 1089 | [Duplicate Zeros](solutions/1089-duplicate-zeros/) | 🟢 Easy | Java | 2 |
