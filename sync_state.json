@@ -508,7 +508,7 @@
     "day": "2026-10-28",
     "problems_completed_today": 2,
     "gemini_requests_used_today": 2,
-    "gemini_blocked_today": false,
+    "gemini_blocked_today": true,
     "pending_new_problems": [
       {
         "titleSlug": "find-pivot-index",
