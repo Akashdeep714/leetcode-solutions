@@ -13,7 +13,7 @@
   "runtime_display": "0 ms",
   "memory": 42956000,
   "memory_display": "43 MB",
-  "solution_count": 1,
+  "solution_count": 2,
   "solutions": [
     {
       "number": 1,
@@ -24,8 +24,8 @@
         "2184123559"
       ],
       "solution_hash": "41f6bb9f205f4299a41ebd032bf1dc51162e35a926ddeac462808c7113027297",
-      "approach_key": "two pass linked list traversal",
-      "approach_name": "Two-pass Linked List Traversal",
+      "approach_key": "two-pass-length-count",
+      "approach_name": "Two-Pass Length Calculation",
       "runtime": 0,
       "runtime_display": "0 ms",
       "memory": 42956000,
@@ -49,6 +49,39 @@
         "key_takeaway": "Using a dummy node placed before the head simplifies linked list node deletions by ensuring every node, including the original head, has a valid predecessor to update.",
         "time_explanation": "The list is traversed twice—once to measure its total length N and once to reach the removal point—taking O(N) linear time overall.",
         "space_explanation": "The implementation only allocates a single dummy node and a few pointer variables, requiring O(1) auxiliary space."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2184950384",
+      "submission_ids": [
+        "2184950384"
+      ],
+      "solution_hash": "38fc4dbf7b5afafa88ad4539b2aae49b4d551b1f96a7771e86eea15d6d2288c1",
+      "approach_key": "two-pointer-one-pass",
+      "approach_name": "Two-Pointer One-Pass Strategy",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 43188000,
+      "memory_display": "43.2 MB",
+      "analysis": {
+        "pattern": "Two Pointers / Fast & Slow Pointers",
+        "problem_summary": "Remove the nth node from the end of a singly-linked list in a single pass.",
+        "intuition": "Maintaining a fixed gap of n nodes between a fast pointer and a slow pointer allows us to find the node preceding the target when the fast pointer reaches the end.",
+        "approach": [
+          "Advance a fast pointer cur forward by n steps from the head.",
+          "Create a dummy head node pointing to head and place a slow pointer prev at dummy.",
+          "Advance both cur and prev simultaneously one step at a time until cur reaches null.",
+          "Update prev.next = prev.next.next to remove the target node and return dummy.next."
+        ],
+        "why_it_works": "Because the distance between cur and prev is exactly n + 1 nodes (due to prev starting at dummy), when cur reaches null (end of list at position L + 1 relative to dummy), prev rests exactly at position L - n, which is the node right before the target.",
+        "time_complexity": "O(N)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Maintaining a fixed offset window with two pointers eliminates the need to pre-compute the list length and achieves single-pass execution.",
+        "time_explanation": "The fast pointer traverses the list of length N exactly once, performing the entire operation in O(N) time.",
+        "space_explanation": "Only pointer references and a single dummy node are maintained, requiring O(1) auxiliary space."
       }
     }
   ],

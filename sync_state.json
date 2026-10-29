@@ -86,7 +86,8 @@
     "2181539745",
     "2182396599",
     "2183376359",
-    "2184123559"
+    "2184123559",
+    "2184950384"
   ],
   "historical_backfill": {
     "version": 6,
@@ -507,11 +508,12 @@
       "2181539745",
       "2182396599",
       "2183376359",
-      "2184123559"
+      "2184123559",
+      "2184950384"
     ],
     "day": "2026-10-29",
-    "problems_completed_today": 1,
-    "gemini_requests_used_today": 1,
+    "problems_completed_today": 2,
+    "gemini_requests_used_today": 2,
     "gemini_blocked_today": false,
     "pending_new_problems": [
       {
