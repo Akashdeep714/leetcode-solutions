@@ -42,6 +42,10 @@
     "2151146279",
     "2154203285",
     "2154233044",
+    "2155123804",
+    "2155139735",
+    "2155158165",
+    "2155164716",
     "2156269907",
     "2156286613",
     "2157356908",
@@ -481,6 +485,10 @@
       "2148961519",
       "2150130175",
       "2150137953",
+      "2155123804",
+      "2155139735",
+      "2155158165",
+      "2155164716",
       "2156269907",
       "2156286613",
       "2157356908",
@@ -537,21 +545,10 @@
       "2185579028"
     ],
     "day": "2026-10-30",
-    "problems_completed_today": 2,
-    "gemini_requests_used_today": 2,
+    "problems_completed_today": 3,
+    "gemini_requests_used_today": 3,
     "gemini_blocked_today": false,
     "pending_new_problems": [
-      {
-        "titleSlug": "sort-array-by-parity",
-        "title": "Sort Array By Parity",
-        "submission_ids": [
-          "2155164716",
-          "2155158165",
-          "2155139735",
-          "2155123804"
-        ],
-        "last_seen_timestamp": 1790527328
-      },
       {
         "titleSlug": "replace-elements-with-greatest-element-on-right-side",
         "title": "Replace Elements with Greatest Element on Right Side",
@@ -616,6 +613,7 @@
       "reverse-string",
       "reverse-words-in-a-string",
       "reverse-words-in-a-string-iii",
+      "sort-array-by-parity",
       "spiral-matrix",
       "string-to-integer-atoi",
       "third-maximum-number",

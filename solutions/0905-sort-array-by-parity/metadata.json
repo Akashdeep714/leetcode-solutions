@@ -1,0 +1,155 @@
+{
+  "number": 905,
+  "title": "Sort Array By Parity",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0905-sort-array-by-parity",
+  "slug": "sort-array-by-parity",
+  "submission_id": "2155123804",
+  "runtime": 5,
+  "runtime_display": "5 ms",
+  "memory": 47040000,
+  "memory_display": "47 MB",
+  "solution_count": 4,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2155123804",
+      "submission_ids": [
+        "2155123804"
+      ],
+      "solution_hash": "cd1d6be25e95eb11ef32531e257d8ac9425858c4dc8582e00b7b3d8e3c9dfd6d",
+      "approach_key": "custom-comparator-sort",
+      "approach_name": "Custom Comparator Sorting",
+      "runtime": 5,
+      "runtime_display": "5 ms",
+      "memory": 47040000,
+      "memory_display": "47 MB",
+      "analysis": {
+        "pattern": "Sorting with Custom Comparator",
+        "problem_summary": "Reorder an array of integers so all even elements appear before all odd elements.",
+        "intuition": "By defining a sort order where an integer's weight is determined by its parity (`x % 2`), even numbers (remainder 0) naturally sort before odd numbers (remainder 1).",
+        "approach": [
+          "Box the primitive `int[]` into an `Integer[]` array to support object custom sorting.",
+          "Sort the array using `Arrays.sort` with a custom lambda comparator comparing `val1 % 2` and `val2 % 2`.",
+          "Unbox the sorted `Integer[]` elements back into the primitive `int[]` array.",
+          "Return the modified array."
+        ],
+        "why_it_works": "Because `0 % 2 == 0` and `1 % 2 == 1` or `3 % 2 == 1`, sorting by `x % 2` orders all even numbers (0) before odd numbers (1).",
+        "time_complexity": "O(n log n)",
+        "space_complexity": "O(n)",
+        "key_takeaway": "Custom sorting directly solves custom ordering problems, but introduces extra comparison and space overhead compared to dedicated partition algorithms.",
+        "time_explanation": "Sorting an array of length $n$ using Timsort (`Arrays.sort` on objects) takes $O(n \\log n)$ time in average and worst cases.",
+        "space_explanation": "Requires $O(n)$ extra space to store the boxed `Integer[]` array."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2155139735",
+      "submission_ids": [
+        "2155139735"
+      ],
+      "solution_hash": "52655f1b04ebab005b29593b03e2f43b1027ffe310e31801e880ab36f19e6a88",
+      "approach_key": "two-pass-auxiliary-array",
+      "approach_name": "Two-Pass Auxiliary Array Construction",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 46876000,
+      "memory_display": "46.9 MB",
+      "analysis": {
+        "pattern": "Auxiliary Array / Two Pass",
+        "problem_summary": "Reorder elements so all evens precede all odds by constructing a new array.",
+        "intuition": "Instead of swapping elements in-place, create a new result array and sequentially copy all even values first, followed by all odd values in a second pass.",
+        "approach": [
+          "Allocate a new array `res` of the same length as `nums`.",
+          "Iterate through `nums` in a first pass and copy every even number (`nums[i] % 2 == 0`) into `res`.",
+          "Iterate through `nums` in a second pass and copy every odd number (`nums[i] % 2 == 1`) into `res`.",
+          "Return `res`."
+        ],
+        "why_it_works": "Processing all evens first guarantees that the prefix of `res` consists entirely of even elements, while the second pass appends all odd elements into the remaining suffix.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(n)",
+        "key_takeaway": "Using extra memory simplifies logic into linear passes when in-place modification is not strictly required.",
+        "time_explanation": "The algorithm makes two full linear scans over the input array of size $n$, resulting in $O(n)$ overall time.",
+        "space_explanation": "Requires $O(n)$ auxiliary space for the output array `res`."
+      }
+    },
+    {
+      "number": 3,
+      "filename": "solution-3.java",
+      "language": "Java",
+      "submission_id": "2155158165",
+      "submission_ids": [
+        "2155158165"
+      ],
+      "solution_hash": "ae9ba236170d024abf8a8d11abac5dece41097a96b7042eeb296104152ad8e40",
+      "approach_key": "opposite-direction-two-pointers",
+      "approach_name": "Opposite-Direction Two Pointers",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 46692000,
+      "memory_display": "46.7 MB",
+      "analysis": {
+        "pattern": "Two Pointers (Inward Convergence)",
+        "problem_summary": "Partition the array in-place so all even integers appear before all odd integers.",
+        "intuition": "Maintain two pointers: one at the start looking for an odd number, and one at the end looking for an even number. Swap them when both are found, and shrink the pointers toward each other.",
+        "approach": [
+          "Initialize pointer `i = 0` at the start and pointer `j = nums.length - 1` at the end.",
+          "While `i < j`, inspect the parity of `nums[i]` and `nums[j]`.",
+          "If `nums[i]` is odd and `nums[j]` is even, swap `nums[i]` and `nums[j]`.",
+          "If `nums[i]` is even, increment `i` since it is already correctly positioned.",
+          "If `nums[j]` is odd, decrement `j` since it is already correctly positioned.",
+          "Return `nums` once `i >= j`."
+        ],
+        "why_it_works": "The left pointer only advances when an even number is confirmed at its position, and the right pointer only retreats when an odd number is confirmed at its position. Swapping misaligned pairs maintains this invariant.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Opposite-direction two pointers provide an optimal $O(n)$ time, $O(1)$ space in-place partitioning strategy.",
+        "time_explanation": "In each step, at least one of the two pointers (`i` or `j`) moves toward the middle, ensuring at most $n$ total pointer increments/decrements.",
+        "space_explanation": "The operation is performed entirely in-place using a constant number of variables, requiring $O(1)$ extra space."
+      }
+    },
+    {
+      "number": 4,
+      "filename": "solution-4.java",
+      "language": "Java",
+      "submission_id": "2155164716",
+      "submission_ids": [
+        "2155164716"
+      ],
+      "solution_hash": "267cb4a20b4ef435a37809ce6a7f80ac16c3c0f7c94994304f96c7cbc6759c71",
+      "approach_key": "same-direction-write-pointer",
+      "approach_name": "Same-Direction Read/Write Pointer Partition",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 46692000,
+      "memory_display": "46.7 MB",
+      "analysis": {
+        "pattern": "Read/Write Two Pointers (Lomuto Partition)",
+        "problem_summary": "Rearrange the input array in-place so all even numbers precede all odd numbers using a single forward pass.",
+        "intuition": "Maintain a write pointer `j` that marks the boundary for the next even number. Scan through the array with a read pointer `i`. Every time an even number is encountered, swap it to position `j` and advance `j`.",
+        "approach": [
+          "Initialize write boundary pointer `j = 0`.",
+          "Iterate reader pointer `i` from `0` to `nums.length - 1`.",
+          "When `nums[i]` is even, swap `nums[i]` with `nums[j]`.",
+          "Increment `j` after the swap.",
+          "Return the modified `nums` array after the loop completes."
+        ],
+        "why_it_works": "Pointer `j` always tracks the index where the next even number should be written. All elements before `j` are guaranteed to be even, effectively partitioning the array in one pass.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Lomuto-style partitioning uses a single loop and a write pointer to achieve clean, single-pass in-place partitioning.",
+        "time_explanation": "The single loop visits each element exactly once, performing $O(1)$ operations per element, yielding $O(n)$ total time.",
+        "space_explanation": "All swaps are done in-place using scalar variables, taking $O(1)$ extra space."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
