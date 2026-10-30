@@ -1,0 +1,55 @@
+{
+  "number": 1299,
+  "title": "Replace Elements with Greatest Element on Right Side",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "1299-replace-elements-with-greatest-element-on-right-side",
+  "slug": "replace-elements-with-greatest-element-on-right-side",
+  "submission_id": "2153245907",
+  "runtime": 3,
+  "runtime_display": "3 ms",
+  "memory": 49152000,
+  "memory_display": "49.2 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2153245907",
+      "submission_ids": [
+        "2153245907"
+      ],
+      "solution_hash": "7f228f763fee563317ac3fa962a47b60e69caca936ba6dec5642422710bc3ca3",
+      "approach_key": "right to left traversal",
+      "approach_name": "Right-to-Left Traversal",
+      "runtime": 3,
+      "runtime_display": "3 ms",
+      "memory": 49152000,
+      "memory_display": "49.2 MB",
+      "analysis": {
+        "pattern": "Right-to-Left Traversal",
+        "problem_summary": "Replace each element in an array with the largest element located to its right, replacing the last element with -1.",
+        "intuition": "Finding the greatest element to the right of each position by scanning forward from left to right would require checking all remaining elements for every index, leading to quadratic time complexity. By reversing the direction and traversing from right to left, we can maintain a running maximum of all elements encountered so far. For any position, this running maximum represents the exact value needed to replace the current element, allowing us to update the array in a single pass.",
+        "approach": [
+          "Initialize a variable `max` to `-1`, representing the running maximum of elements to the right of the current index.",
+          "Loop backwards through the array starting from the last index (`arr.length - 1`) down to `0`.",
+          "At each index `i`, store the original value of `arr[i]` in a variable `temp` before modifying the array.",
+          "Replace `arr[i]` with `max`.",
+          "Update `max` to `Math.max(max, temp)` so that it includes the original element at index `i` for subsequent steps to the left.",
+          "Return the modified array `arr` after the loop completes."
+        ],
+        "why_it_works": "At each index `i` during a right-to-left traversal, `max` stores the maximum value among all original elements strictly to the right of `i`. Because we save `arr[i]` in `temp` before overwriting `arr[i]` with `max`, we can correctly update `max` using `Math.max(max, temp)` to include `arr[i]` in the suffix maximum for index `i - 1` without losing the original element's value.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "When a problem requires computing suffix properties (like the maximum element to the right), traversing the array backwards enables update-and-query operations in O(1) space and O(n) time.",
+        "time_explanation": "The code uses a single loop that traverses the array of length n once from right to left, performing constant-time operations at each index.",
+        "space_explanation": "The algorithm modifies the input array in-place using only two integer variables (`max` and `temp`), requiring O(1) extra space."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
