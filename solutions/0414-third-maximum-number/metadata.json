@@ -1,0 +1,92 @@
+{
+  "number": 414,
+  "title": "Third Maximum Number",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0414-third-maximum-number",
+  "slug": "third-maximum-number",
+  "submission_id": "2157356908",
+  "runtime": 7,
+  "runtime_display": "7 ms",
+  "memory": 45600000,
+  "memory_display": "45.6 MB",
+  "solution_count": 2,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2157356908",
+      "submission_ids": [
+        "2157356908"
+      ],
+      "solution_hash": "a7a26ff8aede769b25bff20af2912c58ce05aa81e78a478646e93b838ffe5093",
+      "approach_key": "sorting-and-linear-scan",
+      "approach_name": "Sorting and Linear Scan",
+      "runtime": 7,
+      "runtime_display": "7 ms",
+      "memory": 45600000,
+      "memory_display": "45.6 MB",
+      "analysis": {
+        "pattern": "Sorting",
+        "problem_summary": "Find the third distinct maximum value in an array, returning the absolute maximum if fewer than three distinct values exist.",
+        "intuition": "Sorting orders all elements sequentially, placing duplicates adjacent to each other. By sorting in descending order, the maximum element sits at index 0, allowing a simple left-to-right scan to count distinct elements.",
+        "approach": [
+          "Sort the array in ascending order using Java's built-in `Arrays.sort`.",
+          "Reverse the array in-place using two pointers to place elements in descending order.",
+          "Traverse the array from index 1, tracking the count of unique elements with `eleCount`.",
+          "Increment `eleCount` whenever `nums[k] != nums[k - 1]`.",
+          "If `eleCount` reaches 3, return `nums[k]`. If the loop finishes without finding 3 distinct maximums, return `nums[0]`."
+        ],
+        "why_it_works": "Sorting guarantees that identical elements group together and elements appear in decreasing order after reversal. Counting transition points between adjacent elements yields distinct maximums in descending rank.",
+        "time_complexity": "O(n log n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Sorting simplifies k-th distinct value problems by aggregating duplicates and ordering elements, though it incurs an O(n log n) sorting overhead.",
+        "time_explanation": "Sorting the array of length `n` takes O(n log n) time. The subsequent reversal and single-pass scan take O(n) time, giving an overall time complexity of O(n log n).",
+        "space_explanation": "The array reversal and linear scan are performed in-place using O(1) additional variable space (excluding recursion stack space used by Dual-Pivot Quicksort)."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2157383203",
+      "submission_ids": [
+        "2157383203",
+        "2157385959",
+        "2158355128"
+      ],
+      "solution_hash": "11c3a1718cc0ad5cb72ea3246eff41088ade6f9ef9e0311f746d81a0a9db62ce",
+      "approach_key": "one-pass-three-pointers",
+      "approach_name": "Single-Pass Linear Tracking",
+      "runtime": 3,
+      "runtime_display": "3 ms",
+      "memory": 44880000,
+      "memory_display": "44.9 MB",
+      "analysis": {
+        "pattern": "Linear Scan / Direct Variable Tracking",
+        "problem_summary": "Find the third distinct maximum value in an array in O(n) time, returning the absolute maximum if fewer than three distinct values exist.",
+        "intuition": "Since we only need the top 3 distinct maximums, we do not need to sort the entire array. Maintaining three variables (`max1`, `max2`, `max3`) allows us to update the top 3 distinct numbers on the fly during a single traversal.",
+        "approach": [
+          "Initialize three variables (`max1`, `max2`, `max3`) to `null` (or sentinel values) to track the 1st, 2nd, and 3rd maximums.",
+          "Iterate through each number in `nums`.",
+          "If the current number is equal to any of `max1`, `max2`, or `max3`, skip it to ignore duplicates.",
+          "If the current number is greater than `max1` (or `max1` is unassigned), cascade values down (`max3 = max2`, `max2 = max1`, `max1 = current`).",
+          "Otherwise, if the number is greater than `max2` (or `max2` is unassigned), update `max3 = max2` and `max2 = current`.",
+          "Otherwise, if the number is greater than `max3` (or `max3` is unassigned), update `max3 = current`.",
+          "After scanning all numbers, return `max3` if it was set; otherwise return `max1`."
+        ],
+        "why_it_works": "A constant set of 3 variables is sufficient to dynamically maintain the top three distinct elements. Checking for equality before comparison prevents duplicate elements from occupying multiple top positions.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "When tracking top-k elements for a small, fixed k, using k tracking variables achieves optimal O(n) time and O(1) space without needing heap or sorting operations.",
+        "time_explanation": "The algorithm inspects each element in `nums` exactly once and performs a constant number of scalar comparisons and updates, resulting in O(n) total execution time.",
+        "space_explanation": "Only three variables are allocated regardless of the input array size, consuming O(1) auxiliary space."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}

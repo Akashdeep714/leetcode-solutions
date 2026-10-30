@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **43** |
-| 🟢 Easy | **30** |
+| 🧩 Total Solved | **44** |
+| 🟢 Easy | **31** |
 | 🟡 Medium | **13** |
 | 🔴 Hard | **0** |
 
@@ -51,6 +51,7 @@
 | 349 | [Intersection of Two Arrays](solutions/0349-intersection-of-two-arrays/) | 🟢 Easy | Java | 1 |
 | 350 | [Intersection of Two Arrays II](solutions/0350-intersection-of-two-arrays-ii/) | 🟢 Easy | Java | 2 |
 | 387 | [First Unique Character in a String](solutions/0387-first-unique-character-in-a-string/) | 🟢 Easy | Java | 1 |
+| 414 | [Third Maximum Number](solutions/0414-third-maximum-number/) | 🟢 Easy | Java | 2 |
 | 448 | [Find All Numbers Disappeared in an Array](solutions/0448-find-all-numbers-disappeared-in-an-array/) | 🟢 Easy | Java | 2 |
 | 485 | [Max Consecutive Ones](solutions/0485-max-consecutive-ones/) | 🟢 Easy | Java | 1 |
 | 498 | [Diagonal Traverse](solutions/0498-diagonal-traverse/) | 🟡 Medium | Java | 2 |
