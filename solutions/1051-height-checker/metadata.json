@@ -1,0 +1,86 @@
+{
+  "number": 1051,
+  "title": "Height Checker",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "1051-height-checker",
+  "slug": "height-checker",
+  "submission_id": "2156269907",
+  "runtime": 3,
+  "runtime_display": "3 ms",
+  "memory": 42888000,
+  "memory_display": "42.9 MB",
+  "solution_count": 2,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2156269907",
+      "submission_ids": [
+        "2156269907"
+      ],
+      "solution_hash": "30e70556f3b96df0558e6ae57947061991ae67ac274e4ff6cdbbcb05d55e42c5",
+      "approach_key": "array-sorting-and-comparison",
+      "approach_name": "Sorting and Element-wise Comparison",
+      "runtime": 3,
+      "runtime_display": "3 ms",
+      "memory": 42888000,
+      "memory_display": "42.9 MB",
+      "analysis": {
+        "pattern": "Array / Comparison Sorting",
+        "problem_summary": "Find the number of indices where the current height array differs from the expected sorted height array.",
+        "intuition": "The expected line ordering is simply the input array sorted in non-decreasing order. By cloning the input array and sorting it, we create the exact target array `expected` and can compare elements index by index.",
+        "approach": [
+          "Create a copy array `res` with the same elements as `heights`.",
+          "Sort `res` in non-decreasing order using standard array sorting.",
+          "Iterate through both `heights` and `res` concurrently.",
+          "Count and return the number of indices where `heights[i] != res[i]`."
+        ],
+        "why_it_works": "Sorting the copied array yields the exact target array `expected`. Comparing corresponding elements at each index directly counts the number of out-of-order students.",
+        "time_complexity": "O(N log N)",
+        "space_complexity": "O(N)",
+        "key_takeaway": "When target order is simply non-decreasing order, cloning and sorting gives a direct O(N log N) baseline solution.",
+        "time_explanation": "Copying takes O(N) time, sorting an array of size N takes O(N log N) time, and linear comparison takes O(N) time, leading to an overall O(N log N) runtime.",
+        "space_explanation": "An auxiliary array of size N is allocated to store the sorted heights, requiring O(N) additional memory."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2156286613",
+      "submission_ids": [
+        "2156286613"
+      ],
+      "solution_hash": "230e70461975b6a5afaa1ef98a3a9e511474a40ef00b1833499593c4978b820b",
+      "approach_key": "counting-sort-frequency-array",
+      "approach_name": "Counting Sort with Frequency Array",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 43228000,
+      "memory_display": "43.2 MB",
+      "analysis": {
+        "pattern": "Counting Sort / Frequency Array",
+        "problem_summary": "Count mismatching height positions without performing an O(N log N) comparison sort.",
+        "intuition": "Since height values are constrained to a small range (1 to 100), we can count the frequency of each height. By consuming heights from smallest to largest in sequence, we can determine what `expected[i]` should be at index `i` on the fly.",
+        "approach": [
+          "Initialize a frequency array `countArray` of size 101 to store the frequency of each height.",
+          "Populate `countArray` by iterating through `heights`.",
+          "Maintain a pointer `currHeight` initialized to 1 to represent the current minimum height available.",
+          "Iterate through index `i` from 0 to N - 1: advance `currHeight` until `countArray[currHeight] > 0`, compare `heights[i]` with `currHeight`, increment mismatch count if they differ, and decrement `countArray[currHeight]`."
+        ],
+        "why_it_works": "The frequency array implicitly represents the sorted order. Consuming counts from lowest to highest height simulates inspecting `expected[i]` without allocating or sorting a full copy of the array.",
+        "time_complexity": "O(N + K)",
+        "space_complexity": "O(K)",
+        "key_takeaway": "When array values lie in a small bounded range, counting sort allows linear-time processing and avoids full comparison sorting.",
+        "time_explanation": "Populating the frequency array takes O(N) time. Iterating through `heights` while advancing `currHeight` up to the max height bound K (100) takes O(N + K) total time.",
+        "space_explanation": "The frequency array size is fixed at K = 101, taking O(K) (or O(1) relative to input size N) auxiliary space."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
