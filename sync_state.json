@@ -95,7 +95,8 @@
     "2182396599",
     "2183376359",
     "2184123559",
-    "2184950384"
+    "2184950384",
+    "2185579028"
   ],
   "historical_backfill": {
     "version": 6,
@@ -457,6 +458,13 @@
         "frontendId": "19",
         "difficulty": "MEDIUM",
         "lastSubmittedAt": "2026-10-28T17:18:42+00:00"
+      },
+      {
+        "titleSlug": "reverse-linked-list",
+        "title": "Reverse Linked List",
+        "frontendId": "206",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-10-30T15:03:52+00:00"
       }
     ],
     "problem_index": 20,
@@ -525,11 +533,12 @@
       "2182396599",
       "2183376359",
       "2184123559",
-      "2184950384"
+      "2184950384",
+      "2185579028"
     ],
     "day": "2026-10-30",
-    "problems_completed_today": 1,
-    "gemini_requests_used_today": 1,
+    "problems_completed_today": 2,
+    "gemini_requests_used_today": 2,
     "gemini_blocked_today": false,
     "pending_new_problems": [
       {
@@ -603,6 +612,7 @@
       "pascals-triangle-ii",
       "remove-nth-node-from-end-of-list",
       "reverse-integer",
+      "reverse-linked-list",
       "reverse-string",
       "reverse-words-in-a-string",
       "reverse-words-in-a-string-iii",
