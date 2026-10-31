@@ -40,6 +40,7 @@
     "2150130175",
     "2150137953",
     "2151146279",
+    "2152246445",
     "2152269247",
     "2153245907",
     "2154203285",
@@ -487,6 +488,7 @@
       "2148961519",
       "2150130175",
       "2150137953",
+      "2152246445",
       "2152269247",
       "2153245907",
       "2155123804",
@@ -548,19 +550,11 @@
       "2184950384",
       "2185579028"
     ],
-    "day": "2026-10-30",
-    "problems_completed_today": 5,
-    "gemini_requests_used_today": 5,
+    "day": "2026-10-31",
+    "problems_completed_today": 1,
+    "gemini_requests_used_today": 1,
     "gemini_blocked_today": false,
     "pending_new_problems": [
-      {
-        "titleSlug": "check-if-n-and-its-double-exist",
-        "title": "Check If N and Its Double Exist",
-        "submission_ids": [
-          "2152246445"
-        ],
-        "last_seen_timestamp": 1790269684
-      },
       {
         "titleSlug": "remove-element",
         "title": "Remove Element",
@@ -583,6 +577,7 @@
     "reconciled_problem_slugs": [
       "add-binary",
       "array-partition",
+      "check-if-n-and-its-double-exist",
       "delete-node-in-a-linked-list",
       "diagonal-traverse",
       "find-all-numbers-disappeared-in-an-array",

@@ -1,0 +1,56 @@
+{
+  "number": 1346,
+  "title": "Check If N and Its Double Exist",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "1346-check-if-n-and-its-double-exist",
+  "slug": "check-if-n-and-its-double-exist",
+  "submission_id": "2152246445",
+  "runtime": 2,
+  "runtime_display": "2 ms",
+  "memory": 45040000,
+  "memory_display": "45 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2152246445",
+      "submission_ids": [
+        "2152246445"
+      ],
+      "solution_hash": "1a6e6a5dc16c429db6427e846cf78dafdca5680bb1d0ce7c61660e8fe4086bb2",
+      "approach_key": "hash set",
+      "approach_name": "Hash Set",
+      "runtime": 2,
+      "runtime_display": "2 ms",
+      "memory": 45040000,
+      "memory_display": "45 MB",
+      "analysis": {
+        "pattern": "Hash Set",
+        "problem_summary": "Determine if an integer array contains two distinct elements where one is exactly twice the value of the other.",
+        "intuition": "To check for a target arithmetic relation between pairs without performing an $O(n^2)$ double loop, we can store previously visited numbers in a hash set. For each number `num`, it could represent either the smaller half ($arr[j]$) or the larger double ($arr[i]$) of a valid pair. Therefore, we check if either its double (`2 * num`) or—if `num` is even—its half (`num / 2`) already exists in our set. Checking before inserting `num` into the set automatically ensures that the two elements come from distinct indices, even when handling zero.",
+        "approach": [
+          "Initialize an empty hash set `set` to store integers visited during iteration.",
+          "Iterate through each element `num` in the array `arr`.",
+          "Check if `set` already contains `2 * num`, indicating `num` is the half-value of a previously seen number.",
+          "Check if `num` is even (`num % 2 == 0`) and `set` contains `num / 2`, indicating `num` is the double of a previously seen number.",
+          "If either condition is true, immediately return `true`.",
+          "Add `num` to `set` for future element checks.",
+          "If the loop finishes without finding any valid pair, return `false`."
+        ],
+        "why_it_works": "Any valid pair of indices $(i, j)$ with $arr[i] = 2 \times arr[j]$ has one element appearing earlier in the array than the other. By checking both `2 * num` and `num / 2` against previously stored elements before adding the current element to the set, the algorithm guarantees detection regardless of whether the double or the half appears first, while strictly enforcing $i \\neq j$.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(n)",
+        "time_explanation": "The array of length $n$ is traversed once, and each hash set lookup and insertion takes $O(1)$ time on average.",
+        "space_explanation": "In the worst case, the hash set stores up to $n$ unique elements when no valid double pair exists.",
+        "key_takeaway": "When searching for asymmetric pairwise relationships in an unsourced array, a single-pass hash set checking both possible directional conditions ($2 \\times x$ and $x / 2$) achieves optimal linear time while enforcing distinct indices."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}

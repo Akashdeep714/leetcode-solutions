@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **49** |
-| 🟢 Easy | **36** |
+| 🧩 Total Solved | **50** |
+| 🟢 Easy | **37** |
 | 🟡 Medium | **13** |
 | 🔴 Hard | **0** |
 
@@ -67,6 +67,7 @@
 | 1089 | [Duplicate Zeros](solutions/1089-duplicate-zeros/) | 🟢 Easy | Java | 2 |
 | 1295 | [Find Numbers with Even Number of Digits](solutions/1295-find-numbers-with-even-number-of-digits/) | 🟢 Easy | Java | 4 |
 | 1299 | [Replace Elements with Greatest Element on Right Side](solutions/1299-replace-elements-with-greatest-element-on-right-side/) | 🟢 Easy | Java | 1 |
+| 1346 | [Check If N and Its Double Exist](solutions/1346-check-if-n-and-its-double-exist/) | 🟢 Easy | Java | 1 |
 
 ---
 
