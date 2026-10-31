@@ -1,0 +1,87 @@
+{
+  "number": 27,
+  "title": "Remove Element",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0027-remove-element",
+  "slug": "remove-element",
+  "submission_id": "2151124227",
+  "runtime": 0,
+  "runtime_display": "0 ms",
+  "memory": 43092000,
+  "memory_display": "43.1 MB",
+  "solution_count": 2,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2151124227",
+      "submission_ids": [
+        "2151124227"
+      ],
+      "solution_hash": "5e369d138483be15babd830031a2231df43848ce531e754c7c2a820c67601ef6",
+      "approach_key": "two-pointers-read-write",
+      "approach_name": "Two Pointers (Read and Write Pointers)",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 43092000,
+      "memory_display": "43.1 MB",
+      "analysis": {
+        "pattern": "Two Pointers (Fast & Slow / Read & Write)",
+        "problem_summary": "Remove all instances of a specific target value from an integer array in-place and return the count of remaining valid elements.",
+        "intuition": "Maintain a write pointer tracking where the next non-target element should go. As a read pointer iterates through the array, any element that does not equal `val` is copied to the write position, compacting all non-target elements to the front while preserving their relative order.",
+        "approach": [
+          "Initialize a write pointer `i = 0` to mark the boundary of valid elements.",
+          "Iterate through the array with a read pointer `j` from index 0 to `nums.length - 1`.",
+          "Whenever `nums[j] != val`, copy `nums[j]` to `nums[i]` and increment `i`.",
+          "Return `i` as the total count of non-`val` elements."
+        ],
+        "why_it_works": "Elements equal to `val` are skipped by the read pointer, while elements not equal to `val` are written sequentially to index `i`. This shifts all non-`val` elements to the beginning of the array in-place.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "The fast/slow pointer technique is the standard approach for in-place array filtering when preserving relative order is preferred.",
+        "time_explanation": "The algorithm inspects each element of the array exactly once using the loop index `j`, performing linear `O(n)` work.",
+        "space_explanation": "All operations modify `nums` in-place using two scalar integer variables (`i` and `j`), requiring `O(1)` auxiliary space."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2151126790",
+      "submission_ids": [
+        "2151126790"
+      ],
+      "solution_hash": "db3ff2ae3776a5092be96b7f31033ca4eea9f0352103991d5295aa313168a6fb",
+      "approach_key": "two-pointers-swap-with-end",
+      "approach_name": "Two Pointers (Swap with Last Element)",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 43684000,
+      "memory_display": "43.7 MB",
+      "analysis": {
+        "pattern": "Two Pointers (Opposite Ends / Boundary Reduction)",
+        "problem_summary": "Remove all instances of `val` from `nums` in-place without needing to maintain element order, returning the new count of non-`val` elements.",
+        "intuition": "Since the problem explicitly permits changing element order, encountering `val` at index `i` allows us to instantly overwrite it with the last element of the active window (`nums[n-1]`) and decrement the valid array size `n`, avoiding unnecessary shifts.",
+        "approach": [
+          "Initialize pointer `i = 0` and boundary length `n = nums.length`.",
+          "Loop while `i < n` to evaluate the current element `nums[i]`.",
+          "If `nums[i] == val`, replace `nums[i]` with `nums[n - 1]` and decrement `n` without incrementing `i` (to inspect the newly moved element).",
+          "If `nums[i] != val`, advance pointer `i` by 1.",
+          "Return `n` as the count of valid elements."
+        ],
+        "why_it_works": "Instead of shifting all subsequent non-`val` elements forward, we discard the unwanted element by filling its spot with the element from the back of the array. The back element is then re-evaluated in the next iteration to ensure it is also valid.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "When element ordering does not matter, overwriting target values with elements from the end minimizes write operations, especially when target elements are rare.",
+        "time_explanation": "Both pointers move toward each other, doing at most `n` total steps in the worst case, resulting in linear `O(n)` time complexity.",
+        "space_explanation": "The array is modified directly in-place using only two integer pointers (`i` and `n`), taking `O(1)` auxiliary memory."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}

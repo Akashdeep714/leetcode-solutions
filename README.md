@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **50** |
-| 🟢 Easy | **37** |
+| 🧩 Total Solved | **51** |
+| 🟢 Easy | **38** |
 | 🟡 Medium | **13** |
 | 🔴 Hard | **0** |
 
@@ -25,6 +25,7 @@
 | 14 | [Longest Common Prefix](solutions/0014-longest-common-prefix/) | 🟢 Easy | Java | 2 |
 | 19 | [Remove Nth Node From End of List](solutions/0019-remove-nth-node-from-end-of-list/) | 🟡 Medium | Java | 2 |
 | 26 | [Remove Duplicates from Sorted Array](solutions/0026-remove-duplicates-from-sorted-array/) | 🟢 Easy | Java | 1 |
+| 27 | [Remove Element](solutions/0027-remove-element/) | 🟢 Easy | Java | 2 |
 | 28 | [Find the Index of the First Occurrence in a String](solutions/0028-find-the-index-of-the-first-occurrence-in-a-string/) | 🟢 Easy | Java | 1 |
 | 36 | [Valid Sudoku](solutions/0036-valid-sudoku/) | 🟡 Medium | Java | 1 |
 | 48 | [Rotate Image](solutions/0048-rotate-image/) | 🟡 Medium | Java | 2 |

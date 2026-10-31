@@ -39,6 +39,8 @@
     "2148961519",
     "2150130175",
     "2150137953",
+    "2151124227",
+    "2151126790",
     "2151146279",
     "2152246445",
     "2152269247",
@@ -488,6 +490,8 @@
       "2148961519",
       "2150130175",
       "2150137953",
+      "2151124227",
+      "2151126790",
       "2152246445",
       "2152269247",
       "2153245907",
@@ -551,19 +555,10 @@
       "2185579028"
     ],
     "day": "2026-10-31",
-    "problems_completed_today": 1,
-    "gemini_requests_used_today": 1,
+    "problems_completed_today": 2,
+    "gemini_requests_used_today": 2,
     "gemini_blocked_today": false,
     "pending_new_problems": [
-      {
-        "titleSlug": "remove-element",
-        "title": "Remove Element",
-        "submission_ids": [
-          "2151126790",
-          "2151124227"
-        ],
-        "last_seen_timestamp": 1790181611
-      },
       {
         "titleSlug": "merge-sorted-array",
         "title": "Merge Sorted Array",
@@ -590,6 +585,7 @@
       "minimum-size-subarray-sum",
       "pascals-triangle",
       "pascals-triangle-ii",
+      "remove-element",
       "remove-nth-node-from-end-of-list",
       "replace-elements-with-greatest-element-on-right-side",
       "reverse-integer",
