@@ -7,8 +7,8 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **48** |
-| 🟢 Easy | **35** |
+| 🧩 Total Solved | **49** |
+| 🟢 Easy | **36** |
 | 🟡 Medium | **13** |
 | 🔴 Hard | **0** |
 
@@ -61,6 +61,7 @@
 | 724 | [Find Pivot Index](solutions/0724-find-pivot-index/) | 🟢 Easy | Java | 2 |
 | 747 | [Largest Number At Least Twice of Others](solutions/0747-largest-number-at-least-twice-of-others/) | 🟢 Easy | Java | 1 |
 | 905 | [Sort Array By Parity](solutions/0905-sort-array-by-parity/) | 🟢 Easy | Java | 4 |
+| 941 | [Valid Mountain Array](solutions/0941-valid-mountain-array/) | 🟢 Easy | Java | 1 |
 | 977 | [Squares of a Sorted Array](solutions/0977-squares-of-a-sorted-array/) | 🟢 Easy | Java | 2 |
 | 1051 | [Height Checker](solutions/1051-height-checker/) | 🟢 Easy | Java | 2 |
 | 1089 | [Duplicate Zeros](solutions/1089-duplicate-zeros/) | 🟢 Easy | Java | 2 |

@@ -1,0 +1,54 @@
+{
+  "number": 941,
+  "title": "Valid Mountain Array",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0941-valid-mountain-array",
+  "slug": "valid-mountain-array",
+  "submission_id": "2152269247",
+  "runtime": 1,
+  "runtime_display": "1 ms",
+  "memory": 47280000,
+  "memory_display": "47.3 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2152269247",
+      "submission_ids": [
+        "2152269247"
+      ],
+      "solution_hash": "aaa67ae564c139f0e5c61eeaf3e2af4674836438ff48b59af84f7bdbb9e6e7bd",
+      "approach_key": "two phase linear scan",
+      "approach_name": "Two-Phase Linear Scan",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 47280000,
+      "memory_display": "47.3 MB",
+      "analysis": {
+        "pattern": "Two-Phase Linear Scan",
+        "problem_summary": "Check if an integer array forms a valid mountain structure, strictly increasing to a peak and then strictly decreasing to the end.",
+        "intuition": "Thinking of the array as a elevation map, a valid mountain must go strictly uphill to a single peak and then strictly downhill to the very end. We can simulate climbing this mountain with a single pointer: first advance as long as elements are strictly increasing. Once the climb stops, we check if we actually climbed (the peak isn't at the very start) and if there is a slope left to descend (the peak isn't at the very end). If these conditions hold, we continue walking downhill while elements are strictly decreasing. If the pointer successfully reaches the final element, the array is a valid mountain.",
+        "approach": [
+          "Initialize a index pointer `i = 0` and store the array length in `n`.",
+          "Advance `i` in a loop as long as `i + 1 < n` and `arr[i] < arr[i + 1]` to traverse the strictly increasing climb.",
+          "Check if `i == 0` (no initial climb) or `i == n - 1` (no subsequent descent); if either is true, return `false` immediately.",
+          "Advance `i` in a second loop as long as `i + 1 < n` and `arr[i] > arr[i + 1]` to traverse the strictly decreasing descent.",
+          "Return `true` if `i == n - 1`, confirming that the descent reached the last element of the array."
+        ],
+        "why_it_works": "A valid mountain must consist of a non-empty strictly increasing prefix followed by a non-empty strictly decreasing suffix that spans the entire array. The first `while` loop locates the end of the initial strictly increasing sequence. Rejecting peaks at index `0` or `n - 1` guarantees both the climb and descent phases are non-empty. The second `while` loop then validates that every remaining element strictly decreases; reaching index `n - 1` proves that the entire array fits the exact peak specification without any flat regions or secondary climbs.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "time_explanation": "The pointer `i` starts at index 0 and only moves forward, visiting each element of the array at most once.",
+        "space_explanation": "The implementation only uses two integer variables (`i` and `n`) to track the traversal, requiring constant memory.",
+        "key_takeaway": "A single pointer advancing through monotonic phases in sequence can validate structural sequence requirements (like an increasing-then-decreasing mountain) in linear time and constant space."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
