@@ -105,7 +105,8 @@
     "2183376359",
     "2184123559",
     "2184950384",
-    "2185579028"
+    "2185579028",
+    "2186385876"
   ],
   "historical_backfill": {
     "version": 6,
@@ -474,6 +475,13 @@
         "frontendId": "206",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-10-30T15:03:52+00:00"
+      },
+      {
+        "titleSlug": "merge-two-sorted-lists",
+        "title": "Merge Two Sorted Lists",
+        "frontendId": "21",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-10-31T17:36:21+00:00"
       }
     ],
     "problem_index": 20,
@@ -552,11 +560,12 @@
       "2183376359",
       "2184123559",
       "2184950384",
-      "2185579028"
+      "2185579028",
+      "2186385876"
     ],
     "day": "2026-10-31",
-    "problems_completed_today": 2,
-    "gemini_requests_used_today": 2,
+    "problems_completed_today": 3,
+    "gemini_requests_used_today": 3,
     "gemini_blocked_today": false,
     "pending_new_problems": [
       {
@@ -582,6 +591,7 @@
       "height-checker",
       "largest-number-at-least-twice-of-others",
       "longest-common-prefix",
+      "merge-two-sorted-lists",
       "minimum-size-subarray-sum",
       "pascals-triangle",
       "pascals-triangle-ii",

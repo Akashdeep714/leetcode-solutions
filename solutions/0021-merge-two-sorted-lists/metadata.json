@@ -1,0 +1,55 @@
+{
+  "number": 21,
+  "title": "Merge Two Sorted Lists",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0021-merge-two-sorted-lists",
+  "slug": "merge-two-sorted-lists",
+  "submission_id": "2186385876",
+  "runtime": 0,
+  "runtime_display": "0 ms",
+  "memory": 43892000,
+  "memory_display": "43.9 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2186385876",
+      "submission_ids": [
+        "2186385876"
+      ],
+      "solution_hash": "919463b029ee961ba548b51fab21c7182a4c72895326d46dcb3565f41c6d0533",
+      "approach_key": "two pointers dummy head",
+      "approach_name": "Two Pointers / Dummy Head",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 43892000,
+      "memory_display": "43.9 MB",
+      "analysis": {
+        "pattern": "Two Pointers / Dummy Head",
+        "problem_summary": "Merge two sorted singly-linked lists into a single sorted list by splicing together existing nodes, returning the head of the merged list.",
+        "intuition": "Because both lists are already sorted, the smallest remaining element overall must always be at the front of either `list1` or `list2`. By comparing the head values of both lists step by step, we can repeatedly pick the smaller node and append it to our merged list. Using a dummy head node eliminates edge-case logic for initializing the result list's head node. Once one list runs out of nodes, we can directly link the rest of the other list since its remaining elements are already sorted and larger than all merged elements.",
+        "approach": [
+          "Instantiate a `dummy` sentinel `ListNode` with a value of `0` and initialize a tail pointer `curr` referencing `dummy`.",
+          "Enter a `while` loop that continues as long as both `list1` and `list2` are not `null`.",
+          "If `list1.val < list2.val`, set `curr.next` to `list1`, move `curr` to `list1`, and advance `list1` to `list1.next`.",
+          "Otherwise, set `curr.next` to `list2`, move `curr` to `list2`, and advance `list2` to `list2.next`.",
+          "After the loop exits, check if `list1` is `null`; if so, attach the remainder of `list2` to `curr.next`, otherwise attach `list1`.",
+          "Return `dummy.next`, which points to the true head of the merged sorted list."
+        ],
+        "why_it_works": "The algorithm maintains the invariant that the merged list built starting at `dummy.next` is always in sorted order. At each iteration, comparing `list1.val` and `list2.val` guarantees that the smallest available node among all unmerged nodes is selected. Because both input lists are sorted, when one list becomes empty, all nodes remaining in the other list are guaranteed to be greater than or equal to all previously merged nodes, allowing them to be attached directly without further comparisons.",
+        "time_complexity": "O(n + m)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Using a dummy head node avoids conditional checks for initializing a list, allowing an in-place merge of two sorted linked lists by adjusting pointers in linear time.",
+        "time_explanation": "Each iteration of the loop advances either `list1` or `list2` by one node, processing every node in both lists at most once.",
+        "space_explanation": "The merge is performed in-place by updating pointer references, using only a fixed number of extra pointers regardless of list size."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
