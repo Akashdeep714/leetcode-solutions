@@ -1,0 +1,56 @@
+{
+  "number": 234,
+  "title": "Palindrome Linked List",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0234-palindrome-linked-list",
+  "slug": "palindrome-linked-list",
+  "submission_id": "2187119014",
+  "runtime": 8,
+  "runtime_display": "8 ms",
+  "memory": 99184000,
+  "memory_display": "99.2 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2187119014",
+      "submission_ids": [
+        "2187119014"
+      ],
+      "solution_hash": "5cc70d9719239a058620b0003258e8b9f069a9e34c96a3c7292ac1e0b829f200",
+      "approach_key": "two pointers",
+      "approach_name": "Two Pointers",
+      "runtime": 8,
+      "runtime_display": "8 ms",
+      "memory": 99184000,
+      "memory_display": "99.2 MB",
+      "analysis": {
+        "pattern": "Two Pointers",
+        "problem_summary": "Determine whether the values in a given singly linked list read the same forward and backward.",
+        "intuition": "Because a singly linked list only allows forward traversal, checking for symmetry directly on the nodes is tricky. By copying all node values into an `ArrayList`, we gain $O(1)$ random index access. This transforms the problem into a standard array palindrome check, where two pointers starting at opposite ends move inward and compare corresponding elements.",
+        "approach": [
+          "Initialize an empty `ArrayList` of integers named `list` to hold node values.",
+          "Traverse the singly linked list starting from `head`, appending each node's value `curr.val` to `list` until `curr` becomes `null`.",
+          "Initialize two index pointers: `i = 0` at the beginning of `list` and `j = list.size() - 1` at the end.",
+          "Loop while `i < j`, comparing `list.get(i)` with `list.get(j)` at each step.",
+          "If `list.get(i)` is not equal to `list.get(j)`, return `false` immediately.",
+          "Increment `i` and decrement `j` to move toward the center of the list.",
+          "If the loop finishes without finding any mismatch, return `true`."
+        ],
+        "why_it_works": "A sequence of length $N$ is a palindrome if and only if the element at index $i$ equals the element at index $N - 1 - i$ for all $0 \\le i < N / 2$. Transferring the linked list elements into an array preserves their order, and the two-pointer loop systematically checks this precise equality condition from the boundaries inward.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(n)",
+        "time_explanation": "The algorithm visits each of the $n$ nodes once to copy values into the array list, followed by at most $n/2$ iterations in the two-pointer loop, running in $O(n)$ overall time.",
+        "space_explanation": "An auxiliary `ArrayList` stores all $n$ node values, resulting in $O(n)$ extra space.",
+        "key_takeaway": "When singly linked list traversal limits bidirectional access, copying elements into an array enables $O(1)$ random access for standard two-pointer techniques at the cost of $O(n)$ space."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}

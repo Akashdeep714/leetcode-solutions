@@ -106,7 +106,8 @@
     "2184123559",
     "2184950384",
     "2185579028",
-    "2186385876"
+    "2186385876",
+    "2187119014"
   ],
   "historical_backfill": {
     "version": 6,
@@ -482,6 +483,13 @@
         "frontendId": "21",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-10-31T17:36:21+00:00"
+      },
+      {
+        "titleSlug": "palindrome-linked-list",
+        "title": "Palindrome Linked List",
+        "frontendId": "234",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-11-01T16:12:09+00:00"
       }
     ],
     "problem_index": 20,
@@ -561,11 +569,12 @@
       "2184123559",
       "2184950384",
       "2185579028",
-      "2186385876"
+      "2186385876",
+      "2187119014"
     ],
     "day": "2026-11-01",
-    "problems_completed_today": 0,
-    "gemini_requests_used_today": 0,
+    "problems_completed_today": 1,
+    "gemini_requests_used_today": 1,
     "gemini_blocked_today": false,
     "pending_new_problems": [
       {
@@ -593,6 +602,7 @@
       "longest-common-prefix",
       "merge-two-sorted-lists",
       "minimum-size-subarray-sum",
+      "palindrome-linked-list",
       "pascals-triangle",
       "pascals-triangle-ii",
       "remove-element",
