@@ -13,7 +13,7 @@
   "runtime_display": "8 ms",
   "memory": 99184000,
   "memory_display": "99.2 MB",
-  "solution_count": 1,
+  "solution_count": 2,
   "solutions": [
     {
       "number": 1,
@@ -24,8 +24,8 @@
         "2187119014"
       ],
       "solution_hash": "5cc70d9719239a058620b0003258e8b9f069a9e34c96a3c7292ac1e0b829f200",
-      "approach_key": "two pointers",
-      "approach_name": "Two Pointers",
+      "approach_key": "arraylist-two-pointers",
+      "approach_name": "ArrayList Conversion and Two Pointers",
       "runtime": 8,
       "runtime_display": "8 ms",
       "memory": 99184000,
@@ -49,6 +49,40 @@
         "time_explanation": "The algorithm visits each of the $n$ nodes once to copy values into the array list, followed by at most $n/2$ iterations in the two-pointer loop, running in $O(n)$ overall time.",
         "space_explanation": "An auxiliary `ArrayList` stores all $n$ node values, resulting in $O(n)$ extra space.",
         "key_takeaway": "When singly linked list traversal limits bidirectional access, copying elements into an array enables $O(1)$ random access for standard two-pointer techniques at the cost of $O(n)$ space."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2188072837",
+      "submission_ids": [
+        "2188072837"
+      ],
+      "solution_hash": "57b3b26e85893b46e18f304837239d8744418682ee67ea83748117f3f083da7d",
+      "approach_key": "fast-slow-pointers-and-in-place-reversal",
+      "approach_name": "Fast and Slow Pointers with In-Place List Reversal",
+      "runtime": 4,
+      "runtime_display": "4 ms",
+      "memory": 93760000,
+      "memory_display": "93.8 MB",
+      "analysis": {
+        "pattern": "Fast and Slow Pointers / Linked List Reversal",
+        "problem_summary": "Determine whether a singly linked list is a palindrome in O(n) time and O(1) auxiliary space.",
+        "intuition": "To check for palindrome symmetry without additional memory, we can find the middle of the list, reverse the second half in place, and iterate simultaneously from the start of the list and the head of the reversed second half.",
+        "approach": [
+          "Use fast and slow pointers to locate the middle node (slow advances by 1, fast advances by 2).",
+          "Reverse the second half of the linked list starting from the slow pointer in place.",
+          "Set one pointer at the original head and another at the start of the reversed second half.",
+          "Iterate both pointers forward, comparing node values. Return false on any mismatch.",
+          "If the second half pointer reaches the end with all values matching, return true."
+        ],
+        "why_it_works": "Reversing the second half allows forward iteration from both ends toward the middle, eliminating the need for backward traversal or external data structures.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Combining the fast and slow pointer midpoint search with in-place list reversal solves the palindrome check in optimal O(1) auxiliary space.",
+        "time_explanation": "Finding the middle takes n/2 steps, reversing the second half takes n/2 steps, and comparing the two halves takes n/2 steps. The total operation count is linear, O(n).",
+        "space_explanation": "All operations are performed in place by modifying link references, requiring only O(1) auxiliary variables."
       }
     }
   ],
