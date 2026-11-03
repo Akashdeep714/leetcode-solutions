@@ -108,7 +108,8 @@
     "2185579028",
     "2186385876",
     "2187119014",
-    "2188072837"
+    "2188072837",
+    "2188306178"
   ],
   "historical_backfill": {
     "version": 6,
@@ -491,6 +492,13 @@
         "frontendId": "234",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-11-01T16:12:09+00:00"
+      },
+      {
+        "titleSlug": "linked-list-cycle",
+        "title": "Linked List Cycle",
+        "frontendId": "141",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-11-03T05:30:57+00:00"
       }
     ],
     "problem_index": 20,
@@ -572,9 +580,10 @@
       "2185579028",
       "2186385876",
       "2187119014",
-      "2188072837"
+      "2188072837",
+      "2188306178"
     ],
-    "day": "2026-11-02",
+    "day": "2026-11-03",
     "problems_completed_today": 1,
     "gemini_requests_used_today": 1,
     "gemini_blocked_today": false,
@@ -601,6 +610,7 @@
       "first-unique-character-in-a-string",
       "height-checker",
       "largest-number-at-least-twice-of-others",
+      "linked-list-cycle",
       "longest-common-prefix",
       "merge-two-sorted-lists",
       "minimum-size-subarray-sum",
