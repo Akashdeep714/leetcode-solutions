@@ -109,7 +109,8 @@
     "2186385876",
     "2187119014",
     "2188072837",
-    "2188306178"
+    "2188306178",
+    "2190864506"
   ],
   "historical_backfill": {
     "version": 6,
@@ -499,6 +500,13 @@
         "frontendId": "141",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-11-03T05:30:57+00:00"
+      },
+      {
+        "titleSlug": "design-linked-list",
+        "title": "Design Linked List",
+        "frontendId": "707",
+        "difficulty": "MEDIUM",
+        "lastSubmittedAt": "2026-11-06T17:39:05+00:00"
       }
     ],
     "problem_index": 20,
@@ -581,11 +589,12 @@
       "2186385876",
       "2187119014",
       "2188072837",
-      "2188306178"
+      "2188306178",
+      "2190864506"
     ],
     "day": "2026-11-06",
-    "problems_completed_today": 0,
-    "gemini_requests_used_today": 0,
+    "problems_completed_today": 1,
+    "gemini_requests_used_today": 1,
     "gemini_blocked_today": false,
     "pending_new_problems": [
       {
@@ -603,6 +612,7 @@
       "array-partition",
       "check-if-n-and-its-double-exist",
       "delete-node-in-a-linked-list",
+      "design-linked-list",
       "diagonal-traverse",
       "find-all-numbers-disappeared-in-an-array",
       "find-pivot-index",

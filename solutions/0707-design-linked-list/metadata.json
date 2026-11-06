@@ -1,0 +1,55 @@
+{
+  "number": 707,
+  "title": "Design Linked List",
+  "difficulty": "Medium",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0707-design-linked-list",
+  "slug": "design-linked-list",
+  "submission_id": "2190864506",
+  "runtime": 10,
+  "runtime_display": "10 ms",
+  "memory": 46616000,
+  "memory_display": "46.6 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2190864506",
+      "submission_ids": [
+        "2190864506"
+      ],
+      "solution_hash": "c38e8db2982c417451605f345278750a6167a273a1b6fb45d88a714e6956f29d",
+      "approach_key": "singly linked list dummy head",
+      "approach_name": "Singly Linked List with Dummy Head",
+      "runtime": 10,
+      "runtime_display": "10 ms",
+      "memory": 46616000,
+      "memory_display": "46.6 MB",
+      "analysis": {
+        "pattern": "Singly Linked List with Dummy Head",
+        "problem_summary": "Design a 0-indexed singly linked list supporting value retrieval by index, insertion at the head, tail, or specific index, and deletion at a specific index.",
+        "intuition": "Inserting and deleting nodes in a singly linked list usually requires handling head updates as special edge cases. By introducing a dummy head node (a sentinel node positioned before index 0) and maintaining an explicit list size counter, every real element—including the very first node—always has a predecessor. This unifies pointer manipulation logic across all operations and makes boundary validation straightforward.",
+        "approach": [
+          "Initialize the data structure with a dummy head node (`ListNode(0)`) and set `size` to 0.",
+          "For `get(index)`, check if `index` is within `[0, size - 1]`. Starting from `head`, traverse `index + 1` steps forward to arrive at the target node and return its `val`.",
+          "For `addAtIndex(index, val)`, validate that `index` is within `[0, size]`. Advance a `curr` pointer from `head` for `index` steps to land on the node immediately preceding the target insertion position.",
+          "Increment `size`, create a `newNode` with value `val`, and splice it in by setting `newNode.next = curr.next` and `curr.next = newNode`.",
+          "Delegate `addAtHead(val)` and `addAtTail(val)` directly to `addAtIndex(0, val)` and `addAtIndex(size, val)`, respectively.",
+          "For `deleteAtIndex(index)`, validate that `index` is within `[0, size - 1]`. Advance `curr` from `head` for `index` steps to locate the predecessor node, decrement `size`, and bypass the target node using `curr.next = curr.next.next`."
+        ],
+        "why_it_works": "The dummy head acts as a fixed anchor at index -1. Because every valid list node (from index 0 to `size - 1`) has a guaranteed predecessor node reachable by making `index` steps from `head`, insertions and deletions never encounter `null` predecessor pointers. Explicitly tracking `size` allows immediate detection of out-of-bounds indices before starting pointer traversals.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(n)",
+        "time_explanation": "Each lookup, insertion, or deletion operation takes up to O(n) time to traverse to the target index in the worst case, where n is the current number of elements in the list.",
+        "space_explanation": "The list stores n element nodes in memory across all insert operations, using O(1) auxiliary space per method call.",
+        "key_takeaway": "Using a dummy head node simplifies singly linked list operations by guaranteeing that every element, including the head, has a non-null preceding node."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
