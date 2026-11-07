@@ -13,7 +13,7 @@
   "runtime_display": "0 ms",
   "memory": 46276000,
   "memory_display": "46.3 MB",
-  "solution_count": 1,
+  "solution_count": 2,
   "solutions": [
     {
       "number": 1,
@@ -24,8 +24,8 @@
         "2188306178"
       ],
       "solution_hash": "ec3537b6fc1fe27bc4a7357e3b86d4cd96163d705c94eb2c8fcb50cd5435d61d",
-      "approach_key": "floyd s cycle finding two pointers",
-      "approach_name": "Floyd's Cycle Finding Algorithm (Two Pointers)",
+      "approach_key": "floyds-cycle-finding",
+      "approach_name": "Floyd's Cycle-Finding Algorithm (Two Pointers)",
       "runtime": 0,
       "runtime_display": "0 ms",
       "memory": 46276000,
@@ -48,6 +48,41 @@
         "key_takeaway": "Using fast and slow pointers moving at different speeds allows detecting cycles in linked structures in $O(n)$ time while maintaining $O(1)$ constant auxiliary memory.",
         "time_explanation": "If the list has no cycle, `fast` reaches the end in $N/2$ steps; if it has a cycle, `fast` catches up to `slow` in at most $N$ iterations, running in linear time total.",
         "space_explanation": "The algorithm only uses two pointer variables (`slow` and `fast`), requiring constant auxiliary space regardless of list size."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2191481959",
+      "submission_ids": [
+        "2191481959"
+      ],
+      "solution_hash": "e84c2890ddb9f463016af4671c0324cb89f0d0c54e9f2ce134570f5fea3fffba",
+      "approach_key": "hash-set-visited-nodes",
+      "approach_name": "Hash Set Node Tracking",
+      "runtime": 7,
+      "runtime_display": "7 ms",
+      "memory": 46056000,
+      "memory_display": "46.1 MB",
+      "analysis": {
+        "pattern": "Hash Table / Hash Set",
+        "problem_summary": "Determine if a linked list contains a cycle by checking for repeated node object references.",
+        "intuition": "If we keep track of every node object we encounter during traversal, reaching a node that has already been stored indicates a cycle.",
+        "approach": [
+          "Create an empty `HashSet` to store node memory references (`ListNode`).",
+          "Traverse the linked list starting from `head` using a pointer `curr`.",
+          "At each node, check if `curr` is already present in the `HashSet`.",
+          "If present, return `true` as a cycle is detected.",
+          "Otherwise, add `curr` to the set and move `curr` to `curr.next`.",
+          "If `curr` becomes `null`, return `false`."
+        ],
+        "why_it_works": "Node references in Java are unique memory addresses. If a cycle exists, traversing the list will eventually hit a node that was previously added to the set.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(n)",
+        "key_takeaway": "Using a hash set to record node identity provides an intuitive way to detect cycles at the cost of linear memory space.",
+        "time_explanation": "We visit each node at most once. Hash set membership check and insertion operate in average O(1) time, yielding O(n) total time complexity.",
+        "space_explanation": "In the worst case (or when a cycle exists), the hash set stores references for up to N unique nodes, requiring O(n) extra space."
       }
     }
   ],
