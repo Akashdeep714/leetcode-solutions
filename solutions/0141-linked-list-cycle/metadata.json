@@ -8,50 +8,15 @@
   ],
   "folder": "0141-linked-list-cycle",
   "slug": "linked-list-cycle",
-  "submission_id": "2188306178",
-  "runtime": 0,
-  "runtime_display": "0 ms",
-  "memory": 46276000,
-  "memory_display": "46.3 MB",
+  "submission_id": "2191481959",
+  "runtime": 7,
+  "runtime_display": "7 ms",
+  "memory": 46056000,
+  "memory_display": "46.1 MB",
   "solution_count": 2,
   "solutions": [
     {
       "number": 1,
-      "filename": "solution.java",
-      "language": "Java",
-      "submission_id": "2188306178",
-      "submission_ids": [
-        "2188306178"
-      ],
-      "solution_hash": "ec3537b6fc1fe27bc4a7357e3b86d4cd96163d705c94eb2c8fcb50cd5435d61d",
-      "approach_key": "floyds-cycle-finding",
-      "approach_name": "Floyd's Cycle-Finding Algorithm (Two Pointers)",
-      "runtime": 0,
-      "runtime_display": "0 ms",
-      "memory": 46276000,
-      "memory_display": "46.3 MB",
-      "analysis": {
-        "pattern": "Floyd's Cycle Finding Algorithm (Two Pointers)",
-        "problem_summary": "Determine whether a singly-linked list contains a cycle, returning true if any node can be reached repeatedly by following next pointers, and false otherwise.",
-        "intuition": "If two runners race on a circular track at different speeds, the faster runner will eventually lap the slower runner and meet them again. We can apply this principle to a linked list using two pointers: a `slow` pointer moving one node per step and a `fast` pointer moving two nodes per step. If the list has no cycle, `fast` will safely hit the end (`null`). If a cycle exists, both pointers will eventually enter the loop, where `fast` closes the gap by one node in every iteration until both pointers meet at the exact same node.",
-        "approach": [
-          "Initialize two pointers, `slow` and `fast`, both starting at `head`.",
-          "Enter a `while` loop that continues as long as `fast` and `fast.next` are not `null`.",
-          "Advance `slow` by one step (`slow = slow.next`).",
-          "Advance `fast` by two steps (`fast = fast.next.next`).",
-          "Check if `slow == fast`. If they point to the exact same node reference, a cycle exists, so return `true`.",
-          "If the loop exits because `fast` or `fast.next` reached `null`, return `false` as the list is acyclic."
-        ],
-        "why_it_works": "When there is a cycle of length $K$, both pointers will eventually enter it. Once inside, the distance between `fast` and `slow` along the cycle decreases by 1 in every iteration because `fast` gains 1 step on `slow` per step ($2 - 1 = 1$). Because the relative distance shrinks by 1 each step modulo $K$, the pointers are guaranteed to meet within at most $K$ iterations, accurately detecting the cycle without an infinite loop.",
-        "time_complexity": "O(n)",
-        "space_complexity": "O(1)",
-        "key_takeaway": "Using fast and slow pointers moving at different speeds allows detecting cycles in linked structures in $O(n)$ time while maintaining $O(1)$ constant auxiliary memory.",
-        "time_explanation": "If the list has no cycle, `fast` reaches the end in $N/2$ steps; if it has a cycle, `fast` catches up to `slow` in at most $N$ iterations, running in linear time total.",
-        "space_explanation": "The algorithm only uses two pointer variables (`slow` and `fast`), requiring constant auxiliary space regardless of list size."
-      }
-    },
-    {
-      "number": 2,
       "filename": "solution-2.java",
       "language": "Java",
       "submission_id": "2191481959",
@@ -60,7 +25,7 @@
       ],
       "solution_hash": "e84c2890ddb9f463016af4671c0324cb89f0d0c54e9f2ce134570f5fea3fffba",
       "approach_key": "hash-set-visited-nodes",
-      "approach_name": "Hash Set Node Tracking",
+      "approach_name": "Hash Set Visited Node Tracking",
       "runtime": 7,
       "runtime_display": "7 ms",
       "memory": 46056000,
@@ -83,6 +48,42 @@
         "key_takeaway": "Using a hash set to record node identity provides an intuitive way to detect cycles at the cost of linear memory space.",
         "time_explanation": "We visit each node at most once. Hash set membership check and insertion operate in average O(1) time, yielding O(n) total time complexity.",
         "space_explanation": "In the worst case (or when a cycle exists), the hash set stores references for up to N unique nodes, requiring O(n) extra space."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2188306178",
+      "submission_ids": [
+        "2188306178",
+        "2192079771"
+      ],
+      "solution_hash": "ec3537b6fc1fe27bc4a7357e3b86d4cd96163d705c94eb2c8fcb50cd5435d61d",
+      "approach_key": "floyds-cycle-finding",
+      "approach_name": "Floyd's Cycle Finding Algorithm (Two Pointers)",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 46276000,
+      "memory_display": "46.3 MB",
+      "analysis": {
+        "pattern": "Floyd's Cycle Finding Algorithm (Two Pointers)",
+        "problem_summary": "Determine whether a singly-linked list contains a cycle, returning true if any node can be reached repeatedly by following next pointers, and false otherwise.",
+        "intuition": "If two runners race on a circular track at different speeds, the faster runner will eventually lap the slower runner and meet them again. We can apply this principle to a linked list using two pointers: a `slow` pointer moving one node per step and a `fast` pointer moving two nodes per step. If the list has no cycle, `fast` will safely hit the end (`null`). If a cycle exists, both pointers will eventually enter the loop, where `fast` closes the gap by one node in every iteration until both pointers meet at the exact same node.",
+        "approach": [
+          "Initialize two pointers, `slow` and `fast`, both starting at `head`.",
+          "Enter a `while` loop that continues as long as `fast` and `fast.next` are not `null`.",
+          "Advance `slow` by one step (`slow = slow.next`).",
+          "Advance `fast` by two steps (`fast = fast.next.next`).",
+          "Check if `slow == fast`. If they point to the exact same node reference, a cycle exists, so return `true`.",
+          "If the loop exits because `fast` or `fast.next` reached `null`, return `false` as the list is acyclic."
+        ],
+        "why_it_works": "When there is a cycle of length $K$, both pointers will eventually enter it. Once inside, the distance between `fast` and `slow` along the cycle decreases by 1 in every iteration because `fast` gains 1 step on `slow` per step ($2 - 1 = 1$). Because the relative distance shrinks by 1 each step modulo $K$, the pointers are guaranteed to meet within at most $K$ iterations, accurately detecting the cycle without an infinite loop.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Using fast and slow pointers moving at different speeds allows detecting cycles in linked structures in $O(n)$ time while maintaining $O(1)$ constant auxiliary memory.",
+        "time_explanation": "If the list has no cycle, `fast` reaches the end in $N/2$ steps; if it has a cycle, `fast` catches up to `slow` in at most $N$ iterations, running in linear time total.",
+        "space_explanation": "The algorithm only uses two pointer variables (`slow` and `fast`), requiring constant auxiliary space regardless of list size."
       }
     }
   ],
