@@ -13,7 +13,7 @@
   "runtime_display": "6 ms",
   "memory": 46212000,
   "memory_display": "46.2 MB",
-  "solution_count": 1,
+  "solution_count": 2,
   "solutions": [
     {
       "number": 1,
@@ -24,8 +24,8 @@
         "2192625409"
       ],
       "solution_hash": "dcdb9e4d6303676c0ab06562f34a59744b2420a36d5b6a617e236026f1b5dc81",
-      "approach_key": "hash table",
-      "approach_name": "Hash Table",
+      "approach_key": "hash-set-visited-nodes",
+      "approach_name": "Hash Table / Visited Nodes Tracking",
       "runtime": 6,
       "runtime_display": "6 ms",
       "memory": 46212000,
@@ -50,6 +50,40 @@
         "key_takeaway": "Using a hash set to track visited node references provides a clean O(n) time solution for cycle entry detection, though Floyd's Cycle-Finding Algorithm can achieve O(1) auxiliary space.",
         "time_explanation": "We visit each node at most twice (or once if there is no cycle), performing O(1) average-time hash set lookups and insertions per node.",
         "space_explanation": "The hash set stores at most n unique node references, where n is the total number of nodes in the linked list."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2193363749",
+      "submission_ids": [
+        "2193363749"
+      ],
+      "solution_hash": "5e03ae01bc14ec856af3137d86e118119d963da47f4130bfcc2ee6ade8b334a9",
+      "approach_key": "floyds-cycle-detection-two-pointers",
+      "approach_name": "Floyd's Cycle-Finding Algorithm (Two Pointers)",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 46236000,
+      "memory_display": "46.2 MB",
+      "analysis": {
+        "pattern": "Two Pointers (Fast & Slow)",
+        "problem_summary": "Determine the start node of a linked list cycle using constant auxiliary memory.",
+        "intuition": "When a fast pointer (moving 2 steps) and a slow pointer (moving 1 step) meet inside a cycle, mathematical relationship shows that the distance from the head to the cycle start equalizes with the distance from the meeting point to the cycle start.",
+        "approach": [
+          "Initialize two pointers, `slow` and `fast`, both pointing to the head of the list.",
+          "Move `slow` by 1 step and `fast` by 2 steps until `fast` reaches null or `fast == slow`.",
+          "If `fast` or `fast.next` is null, there is no cycle, so return null.",
+          "Once `fast == slow`, keep `slow` at the meeting point and initialize a new pointer `curr` at `head`.",
+          "Advance both `curr` and `slow` one step at a time until they meet; their intersection node is the start of the cycle."
+        ],
+        "why_it_works": "Let distance from head to cycle entry be $a$, cycle entry to meeting point be $b$, and remaining cycle length be $c$. Fast travels $a + b + k(b+c)$ and slow travels $a + b$. Because fast is twice as fast: $2(a + b) = a + b + k(b+c) \\implies a = (k-1)(b+c) + c$. Thus, walking $a$ steps from head and $a$ steps from the meeting point leads directly to the cycle entry.",
+        "time_complexity": "O(N)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Floyd's algorithm solves cycle detection and entry location in linear time using only pointer manipulation without extra memory allocation.",
+        "time_explanation": "Phase 1 (cycle detection) takes at most N steps for the pointers to meet inside the cycle. Phase 2 (finding entry) takes $a$ steps (where $a < N$). Hence, total time is bounded by O(N).",
+        "space_explanation": "Only two pointer variables (`slow` and `fast`, plus `curr`) are used, consuming constant O(1) auxiliary space."
       }
     }
   ],

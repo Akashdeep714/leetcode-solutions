@@ -40,7 +40,7 @@
 | 125 | [Valid Palindrome](solutions/0125-valid-palindrome/) | 🟢 Easy | Java | 1 |
 | 136 | [Single Number](solutions/0136-single-number/) | 🟢 Easy | Java | 2 |
 | 141 | [Linked List Cycle](solutions/0141-linked-list-cycle/) | 🟢 Easy | Java | 2 |
-| 142 | [Linked List Cycle II](solutions/0142-linked-list-cycle-ii/) | 🟡 Medium | Java | 1 |
+| 142 | [Linked List Cycle II](solutions/0142-linked-list-cycle-ii/) | 🟡 Medium | Java | 2 |
 | 151 | [Reverse Words in a String](solutions/0151-reverse-words-in-a-string/) | 🟡 Medium | Java | 2 |
 | 167 | [Two Sum II - Input Array Is Sorted](solutions/0167-two-sum-ii-input-array-is-sorted/) | 🟡 Medium | Java | 1 |
 | 189 | [Rotate Array](solutions/0189-rotate-array/) | 🟡 Medium | Java | 2 |
