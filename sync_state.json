@@ -605,11 +605,19 @@
       "2192079771",
       "2192625409"
     ],
-    "day": "2026-11-09",
-    "problems_completed_today": 1,
-    "gemini_requests_used_today": 1,
+    "day": "2026-11-10",
+    "problems_completed_today": 0,
+    "gemini_requests_used_today": 0,
     "gemini_blocked_today": false,
     "pending_new_problems": [
+      {
+        "titleSlug": "linked-list-cycle-ii",
+        "title": "Linked List Cycle II",
+        "submission_ids": [
+          "2193363749"
+        ],
+        "last_seen_timestamp": 1794332276
+      },
       {
         "titleSlug": "merge-sorted-array",
         "title": "Merge Sorted Array",
