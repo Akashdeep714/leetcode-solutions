@@ -518,6 +518,13 @@
         "frontendId": "142",
         "difficulty": "MEDIUM",
         "lastSubmittedAt": "2026-11-09T16:45:57+00:00"
+      },
+      {
+        "titleSlug": "intersection-of-two-linked-lists",
+        "title": "Intersection of Two Linked Lists",
+        "frontendId": "160",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-11-11T15:46:16+00:00"
       }
     ],
     "problem_index": 20,
@@ -612,6 +619,14 @@
     "gemini_requests_used_today": 0,
     "gemini_blocked_today": false,
     "pending_new_problems": [
+      {
+        "titleSlug": "intersection-of-two-linked-lists",
+        "title": "Intersection of Two Linked Lists",
+        "submission_ids": [
+          "2193989621"
+        ],
+        "last_seen_timestamp": 1794411975
+      },
       {
         "titleSlug": "merge-sorted-array",
         "title": "Merge Sorted Array",
