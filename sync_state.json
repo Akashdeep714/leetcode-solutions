@@ -622,6 +622,16 @@
     "gemini_blocked_today": false,
     "pending_new_problems": [
       {
+        "titleSlug": "intersection-of-two-linked-lists",
+        "title": "Intersection of Two Linked Lists",
+        "submission_ids": [
+          "2194778991",
+          "2194772117",
+          "2194769802"
+        ],
+        "last_seen_timestamp": 1794502923
+      },
+      {
         "titleSlug": "merge-sorted-array",
         "title": "Merge Sorted Array",
         "submission_ids": [
