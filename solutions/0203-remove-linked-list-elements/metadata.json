@@ -1,0 +1,56 @@
+{
+  "number": 203,
+  "title": "Remove Linked List Elements",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0203-remove-linked-list-elements",
+  "slug": "remove-linked-list-elements",
+  "submission_id": "2195487921",
+  "runtime": 1,
+  "runtime_display": "1 ms",
+  "memory": 46584000,
+  "memory_display": "46.6 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2195487921",
+      "submission_ids": [
+        "2195487921"
+      ],
+      "solution_hash": "deba08c01795a0c5b81e2f9a8e99fa9fbf3298b82e0d7057842056c43da714ec",
+      "approach_key": "dummy head pointer",
+      "approach_name": "Dummy Head Pointer",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 46584000,
+      "memory_display": "46.6 MB",
+      "analysis": {
+        "pattern": "Dummy Head Pointer",
+        "problem_summary": "Remove all nodes from a singly-linked list whose values match a given integer target `val`, and return the head of the updated list.",
+        "intuition": "Deleting a node in a singly-linked list requires re-linking its predecessor node's `next` pointer to skip the target node. However, if the head of the list itself needs to be removed, it has no predecessor, creating special edge cases. Introducing a dummy head node (`pHead`) before the actual head standardizes the deletion logic: every node, including the original head, now has a non-null preceding node (`prev`), allowing us to cleanly bypass target nodes without extra conditional checks for the start of the list.",
+        "approach": [
+          "Instantiate a dummy node `pHead` with value `0` and set `pHead.next = head`.",
+          "Initialize pointer `prev` to point to `pHead` and pointer `curr` to point to `head`.",
+          "Traverse the linked list using a `while` loop until `curr` becomes `null`.",
+          "If `curr.val == val`, remove `curr` by setting `prev.next = curr.next` without advancing `prev` (since the new `prev.next` might also contain `val`).",
+          "If `curr.val != val`, move `prev` forward to `curr`.",
+          "Advance `curr` to `curr.next` in every iteration to evaluate the next node.",
+          "Return `pHead.next`, which points to the updated head of the list."
+        ],
+        "why_it_works": "The dummy head guarantees that `prev` always references a valid node whose value is confirmed not to equal `val`. When a target node is identified (`curr.val == val`), setting `prev.next = curr.next` effectively unlinks `curr` from the list structure. Keeping `prev` stationary during a deletion ensures that if consecutive nodes contain `val`, they are all continuously bypassed until a non-matching node is reached.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Using a dummy (sentinel) head node simplifies linked list modifications by ensuring every node has a valid predecessor, eliminating special edge cases for head updates.",
+        "time_explanation": "The solution visits each of the n nodes in the linked list exactly once in a single pass.",
+        "space_explanation": "The algorithm operates in-place, using only a single dummy node and two pointer references regardless of input size."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
