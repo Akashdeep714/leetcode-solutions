@@ -13,7 +13,7 @@
   "runtime_display": "1486 ms",
   "memory": 52160000,
   "memory_display": "52.2 MB",
-  "solution_count": 1,
+  "solution_count": 4,
   "solutions": [
     {
       "number": 1,
@@ -24,8 +24,8 @@
         "2193989621"
       ],
       "solution_hash": "21a2a93491d0b45c69511ca3dc25fe2c58a31d9aa6cd32e8575ecf3ba7eeae76",
-      "approach_key": "brute force nested loop comparison",
-      "approach_name": "Brute Force / Nested Loop Comparison",
+      "approach_key": "brute-force-nested-loops",
+      "approach_name": "Brute Force (Nested Loops)",
       "runtime": 1486,
       "runtime_display": "1486 ms",
       "memory": 52160000,
@@ -50,6 +50,108 @@
         "key_takeaway": "Checking linked list intersection requires matching node memory addresses rather than values; while brute-force pair checking costs $O(m \\times n)$ time, it serves as a baseline before optimizing to $O(m + n)$ using two pointers or hash sets.",
         "time_explanation": "The outer loop runs up to $m$ times and the inner loop runs up to $n$ times, resulting in a worst-case time complexity of $O(m \\times n)$ pointer comparisons.",
         "space_explanation": "The implementation only uses two pointer variables (`currA` and `currB`), allocating no additional memory."
+      }
+    },
+    {
+      "number": 2,
+      "filename": "solution-2.java",
+      "language": "Java",
+      "submission_id": "2194769802",
+      "submission_ids": [
+        "2194769802"
+      ],
+      "solution_hash": "246fd60718a9dd7595d22c8fe20472170590eea3f5d603e06130158724d905fd",
+      "approach_key": "hash-set-lookup",
+      "approach_name": "Hash Set Storage",
+      "runtime": 9,
+      "runtime_display": "9 ms",
+      "memory": 52052000,
+      "memory_display": "52.1 MB",
+      "analysis": {
+        "pattern": "Hash Table / Set Lookup",
+        "problem_summary": "Find the node reference where two singly linked lists intersect.",
+        "intuition": "By storing all node references of list A in a set, we can check whether any node in list B has already been visited in $O(1)$ time.",
+        "approach": [
+          "Traverse list A completely and insert every node reference into a `HashSet`.",
+          "Traverse list B node by node.",
+          "For each node in list B, check if it exists in the `HashSet`.",
+          "Return the first node reference from list B that is present in the set; if none match, return `null`."
+        ],
+        "why_it_works": "The `HashSet` relies on object identity/references. The first node in list B that is found in the set is the exact point of intersection.",
+        "time_complexity": "O(m + n)",
+        "space_complexity": "O(m)",
+        "key_takeaway": "Trading auxiliary space for linear time complexity provides a straightforward $O(m + n)$ solution.",
+        "time_explanation": "Traversing list A takes $O(m)$ time to populate the set, and traversing list B takes up to $O(n)$ time for hash lookups, totaling $O(m + n)$ overall.",
+        "space_explanation": "The `HashSet` stores references for all $m$ nodes of list A, consuming $O(m)$ auxiliary space."
+      }
+    },
+    {
+      "number": 3,
+      "filename": "solution-3.java",
+      "language": "Java",
+      "submission_id": "2194772117",
+      "submission_ids": [
+        "2194772117"
+      ],
+      "solution_hash": "d818cc293cc02c62fa62106cff6853faa220d0f200c9f08ca8d8ff893277ce54",
+      "approach_key": "two-pointers-redirection",
+      "approach_name": "Two Pointers (Pointer Redirection)",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 51840000,
+      "memory_display": "51.8 MB",
+      "analysis": {
+        "pattern": "Two Pointers / Path Concatenation",
+        "problem_summary": "Find the intersection node of two singly linked lists in linear time and constant space.",
+        "intuition": "If pointer A traverses list A then list B ($m + n$), and pointer B traverses list B then list A ($n + m$), both pointers will travel the exact same total distance and meet at the intersection node (or both reach `null`).",
+        "approach": [
+          "Initialize pointer `currA` at `headA` and pointer `currB` at `headB`.",
+          "Loop while `currA != currB`.",
+          "In each step, advance `currA` to `currA.next`; if `currA` becomes `null`, redirect it to `headB`.",
+          "Similarly, advance `currB` to `currB.next`; if `currB` becomes `null`, redirect it to `headA`.",
+          "When `currA == currB`, return `currA` (which is either the intersection node or `null`)."
+        ],
+        "why_it_works": "Let list A have $a$ unshared nodes, list B have $b$ unshared nodes, and shared suffix length be $c$. Pointer A travels $a + c + b$ nodes, while pointer B travels $b + c + a$ nodes. Both cover $a + b + c$ nodes and arrive at the intersection simultaneously.",
+        "time_complexity": "O(m + n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Concatenating traversal paths equalizes total path length dynamically, achieving optimal time and space complexity cleanly.",
+        "time_explanation": "Each pointer traverses at most $m + n$ nodes before either meeting at the intersection or reaching `null` simultaneously.",
+        "space_explanation": "Only two pointer references (`currA`, `currB`) are stored, requiring $O(1)$ extra memory."
+      }
+    },
+    {
+      "number": 4,
+      "filename": "solution-4.java",
+      "language": "Java",
+      "submission_id": "2194778991",
+      "submission_ids": [
+        "2194778991"
+      ],
+      "solution_hash": "191ea95cede60131046bec625848be404ab3f8716996412e86426046c9bed0e3",
+      "approach_key": "length-difference-alignment",
+      "approach_name": "Length Difference Alignment",
+      "runtime": 1,
+      "runtime_display": "1 ms",
+      "memory": 52544000,
+      "memory_display": "52.5 MB",
+      "analysis": {
+        "pattern": "Two Pointers / Precomputed Offset Alignment",
+        "problem_summary": "Find the intersection node of two linked lists by aligning starting positions.",
+        "intuition": "The tail portions of both lists from the intersection onwards are shared and identical in length. By computing list lengths, we can advance the pointer of the longer list by the difference in lengths so both pointers start at equal distances from the end.",
+        "approach": [
+          "Traverse list A to calculate its length `lenA`.",
+          "Traverse list B to calculate its length `lenB`.",
+          "Calculate `diff = |lenA - lenB|`.",
+          "Reset pointers to `headA` and `headB`, then advance the pointer of the longer list by `diff` steps.",
+          "Traverse both pointers together until `currA == currB` or `null` is reached.",
+          "Return the matching node."
+        ],
+        "why_it_works": "Aligning the starting positions eliminates the head length disparity, ensuring both pointers reach the intersection node at the exact same iteration step.",
+        "time_complexity": "O(m + n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "Explicit length calculation aligns starting offsets, guaranteeing synchronization without modifying list structure.",
+        "time_explanation": "Traversing both lists to compute lengths takes $O(m + n)$ time. Skipping the offset difference takes at most $O(|m - n|)$ steps, and the final combined traversal takes $O(\\min(m, n))$ steps. Total time complexity is $O(m + n)$.",
+        "space_explanation": "Uses a few integer variables and pointers, requiring constant $O(1)$ auxiliary space."
       }
     }
   ],

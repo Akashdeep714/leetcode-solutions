@@ -42,7 +42,7 @@
 | 141 | [Linked List Cycle](solutions/0141-linked-list-cycle/) | 🟢 Easy | Java | 2 |
 | 142 | [Linked List Cycle II](solutions/0142-linked-list-cycle-ii/) | 🟡 Medium | Java | 2 |
 | 151 | [Reverse Words in a String](solutions/0151-reverse-words-in-a-string/) | 🟡 Medium | Java | 2 |
-| 160 | [Intersection of Two Linked Lists](solutions/0160-intersection-of-two-linked-lists/) | 🟢 Easy | Java | 1 |
+| 160 | [Intersection of Two Linked Lists](solutions/0160-intersection-of-two-linked-lists/) | 🟢 Easy | Java | 4 |
 | 167 | [Two Sum II - Input Array Is Sorted](solutions/0167-two-sum-ii-input-array-is-sorted/) | 🟡 Medium | Java | 1 |
 | 189 | [Rotate Array](solutions/0189-rotate-array/) | 🟡 Medium | Java | 2 |
 | 206 | [Reverse Linked List](solutions/0206-reverse-linked-list/) | 🟢 Easy | Java | 1 |
