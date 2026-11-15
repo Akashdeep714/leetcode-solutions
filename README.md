@@ -7,9 +7,9 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **58** |
+| 🧩 Total Solved | **59** |
 | 🟢 Easy | **43** |
-| 🟡 Medium | **15** |
+| 🟡 Medium | **16** |
 | 🔴 Hard | **0** |
 
 ---
@@ -55,6 +55,7 @@
 | 242 | [Valid Anagram](solutions/0242-valid-anagram/) | 🟢 Easy | Java | 2 |
 | 268 | [Missing Number](solutions/0268-missing-number/) | 🟢 Easy | Java | 2 |
 | 283 | [Move Zeroes](solutions/0283-move-zeroes/) | 🟢 Easy | Java | 2 |
+| 328 | [Odd Even Linked List](solutions/0328-odd-even-linked-list/) | 🟡 Medium | Java | 1 |
 | 344 | [Reverse String](solutions/0344-reverse-string/) | 🟢 Easy | Java | 1 |
 | 349 | [Intersection of Two Arrays](solutions/0349-intersection-of-two-arrays/) | 🟢 Easy | Java | 1 |
 | 350 | [Intersection of Two Arrays II](solutions/0350-intersection-of-two-arrays-ii/) | 🟢 Easy | Java | 2 |

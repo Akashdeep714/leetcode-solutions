@@ -119,7 +119,8 @@
     "2194769802",
     "2194772117",
     "2194778991",
-    "2195487921"
+    "2195487921",
+    "2196734064"
   ],
   "historical_backfill": {
     "version": 6,
@@ -537,6 +538,13 @@
         "frontendId": "203",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-11-13T18:11:52+00:00"
+      },
+      {
+        "titleSlug": "odd-even-linked-list",
+        "title": "Odd Even Linked List",
+        "frontendId": "328",
+        "difficulty": "MEDIUM",
+        "lastSubmittedAt": "2026-11-15T16:02:15+00:00"
       }
     ],
     "problem_index": 20,
@@ -629,11 +637,12 @@
       "2194769802",
       "2194772117",
       "2194778991",
-      "2195487921"
+      "2195487921",
+      "2196734064"
     ],
     "day": "2026-11-15",
-    "problems_completed_today": 0,
-    "gemini_requests_used_today": 0,
+    "problems_completed_today": 1,
+    "gemini_requests_used_today": 1,
     "gemini_blocked_today": false,
     "pending_new_problems": [
       {
@@ -665,6 +674,7 @@
       "longest-common-prefix",
       "merge-two-sorted-lists",
       "minimum-size-subarray-sum",
+      "odd-even-linked-list",
       "palindrome-linked-list",
       "pascals-triangle",
       "pascals-triangle-ii",
