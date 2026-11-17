@@ -7,9 +7,9 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **59** |
+| 🧩 Total Solved | **60** |
 | 🟢 Easy | **43** |
-| 🟡 Medium | **16** |
+| 🟡 Medium | **17** |
 | 🔴 Hard | **0** |
 
 ---
@@ -19,6 +19,7 @@
 | # | Problem | Difficulty | Languages | Approaches |
 |---:|---|---|---|---:|
 | 1 | [Two Sum](solutions/0001-two-sum/) | 🟢 Easy | Java | 2 |
+| 2 | [Add Two Numbers](solutions/0002-add-two-numbers/) | 🟡 Medium | Java | 1 |
 | 7 | [Reverse Integer](solutions/0007-reverse-integer/) | 🟡 Medium | Java | 1 |
 | 8 | [String to Integer (atoi)](solutions/0008-string-to-integer-atoi/) | 🟡 Medium | Java | 1 |
 | 9 | [Palindrome Number](solutions/0009-palindrome-number/) | 🟢 Easy | Java | 1 |

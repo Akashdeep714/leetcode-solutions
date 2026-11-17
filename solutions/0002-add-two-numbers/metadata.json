@@ -1,0 +1,55 @@
+{
+  "number": 2,
+  "title": "Add Two Numbers",
+  "difficulty": "Medium",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0002-add-two-numbers",
+  "slug": "add-two-numbers",
+  "submission_id": "2197374528",
+  "runtime": 2,
+  "runtime_display": "2 ms",
+  "memory": 46384000,
+  "memory_display": "46.4 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2197374528",
+      "submission_ids": [
+        "2197374528"
+      ],
+      "solution_hash": "8af2f14f92af9d03b99d9eabe03a5c0f45f2f8b6964f9077ac6657f303370781",
+      "approach_key": "linked list traversal elementary math",
+      "approach_name": "Linked List Traversal / Elementary Math",
+      "runtime": 2,
+      "runtime_display": "2 ms",
+      "memory": 46384000,
+      "memory_display": "46.4 MB",
+      "analysis": {
+        "pattern": "Linked List Traversal / Elementary Math",
+        "problem_summary": "Add two non-negative integers represented as linked lists with digits stored in reverse order, and return the sum as a new reversed linked list.",
+        "intuition": "Because the digits are stored in reverse order, the head of each list represents the least significant digit (the ones place). This setup aligns directly with standard right-to-left schoolbook addition. By traversing both lists simultaneously, we can sum corresponding digits alongside a carry variable that tracks overflow from the previous column. A dummy head node simplifies constructing the result list, eliminating edge cases for head node creation.",
+        "approach": [
+          "Initialize a dummy head node `dHead` with value 0, set pointer `curr = dHead`, and set `carry = 0`.",
+          "Loop as long as `l1 != null`, `l2 != null`, or `carry != 0`.",
+          "Extract digit `a` from `l1` (or 0 if `l1` is null) and digit `b` from `l2` (or 0 if `l2` is null).",
+          "Calculate `sum = carry + a + b`, update `carry` to `sum / 10`, and create a new `ListNode` with digit `sum % 10` linked to `curr.next`.",
+          "Move `curr` to `curr.next`, and advance `l1` and `l2` to their next nodes if they are not null.",
+          "Return `dHead.next`, which points to the first actual digit node of the calculated sum list."
+        ],
+        "why_it_works": "Positional addition processes digits from right to left, adding corresponding place values and carrying over any amount $\\ge 10$. Since the linked lists store digits in reverse order, iterating through the lists left to right naturally processes least significant to most significant digits. Including `carry != 0` in the loop condition ensures that an extra digit node is appended when the final addition produces an extra place value (e.g., $99 + 1 = 100$).",
+        "time_complexity": "O(max(m, n))",
+        "space_complexity": "O(max(m, n))",
+        "key_takeaway": "Using a dummy sentinel head node simplifies linked list construction by avoiding conditional logic for the initial head node, while a carry variable manages place-value overflow across lists of equal or unequal lengths.",
+        "time_explanation": "The loop executes at most $\\max(m, n) + 1$ times, where $m$ and $n$ are the lengths of the two linked lists, performing $O(1)$ operations per node.",
+        "space_explanation": "The algorithm constructs a new linked list containing at most $\\max(m, n) + 1$ nodes to store the sum result."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
