@@ -561,6 +561,13 @@
         "frontendId": "61",
         "difficulty": "MEDIUM",
         "lastSubmittedAt": "2026-11-17T17:06:10+00:00"
+      },
+      {
+        "titleSlug": "copy-list-with-random-pointer",
+        "title": "Copy List with Random Pointer",
+        "frontendId": "138",
+        "difficulty": "MEDIUM",
+        "lastSubmittedAt": "2026-11-18T17:33:38+00:00"
       }
     ],
     "problem_index": 20,
@@ -664,6 +671,14 @@
     "gemini_blocked_today": false,
     "pending_new_problems": [
       {
+        "titleSlug": "copy-list-with-random-pointer",
+        "title": "Copy List with Random Pointer",
+        "submission_ids": [
+          "2198860744"
+        ],
+        "last_seen_timestamp": 1795023217
+      },
+      {
         "titleSlug": "merge-sorted-array",
         "title": "Merge Sorted Array",
         "submission_ids": [
@@ -716,7 +731,7 @@
       "valid-mountain-array",
       "valid-palindrome"
     ],
-    "live_monitor_cursor": 52,
+    "live_monitor_cursor": 49,
     "gemini_api_key_fingerprint": "b62547aacf7d0e48c1cf0dad93162ba1eda08fd97d007a3ae0ece8ed317c2e75"
   }
 }
