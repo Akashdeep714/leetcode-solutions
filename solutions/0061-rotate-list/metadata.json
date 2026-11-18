@@ -1,0 +1,56 @@
+{
+  "number": 61,
+  "title": "Rotate List",
+  "difficulty": "Medium",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0061-rotate-list",
+  "slug": "rotate-list",
+  "submission_id": "2198162238",
+  "runtime": 0,
+  "runtime_display": "0 ms",
+  "memory": 43936000,
+  "memory_display": "43.9 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2198162238",
+      "submission_ids": [
+        "2198162238"
+      ],
+      "solution_hash": "fdd9aa0756c72922458a72991d92c2705f461e3d8bdbcb0c113bda464d567ea7",
+      "approach_key": "linked list traversal modulo arithmetic",
+      "approach_name": "Linked List Traversal & Modulo Arithmetic",
+      "runtime": 0,
+      "runtime_display": "0 ms",
+      "memory": 43936000,
+      "memory_display": "43.9 MB",
+      "analysis": {
+        "pattern": "Linked List Traversal & Modulo Arithmetic",
+        "problem_summary": "Given the head of a singly-linked list and an integer k, rotate the list to the right by k positions and return the new head.",
+        "intuition": "Rotating a linked list of length N to the right by k places is equivalent to shifting the entire list modulo N, because rotating by N full places results in the exact same list. Thus, we only need to shift right by k % size places. The last (k % size) nodes of the list will become the new head section, while the preceding node becomes the new tail. By first measuring the total length and identifying the original tail node, we can locate the exact split index at size - (k % size), break the list connection there, and attach the original tail to the original head.",
+        "approach": [
+          "Handle base cases: if k == 0, head is null, or the list has only one node (head.next == null), return head immediately.",
+          "Traverse the linked list with a pointer curr to calculate its total length (size) and keep track of the last node (tail).",
+          "Compute the effective number of rotations using newK = k % size. If newK == 0, return head as no rotation changes the list.",
+          "Calculate diff = size - newK to find the 1-based index of the node that will become the new tail.",
+          "Traverse from head up to index diff - 1 using a loop to locate the new tail node (curr).",
+          "Set newHead = curr.next, disconnect the list by setting curr.next = null, and reconnect the list by setting tail.next = head.",
+          "Return newHead as the head of the rotated linked list."
+        ],
+        "why_it_works": "Rotating a list to the right by k positions moves the last k % size nodes to the front of the list while maintaining internal node order. The node at position size - (k % size) becomes the last element of the new list. By severing its next pointer to end the list and pointing the original tail node to the original head node, the algorithm seamlessly reorders the two list segments into the correctly rotated sequence in place.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)",
+        "key_takeaway": "When performing cyclical shifts on linear structures, using modulo arithmetic k % N eliminates unnecessary full rotations and reveals the exact split point for pointer manipulation.",
+        "time_explanation": "The code makes at most two linear passes through the linked list—one to compute the size and tail, and another to reach the split node.",
+        "space_explanation": "Only a few pointer references (curr, tail, newHead) and integer variables are used, requiring standard O(1) auxiliary space."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}

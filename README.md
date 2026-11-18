@@ -7,9 +7,9 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **60** |
+| 🧩 Total Solved | **61** |
 | 🟢 Easy | **43** |
-| 🟡 Medium | **17** |
+| 🟡 Medium | **18** |
 | 🔴 Hard | **0** |
 
 ---
@@ -32,6 +32,7 @@
 | 36 | [Valid Sudoku](solutions/0036-valid-sudoku/) | 🟡 Medium | Java | 1 |
 | 48 | [Rotate Image](solutions/0048-rotate-image/) | 🟡 Medium | Java | 2 |
 | 54 | [Spiral Matrix](solutions/0054-spiral-matrix/) | 🟡 Medium | Java | 1 |
+| 61 | [Rotate List](solutions/0061-rotate-list/) | 🟡 Medium | Java | 1 |
 | 66 | [Plus One](solutions/0066-plus-one/) | 🟢 Easy | Java | 1 |
 | 67 | [Add Binary](solutions/0067-add-binary/) | 🟢 Easy | Java | 2 |
 | 118 | [Pascal's Triangle](solutions/0118-pascal-s-triangle/) | 🟢 Easy | Java | 2 |
