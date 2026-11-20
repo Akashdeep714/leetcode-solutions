@@ -7,9 +7,9 @@
 
 | Metric | Count |
 |---|---:|
-| 🧩 Total Solved | **61** |
+| 🧩 Total Solved | **62** |
 | 🟢 Easy | **43** |
-| 🟡 Medium | **18** |
+| 🟡 Medium | **19** |
 | 🔴 Hard | **0** |
 
 ---
@@ -41,6 +41,7 @@
 | 122 | [Best Time to Buy and Sell Stock II](solutions/0122-best-time-to-buy-and-sell-stock-ii/) | 🟡 Medium | Java | 1 |
 | 125 | [Valid Palindrome](solutions/0125-valid-palindrome/) | 🟢 Easy | Java | 1 |
 | 136 | [Single Number](solutions/0136-single-number/) | 🟢 Easy | Java | 2 |
+| 138 | [Copy List with Random Pointer](solutions/0138-copy-list-with-random-pointer/) | 🟡 Medium | Java | 2 |
 | 141 | [Linked List Cycle](solutions/0141-linked-list-cycle/) | 🟢 Easy | Java | 2 |
 | 142 | [Linked List Cycle II](solutions/0142-linked-list-cycle-ii/) | 🟡 Medium | Java | 2 |
 | 151 | [Reverse Words in a String](solutions/0151-reverse-words-in-a-string/) | 🟡 Medium | Java | 2 |

@@ -122,7 +122,9 @@
     "2195487921",
     "2196734064",
     "2197374528",
-    "2198162238"
+    "2198162238",
+    "2198860744",
+    "2199465225"
   ],
   "historical_backfill": {
     "version": 6,
@@ -663,22 +665,15 @@
       "2195487921",
       "2196734064",
       "2197374528",
-      "2198162238"
+      "2198162238",
+      "2198860744",
+      "2199465225"
     ],
     "day": "2026-11-20",
-    "problems_completed_today": 0,
-    "gemini_requests_used_today": 0,
+    "problems_completed_today": 1,
+    "gemini_requests_used_today": 1,
     "gemini_blocked_today": false,
     "pending_new_problems": [
-      {
-        "titleSlug": "copy-list-with-random-pointer",
-        "title": "Copy List with Random Pointer",
-        "submission_ids": [
-          "2198860744",
-          "2199465225"
-        ],
-        "last_seen_timestamp": 1795105380
-      },
       {
         "titleSlug": "merge-sorted-array",
         "title": "Merge Sorted Array",
@@ -694,6 +689,7 @@
       "add-two-numbers",
       "array-partition",
       "check-if-n-and-its-double-exist",
+      "copy-list-with-random-pointer",
       "delete-node-in-a-linked-list",
       "design-linked-list",
       "diagonal-traverse",
@@ -732,7 +728,7 @@
       "valid-mountain-array",
       "valid-palindrome"
     ],
-    "live_monitor_cursor": 34,
+    "live_monitor_cursor": 31,
     "gemini_api_key_fingerprint": "b62547aacf7d0e48c1cf0dad93162ba1eda08fd97d007a3ae0ece8ed317c2e75"
   }
 }
