@@ -124,7 +124,8 @@
     "2197374528",
     "2198162238",
     "2198860744",
-    "2199465225"
+    "2199465225",
+    "2200796906"
   ],
   "historical_backfill": {
     "version": 6,
@@ -570,6 +571,20 @@
         "frontendId": "138",
         "difficulty": "MEDIUM",
         "lastSubmittedAt": "2026-11-18T17:33:38+00:00"
+      },
+      {
+        "titleSlug": "flatten-a-multilevel-doubly-linked-list",
+        "title": "Flatten a Multilevel Doubly Linked List",
+        "frontendId": "430",
+        "difficulty": "MEDIUM",
+        "lastSubmittedAt": "2026-11-20T18:28:03+00:00"
+      },
+      {
+        "titleSlug": "design-hashset",
+        "title": "Design HashSet",
+        "frontendId": "705",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-11-21T19:23:44+00:00"
       }
     ],
     "problem_index": 20,
@@ -667,13 +682,22 @@
       "2197374528",
       "2198162238",
       "2198860744",
-      "2199465225"
+      "2199465225",
+      "2200796906"
     ],
-    "day": "2026-11-20",
+    "day": "2026-11-21",
     "problems_completed_today": 1,
     "gemini_requests_used_today": 1,
     "gemini_blocked_today": false,
     "pending_new_problems": [
+      {
+        "titleSlug": "flatten-a-multilevel-doubly-linked-list",
+        "title": "Flatten a Multilevel Doubly Linked List",
+        "submission_ids": [
+          "2200169478"
+        ],
+        "last_seen_timestamp": 1795199283
+      },
       {
         "titleSlug": "merge-sorted-array",
         "title": "Merge Sorted Array",
@@ -691,6 +715,7 @@
       "check-if-n-and-its-double-exist",
       "copy-list-with-random-pointer",
       "delete-node-in-a-linked-list",
+      "design-hashset",
       "design-linked-list",
       "diagonal-traverse",
       "find-all-numbers-disappeared-in-an-array",
@@ -728,7 +753,7 @@
       "valid-mountain-array",
       "valid-palindrome"
     ],
-    "live_monitor_cursor": 31,
+    "live_monitor_cursor": 26,
     "gemini_api_key_fingerprint": "b62547aacf7d0e48c1cf0dad93162ba1eda08fd97d007a3ae0ece8ed317c2e75"
   }
 }

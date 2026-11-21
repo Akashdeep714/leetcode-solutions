@@ -1,0 +1,55 @@
+{
+  "number": 705,
+  "title": "Design HashSet",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0705-design-hashset",
+  "slug": "design-hashset",
+  "submission_id": "2200796906",
+  "runtime": 17,
+  "runtime_display": "17 ms",
+  "memory": 53340000,
+  "memory_display": "53.3 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2200796906",
+      "submission_ids": [
+        "2200796906"
+      ],
+      "solution_hash": "5c6477f988285954b260ae06ea55b6226a250bd8c377d7959e0079ab1fb6ad5e",
+      "approach_key": "hash table separate chaining",
+      "approach_name": "Hash Table with Separate Chaining",
+      "runtime": 17,
+      "runtime_display": "17 ms",
+      "memory": 53340000,
+      "memory_display": "53.3 MB",
+      "analysis": {
+        "pattern": "Hash Table with Separate Chaining",
+        "problem_summary": "Design a custom HashSet data structure supporting `add`, `remove`, and `contains` operations for non-negative integer keys without using built-in hash table libraries.",
+        "intuition": "To implement a hash set from scratch, we need a hash function to map integer keys to array indices and a mechanism to handle collisions when two keys map to the same index. This implementation uses separate chaining with a fixed array of 769 buckets (a prime number chosen to distribute keys evenly). Each bucket contains a Java `LinkedList`. When a key is inserted, removed, or checked, we map the key to a bucket index using `key % 769` and perform the corresponding linear search or modification on that specific bucket's linked list.",
+        "approach": [
+          "Define a `Bucket` class that encapsulates a Java `LinkedList<Integer>` to manage elements sharing the same hash index.",
+          "Instantiate `MyHashSet` with a fixed array `buckets` of size 769 (stored in `numBuckets`), populating each index with a new `Bucket` object.",
+          "Compute target bucket indices using the helper method `getIndex(key)`, which returns `key % 769`.",
+          "For `add(key)`: Locate the target bucket, search for `key` using `indexOf`, and prepend it to the linked list using `addFirst` if it is not already present.",
+          "For `remove(key)`: Locate the target bucket and invoke `remove(key)` on the linked list to delete the key if it exists.",
+          "For `contains(key)`: Locate the target bucket and check if `indexOf(key)` returns a index other than `-1`."
+        ],
+        "why_it_works": "The modulo operator `key % 769` deterministically maps any non-negative integer into the range `[0, 768]`. Storing elements in linked lists within each bucket guarantees that multiple keys mapping to the same bucket index coexist without collision conflicts. Checking for duplicate existence before adding ensures the set uniqueness property.",
+        "time_complexity": "O(1)",
+        "space_complexity": "O(N + K)",
+        "key_takeaway": "Separate chaining handles hash collisions by storing elements in a linked list per bucket, combining array indexing with linear traversal to achieve average O(1) set operations.",
+        "time_explanation": "Assuming keys are distributed uniformly across the 769 buckets, each bucket contains N/769 elements on average, making bucket lookup and linked list search O(1) on average.",
+        "space_explanation": "The memory overhead consists of a fixed array of K = 769 buckets plus additional nodes proportional to the number of unique inserted keys N."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
