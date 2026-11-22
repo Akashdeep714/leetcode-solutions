@@ -125,6 +125,7 @@
     "2198162238",
     "2198860744",
     "2199465225",
+    "2200169478",
     "2200796906"
   ],
   "historical_backfill": {
@@ -683,21 +684,14 @@
       "2198162238",
       "2198860744",
       "2199465225",
+      "2200169478",
       "2200796906"
     ],
     "day": "2026-11-21",
-    "problems_completed_today": 1,
-    "gemini_requests_used_today": 1,
+    "problems_completed_today": 2,
+    "gemini_requests_used_today": 2,
     "gemini_blocked_today": false,
     "pending_new_problems": [
-      {
-        "titleSlug": "flatten-a-multilevel-doubly-linked-list",
-        "title": "Flatten a Multilevel Doubly Linked List",
-        "submission_ids": [
-          "2200169478"
-        ],
-        "last_seen_timestamp": 1795199283
-      },
       {
         "titleSlug": "merge-sorted-array",
         "title": "Merge Sorted Array",
@@ -722,6 +716,7 @@
       "find-pivot-index",
       "find-the-index-of-the-first-occurrence-in-a-string",
       "first-unique-character-in-a-string",
+      "flatten-a-multilevel-doubly-linked-list",
       "height-checker",
       "intersection-of-two-linked-lists",
       "largest-number-at-least-twice-of-others",
@@ -753,7 +748,7 @@
       "valid-mountain-array",
       "valid-palindrome"
     ],
-    "live_monitor_cursor": 26,
+    "live_monitor_cursor": 21,
     "gemini_api_key_fingerprint": "b62547aacf7d0e48c1cf0dad93162ba1eda08fd97d007a3ae0ece8ed317c2e75"
   }
 }
