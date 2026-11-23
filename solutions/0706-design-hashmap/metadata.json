@@ -1,0 +1,56 @@
+{
+  "number": 706,
+  "title": "Design HashMap",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0706-design-hashmap",
+  "slug": "design-hashmap",
+  "submission_id": "2201485057",
+  "runtime": 20,
+  "runtime_display": "20 ms",
+  "memory": 51872000,
+  "memory_display": "51.9 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2201485057",
+      "submission_ids": [
+        "2201485057"
+      ],
+      "solution_hash": "098a1cb677f6e515d5e6fb8b93aecfd8f061b9f112e53cf6f6c563ef92fc58eb",
+      "approach_key": "separate chaining hash table",
+      "approach_name": "Separate Chaining Hash Table",
+      "runtime": 20,
+      "runtime_display": "20 ms",
+      "memory": 51872000,
+      "memory_display": "51.9 MB",
+      "analysis": {
+        "pattern": "Separate Chaining Hash Table",
+        "problem_summary": "Design a custom HashMap supporting put, get, and remove operations for integer keys and values without using built-in hash table libraries.",
+        "intuition": "To build a HashMap from scratch, we need a way to map a large key space to a smaller array of buckets using a hash function. Because different keys can hash to the exact same index (a collision), we use separate chaining: each array index contains a bucket backed by a linked list of key-value pairs. Using a prime number size like 769 for the hash table array helps distribute keys uniformly and minimize collisions.",
+        "approach": [
+          "Define a custom generic class Pair<U, V> to store key-value pairs.",
+          "Define a Bucket class containing a LinkedList of Pair<Integer, Integer> elements, providing bucket-level operations for searching, updating, inserting, and deleting pairs.",
+          "In Bucket.put(key, value), iterate through the list: if the key already exists, update its value; otherwise, prepend a new Pair(key, value) to the front of the list.",
+          "In Bucket.get(key) and Bucket.remove(key), iterate through the list to find the matching key to either return its value (returning -1 if not found) or remove the pair from the list.",
+          "Initialize MyHashMap with a fixed array of 769 Bucket instances.",
+          "Compute the bucket index for any key using the modulo hash function: key % 769.",
+          "Delegate put, get, and remove calls from MyHashMap to the corresponding Bucket at index key % 769."
+        ],
+        "why_it_works": "The modulo operation key % 769 maps any integer key into a valid array index within [0, 768]. Separate chaining handles collisions by storing all key-value pairs that hash to the same bucket in a linked list, while linear scanning within a bucket ensures unique keys are updated rather than duplicated.",
+        "time_complexity": "O(1)",
+        "space_complexity": "O(N)",
+        "key_takeaway": "A fundamental hash map can be constructed using an array of buckets combined with separate chaining (linked lists) and modulo hashing to handle collisions efficiently.",
+        "time_explanation": "Assuming a uniform distribution of keys across 769 buckets, each bucket contains a small constant number of elements on average, yielding O(1) average time complexity for put, get, and remove operations.",
+        "space_explanation": "The memory overhead consists of a fixed array of 769 buckets plus O(N) space for storing the N unique key-value pairs currently present in the hash map."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}
