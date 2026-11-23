@@ -702,6 +702,14 @@
     "gemini_blocked_today": false,
     "pending_new_problems": [
       {
+        "titleSlug": "single-number",
+        "title": "Single Number",
+        "submission_ids": [
+          "2202100057"
+        ],
+        "last_seen_timestamp": 1795455633
+      },
+      {
         "titleSlug": "merge-sorted-array",
         "title": "Merge Sorted Array",
         "submission_ids": [
@@ -758,7 +766,7 @@
       "valid-mountain-array",
       "valid-palindrome"
     ],
-    "live_monitor_cursor": 59,
+    "live_monitor_cursor": 53,
     "gemini_api_key_fingerprint": "b62547aacf7d0e48c1cf0dad93162ba1eda08fd97d007a3ae0ece8ed317c2e75"
   }
 }
