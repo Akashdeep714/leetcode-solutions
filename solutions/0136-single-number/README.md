@@ -2,7 +2,7 @@
 
 > **Difficulty:** 🟢 Easy  
 > **Topics:** Array · Bit Manipulation  
-> **Solutions:** 2 unique approach(es)  
+> **Solutions:** 3 unique approach(es)  
 > **Language:** Java
 
 [🔗 View Problem on LeetCode](https://leetcode.com/problems/single-number/)
@@ -17,7 +17,7 @@ Find the unique element in an array where all other elements appear exactly twic
 
 ## 🛠️ Solutions
 
-This folder contains **2 unique accepted implementation(s)** for the same problem. Repeated submissions of identical code are ignored automatically.
+This folder contains **3 unique accepted implementation(s)** for the same problem. Repeated submissions of identical code are ignored automatically.
 
 ### 🧠 Solution 1 — Hash Table
 
@@ -59,6 +59,7 @@ A hash map provides average O(1) insertion and lookup operations. Counting frequ
 
 Using a hash map is an intuitive way to keep track of frequencies, though it uses O(n) extra auxiliary space.
 
+---
 ---
 
 ### 🧠 Solution 2 — Bit Manipulation
@@ -103,10 +104,55 @@ Bitwise XOR allows canceling identical pairs in a single pass without needing an
 
 
 ---
+---
+
+### 🧠 Solution 3 — Mathematical Difference via Hash Set
+
+> **Language:** Java
+> **Runtime:** `10 ms`  
+> **Memory:** `47.3 MB`
+
+#### 💡 Intuition
+
+If every element appeared twice, the sum of all elements would equal twice the sum of unique elements. Since one element appears only once, subtracting the actual array sum from twice the unique element sum isolates the single number: 2 * sum(set) - sum(nums) = single_number.
+
+#### 🧠 Algorithmic Pattern
+
+> **Mathematical Difference via Hash Set**
+
+#### 🚀 Approach
+
+1. Initialize a HashSet to track unique numbers, and two integer accumulators `sum` and `sumSet`.
+2. Iterate through each number in `nums`.
+3. Add the current number to `sum`.
+4. If the number is not already present in `set`, add it to `set` and add its value to `sumSet`.
+5. Calculate and return `2 * sumSet - sum`.
+
+#### ✅ Why This Works
+
+Let S be the sum of unique elements and A be the sum of all elements. Every paired element contributes twice to A and twice to 2*S. The single element x contributes once to A and twice to 2*S. Thus 2*S - A = (2x + 2*pairs) - (x + 2*pairs) = x.
+
+#### ⏱️ Complexity
+
+| Metric | Complexity |
+|---|---|
+| Time | **O(n) — A single traversal of the array is performed. Set insertions and lookups operate in O(1) average time, resulting in O(n) total time complexity.** |
+| Space | **O(n) — The HashSet stores each unique element from the array once, requiring O(n) auxiliary space.** |
+
+#### 💻 Solution
+
+[View the complete Java solution →](./solution-3.java)
+
+#### 🎯 Key Takeaway
+
+Algebraic relationships combined with set operations can resolve uniqueness problems, though set storage requires O(n) space.
+
+
+---
 
 ## 🎯 Key Takeaway
 
-This repository currently contains 2 unique approaches for this problem. Comparing them makes the trade-off between their time, space, and implementation ideas easier to see.
+This repository currently contains 3 unique approaches for this problem. Comparing them makes the trade-off between their time, space, and implementation ideas easier to see.
 
 ---
 

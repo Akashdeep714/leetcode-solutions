@@ -13,7 +13,7 @@
   "runtime_display": "16 ms",
   "memory": 47504000,
   "memory_display": "47.5 MB",
-  "solution_count": 2,
+  "solution_count": 3,
   "solutions": [
     {
       "number": 1,
@@ -25,7 +25,7 @@
       ],
       "solution_hash": "9c0aa187015b56277832315a79f36ba985b025e20b834173724a53b6f949a42f",
       "approach_key": "hash-map-frequency-count",
-      "approach_name": "Frequency Counting with Hash Map",
+      "approach_name": "Hash Map Frequency Counter",
       "runtime": 16,
       "runtime_display": "16 ms",
       "memory": 47504000,
@@ -57,8 +57,8 @@
         "2141850506"
       ],
       "solution_hash": "6172065d83db59ccb1d97e573b7b45a85bc0916101f53873d87367b9060d14c6",
-      "approach_key": "bitwise-xor-accumulation",
-      "approach_name": "Bitwise XOR Accumulation",
+      "approach_key": "bitwise-xor",
+      "approach_name": "Bitwise XOR Accumulator",
       "runtime": 1,
       "runtime_display": "1 ms",
       "memory": 47000000,
@@ -79,6 +79,40 @@
         "key_takeaway": "Bitwise XOR allows canceling identical pairs in a single pass without needing any additional data structure, satisfying both linear time and constant space requirements.",
         "time_explanation": "The algorithm visits each of the n elements in the array exactly once, performing a constant-time bitwise operation at each step.",
         "space_explanation": "Only a single integer variable (`res`) is maintained, requiring O(1) auxiliary space."
+      }
+    },
+    {
+      "number": 3,
+      "filename": "solution-3.java",
+      "language": "Java",
+      "submission_id": "2202100057",
+      "submission_ids": [
+        "2202100057"
+      ],
+      "solution_hash": "e6919d3cc5b0d79907afd9ba30d805360a6f87c57001b2c2bd2d8e5b4764fda5",
+      "approach_key": "math-set-sum",
+      "approach_name": "HashSet Math Formula",
+      "runtime": 10,
+      "runtime_display": "10 ms",
+      "memory": 47252000,
+      "memory_display": "47.3 MB",
+      "analysis": {
+        "pattern": "Mathematical Difference via Hash Set",
+        "problem_summary": "Find the element appearing once by leveraging mathematical relations between unique numbers and duplicate numbers.",
+        "intuition": "If every element appeared twice, the sum of all elements would equal twice the sum of unique elements. Since one element appears only once, subtracting the actual array sum from twice the unique element sum isolates the single number: 2 * sum(set) - sum(nums) = single_number.",
+        "approach": [
+          "Initialize a HashSet to track unique numbers, and two integer accumulators `sum` and `sumSet`.",
+          "Iterate through each number in `nums`.",
+          "Add the current number to `sum`.",
+          "If the number is not already present in `set`, add it to `set` and add its value to `sumSet`.",
+          "Calculate and return `2 * sumSet - sum`."
+        ],
+        "why_it_works": "Let S be the sum of unique elements and A be the sum of all elements. Every paired element contributes twice to A and twice to 2*S. The single element x contributes once to A and twice to 2*S. Thus 2*S - A = (2x + 2*pairs) - (x + 2*pairs) = x.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(n)",
+        "key_takeaway": "Algebraic relationships combined with set operations can resolve uniqueness problems, though set storage requires O(n) space.",
+        "time_explanation": "A single traversal of the array is performed. Set insertions and lookups operate in O(1) average time, resulting in O(n) total time complexity.",
+        "space_explanation": "The HashSet stores each unique element from the array once, requiring O(n) auxiliary space."
       }
     }
   ],
