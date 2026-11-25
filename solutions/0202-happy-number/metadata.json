@@ -1,0 +1,56 @@
+{
+  "number": 202,
+  "title": "Happy Number",
+  "difficulty": "Easy",
+  "language": "Java",
+  "languages": [
+    "Java"
+  ],
+  "folder": "0202-happy-number",
+  "slug": "happy-number",
+  "submission_id": "2202725734",
+  "runtime": 2,
+  "runtime_display": "2 ms",
+  "memory": 41632000,
+  "memory_display": "41.6 MB",
+  "solution_count": 1,
+  "solutions": [
+    {
+      "number": 1,
+      "filename": "solution.java",
+      "language": "Java",
+      "submission_id": "2202725734",
+      "submission_ids": [
+        "2202725734"
+      ],
+      "solution_hash": "6ec0a4f48697181e9716fb9a9342876b38e304d2cb26fc91df890d6621544085",
+      "approach_key": "hash table cycle detection",
+      "approach_name": "Hash Table / Cycle Detection",
+      "runtime": 2,
+      "runtime_display": "2 ms",
+      "memory": 41632000,
+      "memory_display": "41.6 MB",
+      "analysis": {
+        "pattern": "Hash Table / Cycle Detection",
+        "problem_summary": "Determine if repeatedly replacing a positive integer with the sum of the squares of its digits eventually reaches 1 or falls into an infinite repeating loop.",
+        "intuition": "When repeatedly calculating the sum of squares of digits, large numbers rapidly shrink (for example, the largest 32-bit integer produces a sum well under 250 in one step). Because the set of possible numbers in the sequence is small and bounded, the process will either reach 1 or cycle endlessly through previously visited numbers. Using a hash set to store each intermediate number allows us to detect when we have entered a loop.",
+        "approach": [
+          "Define a helper function sumOfSquaresOfDigits(n) that extracts each digit using n % 10, squares it, adds it to a total sum, and reduces n using integer division n / 10 until n is 0.",
+          "Initialize a HashSet of integers named set to track numbers encountered in the chain.",
+          "Execute a while loop that runs as long as n is not equal to 1.",
+          "Inside the loop, check if set already contains n; if it does, a cycle is detected, so return false.",
+          "Add the current value of n to set to mark it as visited.",
+          "Update n to sumOfSquaresOfDigits(n).",
+          "If the loop terminates because n becomes 1, return true."
+        ],
+        "why_it_works": "The process is a deterministic state transition where each number maps to exactly one next number. Since the values quickly drop below 243 for any 32-bit integer, there are only finitely many distinct values the sequence can take. By Dirichlet's box principle (pigeonhole principle), the chain must either hit 1 (and stay there) or repeat a value. The hash set acts as a memory of visited states; returning false as soon as a duplicate number appears correctly identifies non-terminating infinite loops.",
+        "time_complexity": "O(log n)",
+        "space_complexity": "O(log n)",
+        "time_explanation": "Computing the sum of squared digits takes O(log n) time based on the number of digits, and for values under 243, the chain length is bounded by a small constant.",
+        "space_explanation": "The hash set stores at most O(log n) distinct numbers generated during the sequence before reaching 1 or entering a loop.",
+        "key_takeaway": "When repeatedly applying a deterministic function generates a sequence of bounded values, a Hash Set can effectively detect infinite loops by identifying duplicate states."
+      }
+    }
+  ],
+  "historical_backfill_version": 6
+}

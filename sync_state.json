@@ -127,7 +127,8 @@
     "2199465225",
     "2200169478",
     "2200796906",
-    "2201485057"
+    "2201485057",
+    "2202725734"
   ],
   "historical_backfill": {
     "version": 6,
@@ -701,21 +702,14 @@
       "2199465225",
       "2200169478",
       "2200796906",
-      "2201485057"
+      "2201485057",
+      "2202725734"
     ],
-    "day": "2026-11-24",
-    "problems_completed_today": 0,
-    "gemini_requests_used_today": 0,
+    "day": "2026-11-25",
+    "problems_completed_today": 1,
+    "gemini_requests_used_today": 1,
     "gemini_blocked_today": false,
     "pending_new_problems": [
-      {
-        "titleSlug": "happy-number",
-        "title": "Happy Number",
-        "submission_ids": [
-          "2202725734"
-        ],
-        "last_seen_timestamp": 1795538981
-      },
       {
         "titleSlug": "single-number",
         "title": "Single Number",
@@ -750,6 +744,7 @@
       "find-the-index-of-the-first-occurrence-in-a-string",
       "first-unique-character-in-a-string",
       "flatten-a-multilevel-doubly-linked-list",
+      "happy-number",
       "height-checker",
       "intersection-of-two-linked-lists",
       "largest-number-at-least-twice-of-others",
@@ -781,7 +776,7 @@
       "valid-mountain-array",
       "valid-palindrome"
     ],
-    "live_monitor_cursor": 34,
+    "live_monitor_cursor": 27,
     "gemini_api_key_fingerprint": "b62547aacf7d0e48c1cf0dad93162ba1eda08fd97d007a3ae0ece8ed317c2e75"
   }
 }
