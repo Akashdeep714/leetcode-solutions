@@ -594,6 +594,13 @@
         "frontendId": "706",
         "difficulty": "EASY",
         "lastSubmittedAt": "2026-11-22T19:12:53+00:00"
+      },
+      {
+        "titleSlug": "happy-number",
+        "title": "Happy Number",
+        "frontendId": "202",
+        "difficulty": "EASY",
+        "lastSubmittedAt": "2026-11-24T16:49:42+00:00"
       }
     ],
     "problem_index": 20,
@@ -702,6 +709,14 @@
     "gemini_blocked_today": false,
     "pending_new_problems": [
       {
+        "titleSlug": "happy-number",
+        "title": "Happy Number",
+        "submission_ids": [
+          "2202725734"
+        ],
+        "last_seen_timestamp": 1795538981
+      },
+      {
         "titleSlug": "single-number",
         "title": "Single Number",
         "submission_ids": [
@@ -766,7 +781,7 @@
       "valid-mountain-array",
       "valid-palindrome"
     ],
-    "live_monitor_cursor": 41,
+    "live_monitor_cursor": 34,
     "gemini_api_key_fingerprint": "b62547aacf7d0e48c1cf0dad93162ba1eda08fd97d007a3ae0ece8ed317c2e75"
   }
 }
