@@ -48,7 +48,7 @@
 | 160 | [Intersection of Two Linked Lists](solutions/0160-intersection-of-two-linked-lists/) | 🟢 Easy | Java | 4 |
 | 167 | [Two Sum II - Input Array Is Sorted](solutions/0167-two-sum-ii-input-array-is-sorted/) | 🟡 Medium | Java | 1 |
 | 189 | [Rotate Array](solutions/0189-rotate-array/) | 🟡 Medium | Java | 2 |
-| 202 | [Happy Number](solutions/0202-happy-number/) | 🟢 Easy | Java | 1 |
+| 202 | [Happy Number](solutions/0202-happy-number/) | 🟢 Easy | Java | 2 |
 | 203 | [Remove Linked List Elements](solutions/0203-remove-linked-list-elements/) | 🟢 Easy | Java | 1 |
 | 206 | [Reverse Linked List](solutions/0206-reverse-linked-list/) | 🟢 Easy | Java | 1 |
 | 209 | [Minimum Size Subarray Sum](solutions/0209-minimum-size-subarray-sum/) | 🟡 Medium | Java | 1 |

@@ -129,7 +129,8 @@
     "2200796906",
     "2201485057",
     "2202100057",
-    "2202725734"
+    "2202725734",
+    "2204631833"
   ],
   "historical_backfill": {
     "version": 6,
@@ -707,11 +708,12 @@
       "2200796906",
       "2201485057",
       "2202100057",
-      "2202725734"
+      "2202725734",
+      "2204631833"
     ],
     "day": "2026-11-27",
-    "problems_completed_today": 0,
-    "gemini_requests_used_today": 0,
+    "problems_completed_today": 1,
+    "gemini_requests_used_today": 1,
     "gemini_blocked_today": false,
     "pending_new_problems": [
       {
@@ -773,7 +775,7 @@
       "valid-mountain-array",
       "valid-palindrome"
     ],
-    "live_monitor_cursor": 52,
+    "live_monitor_cursor": 45,
     "gemini_api_key_fingerprint": "b62547aacf7d0e48c1cf0dad93162ba1eda08fd97d007a3ae0ece8ed317c2e75"
   }
 }
